@@ -1,9 +1,9 @@
 import { type Duration } from 'date-fns';
 
 export class Stage {
-  #dependencies: Set<Stage>;
-  #resources: Set<ResourceName>;
-  #duration: Duration;
+  dependencies: Set<Stage>;
+  resources: Set<ResourceName>;
+  duration: Duration;
 
   constructor(stageName: string);
   constructor(
@@ -12,9 +12,9 @@ export class Stage {
     resources?: Set<ResourceName>,
     duration?: Duration,
   ) {
-    this.#dependencies = dependencies ?? new Set<Stage>();
-    this.#resources = resources ?? new Set<ResourceName>();
-    this.#duration = duration ?? {};
+    this.dependencies = dependencies ?? new Set<Stage>();
+    this.resources = resources ?? new Set<ResourceName>();
+    this.duration = duration ?? {};
   }
 
   get name(): string {
@@ -22,7 +22,7 @@ export class Stage {
   }
 
   public dependsOn(stage: Stage): Stage {
-    this.#dependencies.add(stage);
+    this.dependencies.add(stage);
     return this;
   }
 
@@ -32,3 +32,20 @@ export class Stage {
 }
 
 export type ResourceName = Readonly<{ name: string }>;
+
+export const containsAll = (
+  presentIn: Stage[],
+  dependencies: Set<Stage>,
+): boolean => {
+  return (
+    [...dependencies].filter((dep) => presentIn.some((s) => s.equals(dep)))
+      .length === dependencies.size
+  );
+};
+
+export const except = (set: Set<Stage>, toRemove: Set<Stage>): Set<Stage> => {
+  const valuesToRemove = [...toRemove];
+  return new Set(
+    [...set].filter((stage) => !valuesToRemove.some((s) => s.equals(stage))),
+  );
+};
