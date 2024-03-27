@@ -1,1 +1,1 @@
-export { ParallelStages } from './parallelStages';
+export { ParallelStages } from './parallelization/parallelStages';

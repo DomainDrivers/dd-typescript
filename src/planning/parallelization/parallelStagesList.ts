@@ -1,4 +1,4 @@
-import type { ParallelStages } from '../planning';
+import type { ParallelStages } from '..';
 
 export class ParallelStagesList {
   constructor(public readonly all: ParallelStages[]) {}
