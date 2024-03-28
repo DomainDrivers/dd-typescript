@@ -1,8 +1,9 @@
+import type { WeightDimension } from '../optimization';
+import type { TimeSlot } from '../shared/timeslot';
 import { AvailableResourceCapability } from './availableResourceCapability';
 import type { Capability } from './capability';
-import type { TimeSlot } from './timeslot';
 
-export class Demand {
+export class Demand implements WeightDimension<AvailableResourceCapability> {
   constructor(
     public readonly capability: Capability,
     public readonly slot: TimeSlot,

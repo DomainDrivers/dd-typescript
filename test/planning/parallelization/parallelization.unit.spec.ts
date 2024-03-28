@@ -6,7 +6,7 @@ import {
   StageParallelization,
   type ResourceName,
 } from '../../../src/planning/parallelization';
-import { ObjectSet } from '../../../src/utils/objectSet';
+import { ObjectSet } from '../../../src/utils';
 
 describe('Parallelization', () => {
   const LEON: ResourceName = { name: 'Leon' };

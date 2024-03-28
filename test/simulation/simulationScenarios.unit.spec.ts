@@ -2,14 +2,15 @@
 import BigNumber from 'bignumber.js';
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
+import { OptimizationFacade } from '../../src/optimization';
+import { TimeSlot } from '../../src/shared';
 import {
   AvailableResourceCapability,
+  Capability,
   Demand,
   ProjectId,
   SimulationFacade,
-  TimeSlot,
 } from '../../src/simulation';
-import { Capability } from '../../src/simulation/capability';
 import { UUID } from '../../src/utils';
 import { AvailableCapabilitiesBuilder } from './availableCapabilitiesBuilder';
 import { SimulatedProjectsBuilder } from './simulatedProjectsBuilder';
@@ -24,7 +25,7 @@ describe('SimulationScenarios', () => {
   const STASZEK = UUID.randomUUID();
   const LEON = UUID.randomUUID();
 
-  const simulationFacade = new SimulationFacade();
+  const simulationFacade = new SimulationFacade(new OptimizationFacade());
 
   const SimulatedProjects = () => new SimulatedProjectsBuilder();
 

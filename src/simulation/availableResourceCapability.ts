@@ -1,8 +1,10 @@
-import { UUID, deepEquals } from '../utils';
+import type { CapacityDimension } from '../optimization';
+import { TimeSlot } from '../shared';
+import type { UUID } from '../utils';
+import { deepEquals } from '../utils/equatable';
 import { Capability } from './capability';
-import type { TimeSlot } from './timeslot';
 
-export class AvailableResourceCapability {
+export class AvailableResourceCapability implements CapacityDimension {
   public readonly __brand = 'CapacityDimension';
 
   constructor(

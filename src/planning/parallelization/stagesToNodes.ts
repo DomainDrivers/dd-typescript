@@ -1,5 +1,5 @@
 import { Node, Nodes } from '../../sorter';
-import { ObjectSet } from '../../utils/objectSet';
+import { ObjectSet } from '../../utils';
 import { Stage } from './stage';
 
 export const StagesToNodes = {

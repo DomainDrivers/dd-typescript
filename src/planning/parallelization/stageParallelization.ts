@@ -1,5 +1,5 @@
-import { GraphTopologicalSort, Nodes, SortedNodes } from '../../sorter';
-import type { ObjectSet } from '../../utils/objectSet';
+import { Nodes, SortedNodes, GraphTopologicalSort } from '../../sorter';
+import type { ObjectSet } from '../../utils';
 import { ParallelStagesList } from './parallelStagesList';
 import { SortedNodesToParallelizedStages } from './sortedNodesToParallelizedStages';
 import { type Stage } from './stage';

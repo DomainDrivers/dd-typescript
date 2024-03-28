@@ -14,7 +14,7 @@
     "fix": "run-s fix:eslint fix:prettier",
     "fix:prettier": "prettier --write \"**/**/!(*.d).{ts,json,md}\"",
     "fix:eslint": "eslint '**/*.ts' --fix",
-    "test": "run-s test:unit test:int",
+    "test": "run-s test:unit",
     "test:unit": "glob -d -c \"node --import tsx --test\" **/*.unit.spec.ts",
     "test:int": "glob -d -c \"node --import tsx --test\" **/*.int.spec.ts",
     "test:watch": "run-p test:unit:watch test:int:watch",
@@ -31,6 +31,7 @@
     "date-fns": "3.6.0"
   },
   "devDependencies": {
+    "@types/bignumber.js": "5.0.0",
     "@types/node": "20.11.30",
     "@typescript-eslint/eslint-plugin": "7.4.0",
     "@typescript-eslint/parser": "7.4.0",
