@@ -15,15 +15,10 @@ export class Node<T> {
     this.content = content ?? null;
   }
 
-  public dependsOn = (node: Node<T>): Node<T> => {
-    return new Node(this.name, this.dependencies.add(node), this.content);
-  };
+  public dependsOn = (node: Node<T>) =>
+    new Node<T>(this.name, this.dependencies.add(node), this.content);
 
-  public toString = (): string => {
-    return this.name;
-  };
+  public toString = () => this.name;
 
-  public equals(node: Node<T>): boolean {
-    return this.name === node.name;
-  }
+  public equals = (node: Node<T>) => this.name === node.name;
 }

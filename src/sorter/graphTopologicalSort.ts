@@ -27,5 +27,5 @@ const createSortedNodesRecursively = <T>(
 
 export const GraphTopologicalSort = {
   sort: <T>(nodes: Nodes<T>): SortedNodes<T> =>
-    createSortedNodesRecursively(nodes, SortedNodes.empty()),
+    createSortedNodesRecursively<T>(nodes, SortedNodes.empty<T>()),
 };

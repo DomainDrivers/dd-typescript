@@ -41,7 +41,7 @@ export class Stage {
     );
   };
 
-  public dependsOn(stage: Stage): Stage {
+  public dependsOn = (stage: Stage): Stage => {
     const newDependencies = ObjectSet.from(this.dependencies);
     newDependencies.push(stage);
     this.dependencies.push(stage);
@@ -52,11 +52,9 @@ export class Stage {
       this.resources,
       this.duration,
     );
-  }
+  };
 
-  public equals(stage: Stage): boolean {
-    return this.stageName === stage.stageName;
-  }
+  public equals = (stage: Stage) => this.stageName === stage.stageName;
 }
 
 export type ResourceName = Readonly<{ name: string }>;

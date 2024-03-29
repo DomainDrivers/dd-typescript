@@ -52,11 +52,8 @@ export class Edge {
     public readonly target: number,
   ) {}
 
-  public equals(edge: Edge): boolean {
-    return this.source === edge.source && this.target === edge.target;
-  }
+  public equals = (edge: Edge) =>
+    this.source === edge.source && this.target === edge.target;
 
-  public toString = (): string => {
-    return `(${this.source} -> ${this.target})`;
-  };
+  public toString = () => `(${this.source} -> ${this.target})`;
 }
