@@ -3,12 +3,13 @@
     "es2023": true,
     "node": true
   },
-  "plugins": ["@typescript-eslint"],
+  "plugins": ["@typescript-eslint", "import"],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
-    "plugin:prettier/recommended"
+    "plugin:prettier/recommended",
+    "plugin:import/typescript"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -23,11 +24,34 @@
       { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_" }
     ],
     "@typescript-eslint/no-misused-promises": ["off"],
-    "@typescript-eslint/prefer-namespace-keyword": "off"
+    "@typescript-eslint/prefer-namespace-keyword": "off",
+
+    // This is addded instead of Architecture Tests in Java version
+    // to ensure imports
+    "import/no-restricted-paths": [
+      "error",
+      {
+        "zones": [
+          {
+            "target": "./src/sorter/*",
+            "from": ["./src/planning"]
+          },
+          {
+            "target": "./src/utils/*",
+            "from": ["./src/planning", "./src/sorter"]
+          }
+        ]
+      }
+    ]
   },
   "settings": {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    },
     "import/resolver": {
-      "typescript": {}
+      "typescript": {
+        "alwaysTryTypes": true
+      }
     }
   }
 }
