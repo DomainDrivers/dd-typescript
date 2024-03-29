@@ -7,8 +7,8 @@ import { StagesToNodes } from './stagesToNodes';
 
 export const StageParallelization = {
   of: (stages: ObjectSet<Stage>): ParallelStagesList => {
-    const nodes: Nodes = StagesToNodes.calculate(stages);
-    const sortedNodes: SortedNodes = GraphTopologicalSort.sort(nodes);
+    const nodes: Nodes<Stage> = StagesToNodes.calculate(stages);
+    const sortedNodes: SortedNodes<Stage> = GraphTopologicalSort.sort(nodes);
     return SortedNodesToParallelizedStages.calculate(sortedNodes);
   },
 };

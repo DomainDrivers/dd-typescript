@@ -3,8 +3,8 @@ import { ObjectSet } from '../../utils/objectSet';
 import { Stage } from './stage';
 
 export const StagesToNodes = {
-  calculate: (stages: Stage[]): Nodes => {
-    let result = new Map<string, Node>(
+  calculate: (stages: Stage[]): Nodes<Stage> => {
+    let result = new Map<string, Node<Stage>>(
       stages.map((stage) => [
         stage.name,
         new Node(stage.name, undefined, stage),
@@ -17,15 +17,15 @@ export const StagesToNodes = {
       result = sharedResources(stage, stages.slice(i + 1), result);
     }
 
-    return new Nodes(ObjectSet.from<Node>([...result.values()]));
+    return new Nodes(ObjectSet.from<Node<Stage>>([...result.values()]));
   },
 };
 
 const sharedResources = (
   stage: Stage,
   withStages: Stage[],
-  result: Map<string, Node>,
-): Map<string, Node> => {
+  result: Map<string, Node<Stage>>,
+): Map<string, Node<Stage>> => {
   for (const other of withStages) {
     if (stage.name !== other.name) {
       if (
@@ -50,8 +50,8 @@ const sharedResources = (
 
 const explicitDependencies = (
   stage: Stage,
-  result: Map<string, Node>,
-): Map<string, Node> => {
+  result: Map<string, Node<Stage>>,
+): Map<string, Node<Stage>> => {
   let nodeWithExplicitDeps = result.get(stage.name)!;
   for (const explicitDependency of stage.dependencies) {
     nodeWithExplicitDeps = nodeWithExplicitDeps.dependsOn(

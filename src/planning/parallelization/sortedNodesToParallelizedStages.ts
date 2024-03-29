@@ -5,7 +5,7 @@ import { ParallelStagesList } from './parallelStagesList';
 import { Stage } from './stage';
 
 export const SortedNodesToParallelizedStages = {
-  calculate: (sortedNodes: SortedNodes): ParallelStagesList => {
+  calculate: (sortedNodes: SortedNodes<Stage>): ParallelStagesList => {
     const parallelized = sortedNodes.all.map(
       (nodes) =>
         new ParallelStages(

@@ -1,6 +1,8 @@
 import { Node } from './node';
 
-const createAdjacencyList = (initialNodes: Node[]): Map<number, number[]> => {
+const createAdjacencyList = <T>(
+  initialNodes: Node<T>[],
+): Map<number, number[]> => {
   const adjacencyList = new Map<number, number[]>();
 
   for (let i = 1; i <= initialNodes.length; i++) {
@@ -20,7 +22,7 @@ const createAdjacencyList = (initialNodes: Node[]): Map<number, number[]> => {
 };
 
 export const FeedbackArcSeOnGraph = {
-  calculate: (initialNodes: Node[]): Edge[] => {
+  calculate: <T>(initialNodes: Node<T>[]): Edge[] => {
     const adjacencyList: Map<number, number[]> =
       createAdjacencyList(initialNodes);
     const feedbackEdges: Edge[] = [];

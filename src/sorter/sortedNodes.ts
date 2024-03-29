@@ -1,13 +1,13 @@
 import { Nodes } from './nodes';
 
-export class SortedNodes {
-  constructor(public readonly all: Nodes[]) {}
+export class SortedNodes<T> {
+  constructor(public readonly all: Nodes<T>[]) {}
 
-  public static empty = (): SortedNodes => {
+  public static empty = <T>(): SortedNodes<T> => {
     return new SortedNodes([]);
   };
 
-  public add = (newNodes: Nodes): SortedNodes => {
+  public add = (newNodes: Nodes<T>): SortedNodes<T> => {
     const result = [...this.all, newNodes];
     return new SortedNodes(result);
   };

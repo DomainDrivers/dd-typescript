@@ -1,21 +1,21 @@
-import { Stage } from '../planning/parallelization';
-import { ObjectSet } from '../utils/objectSet';
+import { ObjectSet } from '../utils';
 import { Nodes } from './nodes';
 
-export class Node {
-  public readonly dependencies: Nodes;
-  public readonly content: Stage | null = null;
+export class Node<T> {
+  public readonly dependencies: Nodes<T>;
+  public readonly content: T | null = null;
 
   constructor(
     public readonly name: string,
-    dependencies?: Nodes,
-    content?: Stage | null,
+    dependencies?: Nodes<T>,
+    content?: T | null,
   ) {
-    this.dependencies = dependencies ?? new Nodes(ObjectSet.empty<Node>());
+    this.dependencies =
+      dependencies ?? new Nodes<T>(ObjectSet.empty<Node<T>>());
     this.content = content ?? null;
   }
 
-  public dependsOn = (node: Node): Node => {
+  public dependsOn = (node: Node<T>): Node<T> => {
     return new Node(this.name, this.dependencies.add(node), this.content);
   };
 
@@ -23,7 +23,7 @@ export class Node {
     return this.name;
   };
 
-  public equals(Node: Node): boolean {
-    return this.name === Node.name;
+  public equals(node: Node<T>): boolean {
+    return this.name === node.name;
   }
 }
