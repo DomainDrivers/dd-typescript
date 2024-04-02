@@ -1,3 +1,4 @@
+import type BigNumber from 'bignumber.js';
 import {
   Item,
   OptimizationFacade,
@@ -8,6 +9,7 @@ import {
   type CapacityDimension,
   type WeightDimension,
 } from '../optimization';
+import type { AdditionalPricedCapability } from './additionalPricedCapability';
 import { AvailableResourceCapability } from './availableResourceCapability';
 import { Demand } from './demand';
 import { SimulatedCapabilities } from './simulatedCapabilities';
@@ -27,6 +29,30 @@ export class SimulationFacade {
       this.toCapacity(totalCapability),
       compareItemValueReversed,
     );
+  };
+
+  public profitAfterBuyingNewCapability = (
+    projectsSimulations: SimulatedProject[],
+    capabilitiesWithoutNewOne: SimulatedCapabilities,
+    newPricedCapability: AdditionalPricedCapability,
+  ): BigNumber => {
+    const capabilitiesWithNewResource: SimulatedCapabilities =
+      capabilitiesWithoutNewOne.add(
+        newPricedCapability.availableResourceCapability,
+      );
+    const resultWithout: Result = this.optimizationFacade.calculate(
+      this.toItems(projectsSimulations),
+      this.toCapacity(capabilitiesWithoutNewOne),
+      compareItemValueReversed,
+    );
+    const resultWith: Result = this.optimizationFacade.calculate(
+      this.toItems(projectsSimulations),
+      this.toCapacity(capabilitiesWithNewResource),
+      compareItemValueReversed,
+    );
+    return resultWith.profit
+      .minus(newPricedCapability.value)
+      .minus(resultWithout.profit);
   };
 
   private toCapacity = (

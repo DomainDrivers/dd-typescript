@@ -11,6 +11,7 @@ import {
   ProjectId,
   SimulationFacade,
 } from '../../src/simulation';
+import { AdditionalPricedCapability } from '../../src/simulation/additionalPricedCapability';
 import { UUID } from '../../src/utils';
 import { AvailableCapabilitiesBuilder } from './availableCapabilitiesBuilder';
 import { SimulatedProjectsBuilder } from './simulatedProjectsBuilder';
@@ -166,5 +167,58 @@ describe('SimulationScenarios', () => {
 
     //then
     assert.equal(result.chosenItems[0].name, PROJECT_1);
+  });
+
+  it('check if it pays off to pay for capability', () => {
+    //given
+    const simulatedProjects = SimulatedProjects()
+      .withProject(PROJECT_1)
+      .thatRequires(demandFor(skill('JAVA-MID'), JAN_1))
+      .thatCanGenerateReputationLoss(100)
+      .withProject(PROJECT_2)
+      .thatRequires(demandFor(skill('JAVA-MID'), JAN_1))
+      .thatCanGenerateReputationLoss(40)
+      .build();
+
+    //and there are
+    const simulatedAvailability = SimulatedCapabilities()
+      .withEmployee(STASZEK)
+      .thatBrings(skill('JAVA-MID'))
+      .thatIsAvailableAt(JAN_1)
+      .build();
+
+    //and there are
+    const slawek = new AdditionalPricedCapability(
+      new BigNumber(9999),
+      new AvailableResourceCapability(
+        UUID.randomUUID(),
+        skill('JAVA-MID'),
+        JAN_1,
+      ),
+    );
+    const staszek = new AdditionalPricedCapability(
+      new BigNumber(3),
+      new AvailableResourceCapability(
+        UUID.randomUUID(),
+        skill('JAVA-MID'),
+        JAN_1,
+      ),
+    );
+
+    //when
+    const buyingSlawek = simulationFacade.profitAfterBuyingNewCapability(
+      simulatedProjects,
+      simulatedAvailability,
+      slawek,
+    );
+    const buyingStaszek = simulationFacade.profitAfterBuyingNewCapability(
+      simulatedProjects,
+      simulatedAvailability,
+      staszek,
+    );
+
+    //then
+    assert.ok(buyingSlawek.eq(new BigNumber(-9959))); //we pay 9999 and get the project for 40
+    assert.ok(buyingStaszek.eq(new BigNumber(37))); //we pay 3 and get the project for 40
   });
 });
