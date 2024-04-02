@@ -1,4 +1,4 @@
-import type { ParallelStages } from '..';
+import type { ParallelStages } from './parallelStages';
 
 export class ParallelStagesList {
   constructor(public readonly all: ParallelStages[]) {}
@@ -15,4 +15,8 @@ export class ParallelStagesList {
 
     return new ParallelStagesList(result);
   };
+
+  public allSorted = (
+    comparing: (a: ParallelStages, b: ParallelStages) => number,
+  ): ParallelStages[] => this.all.sort(comparing);
 }

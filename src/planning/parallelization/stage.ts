@@ -1,11 +1,10 @@
-import { type Duration } from 'date-fns';
-import { ObjectSet } from '../../utils/objectSet';
+import { Duration, ObjectSet } from '../../utils';
 
 export class Stage {
   private readonly stageName: string;
   dependencies: ObjectSet<Stage>;
   resources: ObjectSet<ResourceName>;
-  duration: Duration;
+  public duration: Duration;
 
   constructor(stageName: string);
   constructor(
@@ -23,8 +22,11 @@ export class Stage {
     this.stageName = stageName;
     this.dependencies = dependencies ?? ObjectSet.empty<Stage>();
     this.resources = resources ?? ObjectSet.empty<ResourceName>();
-    this.duration = duration ?? {};
+    this.duration = duration ?? Duration.zero;
   }
+
+  public ofDuration = (duration: Duration) =>
+    new Stage(this.stageName, this.dependencies, this.resources, duration);
 
   get name(): string {
     return this.stageName;

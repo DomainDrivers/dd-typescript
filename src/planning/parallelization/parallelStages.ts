@@ -1,13 +1,21 @@
 import type { Stage } from '.';
-import type { ObjectSet } from '../../utils/objectSet';
+import { Duration, ObjectSet, compareDuration } from '../../utils';
 
 export class ParallelStages {
   public constructor(public readonly stages: ObjectSet<Stage>) {}
 
-  public print() {
-    return [...this.stages]
+  public print = (): string =>
+    this.stages
       .map((stage) => stage.name)
       .sort()
       .join(', ');
-  }
+
+  public static of = (...stages: Stage[]): ParallelStages =>
+    new ParallelStages(ObjectSet.from(stages));
+
+  public duration = (): Duration => {
+    const ordered = this.stages.map((s) => s.duration).sort(compareDuration);
+
+    return ordered.length > 0 ? ordered[ordered.length - 1] : Duration.zero;
+  };
 }

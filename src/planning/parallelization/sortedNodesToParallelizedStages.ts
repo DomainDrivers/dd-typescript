@@ -1,6 +1,6 @@
-import { ParallelStages } from '..';
 import { SortedNodes } from '../../sorter/sortedNodes';
 import { ObjectSet } from '../../utils/objectSet';
+import { ParallelStages } from './parallelStages';
 import { ParallelStagesList } from './parallelStagesList';
 import { Stage } from './stage';
 

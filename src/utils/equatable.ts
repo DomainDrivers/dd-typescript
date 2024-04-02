@@ -1,17 +1,44 @@
-import assert from 'assert';
-
 export const deepEquals = <T>(left: T, right: T): boolean => {
   if (isEquatable(left)) {
     return left.equals(right);
   }
 
-  // Fallback to the deep equality comparison
-  try {
-    assert.deepEqual(left, right);
-    return true;
-  } catch {
-    return false;
+  if (Array.isArray(left)) {
+    return (
+      Array.isArray(right) &&
+      left.length === right.length &&
+      left.every((val, index) => deepEquals(val, right[index]))
+    );
   }
+
+  if (
+    typeof left !== 'object' ||
+    typeof right !== 'object' ||
+    left === null ||
+    right === null
+  ) {
+    return left === right;
+  }
+
+  if (Array.isArray(left) || Array.isArray(right)) return false;
+
+  const keys1 = Object.keys(left);
+  const keys2 = Object.keys(right);
+
+  if (
+    keys1.length !== keys2.length ||
+    !keys1.every((key) => keys2.includes(key))
+  )
+    return false;
+
+  for (const key in left) {
+    const isEqual = deepEquals(left[key], right[key]);
+    if (!isEqual) {
+      return false;
+    }
+  }
+
+  return true;
 };
 
 export type Equatable<T> = { equals: (right: T) => boolean } & T;
