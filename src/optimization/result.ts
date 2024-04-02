@@ -1,7 +1,7 @@
+import type { ObjectMap, ObjectSet } from '#utils';
 import type BigNumber from 'bignumber.js';
-import type { CapacityDimension, Item } from '.';
-import type { ObjectMap } from '../utils/objectMap';
-import type { ObjectSet } from '../utils/objectSet';
+import type { CapacityDimension } from './dimension';
+import type { Item } from './item';
 
 export class Result {
   constructor(

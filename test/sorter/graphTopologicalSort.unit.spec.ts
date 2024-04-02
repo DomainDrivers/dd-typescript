@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import { GraphTopologicalSort, Node, Nodes } from '#sorter';
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { GraphTopologicalSort, Node, Nodes } from '../../src/sorter';
 
 describe('GraphTopologicalSort', () => {
   it('test topological sort with simple dependencies', () => {

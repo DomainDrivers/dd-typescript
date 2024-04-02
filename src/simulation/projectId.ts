@@ -1,4 +1,4 @@
-import { UUID, type Brand } from '../utils';
+import { UUID, type Brand } from '#utils';
 
 export type ProjectId = Brand<UUID, 'ProjectId'>;
 

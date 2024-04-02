@@ -33,20 +33,54 @@
       {
         "zones": [
           {
-            "target": "./src/sorter/*",
-            "from": ["./src/planning", "./src/simulation"]
+            "target": "./src/optimization/*",
+            "from": [
+              // "./src/optimization", // allowed
+              "./src/planning",
+              // "./src/shared", // allowed
+              "./src/simulation",
+              "./src/sorter"
+            ]
           },
           {
             "target": "./src/planning/parallelization/*",
-            "from": ["./src/simulation"]
+            "from": [
+              "./src/optimization",
+              // "./src/planning", // allowed
+              "./src/shared",
+              "./src/simulation"
+              // "./src/sorter" // allowed
+            ]
           },
           {
             "target": "./src/simulation/*",
-            "from": ["./src/planning", "./src/sorter"]
+            "from": [
+              // "./src/optimization", // allowed
+              "./src/planning",
+              // "./src/shared", // allowed
+              // "./src/simulation", // allowed
+              "./src/sorter"
+            ]
+          },
+          {
+            "target": "./src/sorter/*",
+            "from": [
+              "./src/optimization",
+              "./src/planning",
+              "./src/shared",
+              "./src/simulation"
+              // "./src/sorter" // allowed
+            ]
           },
           {
             "target": "./src/utils/*",
-            "from": ["./src/planning", "./src/sorter", "./src/simulation"]
+            "from": [
+              "./src/optimization",
+              "./src/planning",
+              "./src/shared",
+              "./src/simulation",
+              "./src/sorter"
+            ]
           }
         ]
       }

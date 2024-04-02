@@ -1,5 +1,5 @@
-import type { WeightDimension } from '../optimization';
-import type { TimeSlot } from '../shared/timeslot';
+import type { WeightDimension } from '#optimization';
+import type { TimeSlot } from '#shared';
 import { AvailableResourceCapability } from './availableResourceCapability';
 import type { Capability } from './capability';
 

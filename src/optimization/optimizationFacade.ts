@@ -1,7 +1,6 @@
+import { ObjectMap, ObjectSet } from '#utils';
 import BigNumber from 'bignumber.js';
-import { type CapacityDimension } from '.';
-import { ObjectMap } from '../utils/objectMap';
-import { ObjectSet } from '../utils/objectSet';
+import { type CapacityDimension } from './dimension';
 import { Item } from './item';
 import { Result } from './result';
 import type { TotalCapacity } from './totalCapacity';

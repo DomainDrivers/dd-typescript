@@ -1,5 +1,5 @@
+import { ObjectSet } from '#utils';
 import { type Duration } from 'date-fns';
-import { ObjectSet } from '../../utils';
 
 export class Stage {
   private readonly stageName: string;

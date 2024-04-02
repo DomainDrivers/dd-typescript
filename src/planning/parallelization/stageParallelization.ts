@@ -1,8 +1,8 @@
-import { Nodes, SortedNodes, GraphTopologicalSort } from '../../sorter';
-import type { ObjectSet } from '../../utils';
+import { GraphTopologicalSort, Nodes, SortedNodes } from '#sorter';
+import type { ObjectSet } from '#utils';
 import { ParallelStagesList } from './parallelStagesList';
 import { SortedNodesToParallelizedStages } from './sortedNodesToParallelizedStages';
-import { type Stage } from './stage';
+import type { Stage } from './stage';
 import { StagesToNodes } from './stagesToNodes';
 
 export const StageParallelization = {

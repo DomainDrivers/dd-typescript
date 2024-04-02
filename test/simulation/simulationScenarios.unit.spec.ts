@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import BigNumber from 'bignumber.js';
-import assert from 'node:assert';
-import { describe, it } from 'node:test';
-import { OptimizationFacade } from '../../src/optimization';
-import { TimeSlot } from '../../src/shared';
+import { OptimizationFacade } from '#optimization';
+import { TimeSlot } from '#shared';
 import {
+  AdditionalPricedCapability,
   AvailableResourceCapability,
   Capability,
   Demand,
   ProjectId,
   SimulationFacade,
-} from '../../src/simulation';
-import { AdditionalPricedCapability } from '../../src/simulation/additionalPricedCapability';
-import { UUID } from '../../src/utils';
+} from '#simulation';
+import { UUID } from '#utils';
+import BigNumber from 'bignumber.js';
+import assert from 'node:assert';
+import { describe, it } from 'node:test';
 import { AvailableCapabilitiesBuilder } from './availableCapabilitiesBuilder';
 import { SimulatedProjectsBuilder } from './simulatedProjectsBuilder';
 const demandFor = Demand.demandFor;

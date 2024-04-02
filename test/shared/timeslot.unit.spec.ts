@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import { TimeSlot } from '#shared';
 import { UTCDate } from '@date-fns/utc';
 import { isEqual, startOfDay } from 'date-fns';
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
-import { TimeSlot } from '../../src/shared';
 
 describe('TimeSlot', () => {
   it('creating monthly time slot at UTC', () => {

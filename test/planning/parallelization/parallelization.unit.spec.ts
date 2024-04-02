@@ -1,12 +1,8 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import { Stage, StageParallelization, type ResourceName } from '#planning';
+import { ObjectSet } from '#utils';
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import {
-  Stage,
-  StageParallelization,
-  type ResourceName,
-} from '../../../src/planning/parallelization';
-import { ObjectSet } from '../../../src/utils';
 
 describe('Parallelization', () => {
   const LEON: ResourceName = { name: 'Leon' };

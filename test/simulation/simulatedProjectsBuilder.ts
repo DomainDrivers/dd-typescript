@@ -1,10 +1,5 @@
+import { Demand, Demands, SimulatedProject, type ProjectId } from '#simulation';
 import BigNumber from 'bignumber.js';
-import {
-  Demand,
-  Demands,
-  SimulatedProject,
-  type ProjectId,
-} from '../../src/simulation';
 
 export class SimulatedProjectsBuilder {
   private currentId?: ProjectId;

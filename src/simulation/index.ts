@@ -1,3 +1,4 @@
+export { AdditionalPricedCapability } from './additionalPricedCapability';
 export { AvailableResourceCapability } from './availableResourceCapability';
 export { Capability } from './capability';
 export { Demand } from './demand';

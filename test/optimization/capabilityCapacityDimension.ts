@@ -1,9 +1,6 @@
-import {
-  type CapacityDimension,
-  type WeightDimension,
-} from '../../src/optimization';
-import type { TimeSlot } from '../../src/shared';
-import { UUID } from '../../src/utils';
+import { type CapacityDimension, type WeightDimension } from '#optimization';
+import type { TimeSlot } from '#shared';
+import { UUID } from '#utils';
 
 export class CapabilityCapacityDimension implements CapacityDimension {
   public readonly __brand = 'CapacityDimension';

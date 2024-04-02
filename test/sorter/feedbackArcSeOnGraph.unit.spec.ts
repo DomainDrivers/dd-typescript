@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import { Edge, FeedbackArcSeOnGraph, Node } from '#sorter';
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { Edge, FeedbackArcSeOnGraph, Node } from '../../src/sorter';
 
 describe('FeedbackArcSetOnGraph', () => {
   it('can find minimum number of edges to remove to make the graph acyclic', () => {

@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import BigNumber from 'bignumber.js';
-import assert from 'node:assert';
-import { describe, it } from 'node:test';
 import {
   Item,
   OptimizationFacade,
   TotalCapacity,
   TotalWeight,
-} from '../../src/optimization';
-import { TimeSlot } from '../../src/shared';
+} from '#optimization';
+import { TimeSlot } from '#shared';
+import BigNumber from 'bignumber.js';
+import assert from 'node:assert';
+import { describe, it } from 'node:test';
 import {
   CapabilityTimedCapacityDimension,
   CapabilityTimedWeightDimension,

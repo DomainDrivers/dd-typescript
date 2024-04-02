@@ -1,4 +1,4 @@
-import { ObjectSet } from '../utils';
+import { ObjectSet } from '#utils';
 import { Nodes } from './nodes';
 import { SortedNodes } from './sortedNodes';
 

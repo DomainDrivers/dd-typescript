@@ -1,5 +1,5 @@
+import type { Brand } from '#utils';
 import { randomUUID } from 'crypto';
-import type { Brand } from '../utils';
 
 export type UUID = Brand<string, 'UUID'>;
 

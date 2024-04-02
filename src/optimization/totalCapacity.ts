@@ -1,4 +1,4 @@
-import { type CapacityDimension } from '.';
+import { type CapacityDimension } from './dimension';
 
 export class TotalCapacity {
   constructor(private readonly _capacities: CapacityDimension[]) {}

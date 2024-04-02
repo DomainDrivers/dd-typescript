@@ -1,4 +1,3 @@
-import type BigNumber from 'bignumber.js';
 import {
   Item,
   OptimizationFacade,
@@ -8,7 +7,8 @@ import {
   compareItemValueReversed,
   type CapacityDimension,
   type WeightDimension,
-} from '../optimization';
+} from '#optimization';
+import type BigNumber from 'bignumber.js';
 import type { AdditionalPricedCapability } from './additionalPricedCapability';
 import { AvailableResourceCapability } from './availableResourceCapability';
 import { Demand } from './demand';

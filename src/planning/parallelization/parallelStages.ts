@@ -1,5 +1,5 @@
-import type { ObjectSet } from '../../utils';
-import type { Stage } from '../parallelization';
+import type { ObjectSet } from '#utils';
+import type { Stage } from './stage';
 
 export class ParallelStages {
   public constructor(public readonly stages: ObjectSet<Stage>) {}

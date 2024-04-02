@@ -1,10 +1,10 @@
-import type { TimeSlot } from '../../src/shared';
+import type { TimeSlot } from '#shared';
 import {
   AvailableResourceCapability,
   Capability,
   SimulatedCapabilities,
-} from '../../src/simulation';
-import type { UUID } from '../../src/utils';
+} from '#simulation';
+import type { UUID } from '#utils';
 
 export class AvailableCapabilitiesBuilder {
   private readonly availabilities: AvailableResourceCapability[] = [];

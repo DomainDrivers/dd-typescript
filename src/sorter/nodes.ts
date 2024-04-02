@@ -1,4 +1,4 @@
-import { ObjectSet } from '../utils';
+import { ObjectSet } from '#utils';
 import { Node } from './node';
 
 export class Nodes<T> {

@@ -1,5 +1,5 @@
+import type { ObjectMap, ObjectSet } from '#utils';
 import type BigNumber from 'bignumber.js';
-import type { ObjectMap, ObjectSet } from '../utils';
 import type { AvailableResourceCapability } from './availableResourceCapability';
 import type { SimulatedProject } from './simulatedProject';
 

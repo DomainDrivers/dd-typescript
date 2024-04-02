@@ -1,4 +1,4 @@
-import type { Brand } from '../utils/typing';
+import type { Brand } from '#utils';
 
 export interface CapacityDimension
   extends Brand<unknown, 'CapacityDimension'> {}
