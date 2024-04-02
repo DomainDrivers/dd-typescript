@@ -20,7 +20,7 @@ export class SimulationFacade {
     this.optimizationFacade = optimizationFacade;
   }
 
-  public whichProjectWithMissingDemandsIsMostProfitableToAllocateResourcesTo = (
+  public whatIsTheOptimalSetup = (
     projectsSimulations: SimulatedProject[],
     totalCapability: SimulatedCapabilities,
   ): Result => {

@@ -3,6 +3,8 @@ import { AvailableResourceCapability } from './availableResourceCapability';
 export class SimulatedCapabilities {
   constructor(public readonly capabilities: AvailableResourceCapability[]) {}
 
+  public static none = () => new SimulatedCapabilities([]);
+
   public add = (
     ...newCapabilities: AvailableResourceCapability[]
   ): SimulatedCapabilities => {

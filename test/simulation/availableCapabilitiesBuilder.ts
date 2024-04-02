@@ -1,7 +1,6 @@
-import type { TimeSlot } from '#shared';
+import type { Capability, TimeSlot } from '#shared';
 import {
   AvailableResourceCapability,
-  Capability,
   SimulatedCapabilities,
 } from '#simulation';
 import type { UUID } from '#utils';

@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import { OptimizationFacade } from '#optimization';
-import { TimeSlot } from '#shared';
+import { Capability, TimeSlot } from '#shared';
 import {
   AdditionalPricedCapability,
   AvailableResourceCapability,
-  Capability,
   Demand,
   ProjectId,
   SimulationFacade,
@@ -57,11 +56,10 @@ describe('SimulationScenarios', () => {
       .build();
 
     //when
-    const result =
-      simulationFacade.whichProjectWithMissingDemandsIsMostProfitableToAllocateResourcesTo(
-        simulatedProjects,
-        simulatedAvailability,
-      );
+    const result = simulationFacade.whatIsTheOptimalSetup(
+      simulatedProjects,
+      simulatedAvailability,
+    );
 
     //then
     assert.ok(result.profit.eq(108));
@@ -87,11 +85,10 @@ describe('SimulationScenarios', () => {
       .build();
 
     //when
-    const result =
-      simulationFacade.whichProjectWithMissingDemandsIsMostProfitableToAllocateResourcesTo(
-        simulatedProjects,
-        simulatedAvailability,
-      );
+    const result = simulationFacade.whatIsTheOptimalSetup(
+      simulatedProjects,
+      simulatedAvailability,
+    );
 
     //then
     assert.ok(result.profit.eq(99));
@@ -124,16 +121,14 @@ describe('SimulationScenarios', () => {
     );
 
     //when
-    const resultWithoutExtraResource =
-      simulationFacade.whichProjectWithMissingDemandsIsMostProfitableToAllocateResourcesTo(
-        simulatedProjects,
-        simulatedAvailability,
-      );
-    const resultWithExtraResource =
-      simulationFacade.whichProjectWithMissingDemandsIsMostProfitableToAllocateResourcesTo(
-        simulatedProjects,
-        simulatedAvailability.add(extraCapability),
-      );
+    const resultWithoutExtraResource = simulationFacade.whatIsTheOptimalSetup(
+      simulatedProjects,
+      simulatedAvailability,
+    );
+    const resultWithExtraResource = simulationFacade.whatIsTheOptimalSetup(
+      simulatedProjects,
+      simulatedAvailability.add(extraCapability),
+    );
 
     //then
     assert.ok(resultWithoutExtraResource.profit.eq(99));
@@ -159,11 +154,10 @@ describe('SimulationScenarios', () => {
       .build();
 
     //when
-    const result =
-      simulationFacade.whichProjectWithMissingDemandsIsMostProfitableToAllocateResourcesTo(
-        simulatedProjects,
-        simulatedAvailability,
-      );
+    const result = simulationFacade.whatIsTheOptimalSetup(
+      simulatedProjects,
+      simulatedAvailability,
+    );
 
     //then
     assert.equal(result.chosenItems[0].name, PROJECT_1);

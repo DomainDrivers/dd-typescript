@@ -1,7 +1,6 @@
 import type { CapacityDimension } from '#optimization';
-import { TimeSlot } from '#shared';
+import { Capability, TimeSlot } from '#shared';
 import { deepEquals, type UUID } from '#utils';
-import { Capability } from './capability';
 
 export class AvailableResourceCapability implements CapacityDimension {
   public readonly __brand = 'CapacityDimension';
