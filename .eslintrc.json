@@ -34,11 +34,19 @@
         "zones": [
           {
             "target": "./src/sorter/*",
-            "from": ["./src/planning"]
+            "from": ["./src/planning", "./src/simulation"]
+          },
+          {
+            "target": "./src/planning/parallelization/*",
+            "from": ["./src/simulation"]
+          },
+          {
+            "target": "./src/simulation/*",
+            "from": ["./src/planning", "./src/sorter"]
           },
           {
             "target": "./src/utils/*",
-            "from": ["./src/planning", "./src/sorter"]
+            "from": ["./src/planning", "./src/sorter", "./src/simulation"]
           }
         ]
       }

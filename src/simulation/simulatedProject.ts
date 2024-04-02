@@ -8,4 +8,6 @@ export class SimulatedProject {
     public readonly earnings: BigNumber,
     public readonly missingDemands: Demands,
   ) {}
+
+  public allDemandsSatisfied = () => this.missingDemands.all.length === 0;
 }
