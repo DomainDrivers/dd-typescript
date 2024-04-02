@@ -1,4 +1,4 @@
-import type BigNumber from 'bignumber.js';
+import BigNumber from 'bignumber.js';
 import {
   Demand,
   Demands,
@@ -10,7 +10,7 @@ export class SimulatedProjectsBuilder {
   private currentId?: ProjectId;
   private readonly simulatedProjects: ProjectId[] = [];
   private readonly simulatedDemands = new Map<ProjectId, Demands>();
-  private readonly simulatedEarnings = new Map<ProjectId, BigNumber>();
+  private readonly values = new Map<ProjectId, () => BigNumber>();
 
   public withProject = (id: ProjectId) => {
     this.currentId = id;
@@ -24,7 +24,12 @@ export class SimulatedProjectsBuilder {
   };
 
   public thatCanEarn = (earnings: BigNumber) => {
-    this.simulatedEarnings.set(this.currentId!, earnings);
+    this.values.set(this.currentId!, () => earnings);
+    return this;
+  };
+
+  public thatCanGenerateReputationLoss = (factor: number) => {
+    this.values.set(this.currentId!, () => new BigNumber(factor));
     return this;
   };
 
@@ -33,7 +38,7 @@ export class SimulatedProjectsBuilder {
       (id) =>
         new SimulatedProject(
           id,
-          this.simulatedEarnings.get(id)!,
+          this.values.get(id)!,
           this.simulatedDemands.get(id)!,
         ),
     );

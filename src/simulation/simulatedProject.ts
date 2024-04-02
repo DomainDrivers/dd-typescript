@@ -5,7 +5,9 @@ import type { ProjectId } from './projectId';
 export class SimulatedProject {
   constructor(
     public readonly projectId: ProjectId,
-    public readonly earnings: BigNumber,
+    private readonly value: () => BigNumber,
     public readonly missingDemands: Demands,
   ) {}
+
+  public calculateValue = () => this.value();
 }

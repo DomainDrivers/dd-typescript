@@ -138,4 +138,33 @@ describe('SimulationScenarios', () => {
     assert.ok(resultWithoutExtraResource.profit.eq(99));
     assert.ok(resultWithExtraResource.profit.eq(108));
   });
+
+  it('picks optimal project based on reputation', () => {
+    //given
+    const simulatedProjects = SimulatedProjects()
+      .withProject(PROJECT_1)
+      .thatRequires(demandFor(skill('JAVA-MID'), JAN_1))
+      .thatCanGenerateReputationLoss(100)
+      .withProject(PROJECT_2)
+      .thatRequires(demandFor(skill('JAVA-MID'), JAN_1))
+      .thatCanGenerateReputationLoss(40)
+      .build();
+
+    //and there are
+    const simulatedAvailability = SimulatedCapabilities()
+      .withEmployee(STASZEK)
+      .thatBrings(skill('JAVA-MID'))
+      .thatIsAvailableAt(JAN_1)
+      .build();
+
+    //when
+    const result =
+      simulationFacade.whichProjectWithMissingDemandsIsMostProfitableToAllocateResourcesTo(
+        simulatedProjects,
+        simulatedAvailability,
+      );
+
+    //then
+    assert.equal(result.chosenItems[0].name, PROJECT_1);
+  });
 });

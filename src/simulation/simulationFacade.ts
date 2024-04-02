@@ -4,6 +4,7 @@ import {
   Result,
   TotalCapacity,
   TotalWeight,
+  compareItemValueReversed,
   type CapacityDimension,
   type WeightDimension,
 } from '../optimization';
@@ -24,6 +25,7 @@ export class SimulationFacade {
     return this.optimizationFacade.calculate(
       this.toItems(projectsSimulations),
       this.toCapacity(totalCapability),
+      compareItemValueReversed,
     );
   };
 
@@ -44,7 +46,7 @@ export class SimulationFacade {
     const weights: WeightDimension[] = missingDemands;
     return new Item(
       simulatedProject.projectId,
-      simulatedProject.earnings,
+      simulatedProject.calculateValue(),
       new TotalWeight(weights),
     );
   };

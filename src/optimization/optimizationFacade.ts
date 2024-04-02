@@ -7,8 +7,15 @@ import { Result } from './result';
 import type { TotalCapacity } from './totalCapacity';
 import { TotalWeight } from './totalWeight';
 
+export const compareItemValueReversed: (a: Item, b: Item) => number = (a, b) =>
+  b.value.comparedTo(a.value);
+
 export class OptimizationFacade {
-  calculate = (items: Item[], totalCapacity: TotalCapacity): Result => {
+  calculate = (
+    items: Item[],
+    totalCapacity: TotalCapacity,
+    comparer: (a: Item, b: Item) => number = compareItemValueReversed,
+  ): Result => {
     const capacitiesSize = totalCapacity.size;
     const dp = new Array<BigNumber>(capacitiesSize + 1).fill(new BigNumber(0));
     const chosenItemsList = new Array<Item[]>(capacitiesSize + 1).fill([]);
@@ -30,7 +37,7 @@ export class OptimizationFacade {
       ObjectSet<CapacityDimension>
     >();
 
-    for (const item of items.sort((a, b) => b.value.comparedTo(a.value))) {
+    for (const item of items.sort(comparer)) {
       const chosenCapacities: CapacityDimension[] = this.matchCapacities(
         item.totalWeight,
         allCapacities,
