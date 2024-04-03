@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import { TimeSlot } from '#shared';
+import { Duration, ObjectSet } from '#utils';
 import { UTCDate } from '@date-fns/utc';
 import { isEqual, startOfDay } from 'date-fns';
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
-import { ObjectSet } from '../../src/utils';
 
 describe('TimeSlot', () => {
   it('creating monthly time slot at UTC', () => {
@@ -240,5 +240,57 @@ describe('TimeSlot', () => {
     assert.ok(isEqual(difference[0].to, new UTCDate('2022-01-10T00:00:00Z')));
     assert.ok(isEqual(difference[1].from, new UTCDate('2022-01-15T00:00:00Z')));
     assert.ok(isEqual(difference[1].to, new UTCDate('2022-01-20T00:00:00Z')));
+  });
+  it('two slots have common part when slots overlap', () => {
+    //given
+    const slot1 = new TimeSlot(
+      new UTCDate('2022-01-01T00:00:00Z'),
+      new UTCDate('2022-01-15T00:00:00Z'),
+    );
+    const slot2 = new TimeSlot(
+      new UTCDate('2022-01-10T00:00:00Z'),
+      new UTCDate('2022-01-20T00:00:00Z'),
+    );
+
+    //when
+    const common = slot1.commonPartWith(slot2);
+
+    //then
+    assert.ok(!common.isEmpty());
+    assert.ok(isEqual(common.from, new UTCDate('2022-01-10T00:00:00Z')));
+    assert.ok(isEqual(common.to, new UTCDate('2022-01-15T00:00:00Z')));
+  });
+
+  it('two slots have common part when slots overlap', () => {
+    //given
+    const slot1 = new TimeSlot(
+      new UTCDate('2022-01-10T00:00:00Z'),
+      new UTCDate('2022-01-20T00:00:00Z'),
+    );
+    const slot2 = new TimeSlot(
+      new UTCDate('2022-01-10T00:00:00Z'),
+      new UTCDate('2022-01-20T00:00:00Z'),
+    );
+
+    //when
+    const common = slot1.commonPartWith(slot2);
+
+    //then
+    assert.ok(!common.isEmpty());
+    assert.ok(slot1.equals(common));
+  });
+
+  it('stretch time slot', () => {
+    // Arrange
+    const initialFrom = new UTCDate('2022-01-01T10:00:00Z');
+    const initialTo = new UTCDate('2022-01-01T12:00:00Z');
+    const timeSlot = new TimeSlot(initialFrom, initialTo);
+
+    // Act
+    const stretchedSlot = timeSlot.stretch(Duration.ofHours(1));
+
+    // Assert
+    assert.ok(isEqual(stretchedSlot.from, new UTCDate('2022-01-01T09:00:00Z')));
+    assert.ok(isEqual(stretchedSlot.to, new UTCDate('2022-01-01T13:00:00Z')));
   });
 });

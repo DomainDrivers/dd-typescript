@@ -1,6 +1,6 @@
 import { deepEquals } from './equatable';
 
-type KeyValue<Key, Value> = { readonly key: Key; value: Value };
+export type KeyValue<Key, Value> = { readonly key: Key; value: Value };
 
 export class ObjectMap<Key, Value> extends Array<KeyValue<Key, Value>> {
   #comparison: (left: Key, right: Key) => boolean;
@@ -21,10 +21,14 @@ export class ObjectMap<Key, Value> extends Array<KeyValue<Key, Value>> {
   ): ObjectMap<Key, Value> => ObjectMap.from<Key, Value>([], comparison);
 
   public static from = <Key, Value>(
-    items: KeyValue<Key, Value>[],
+    items: [Key, Value][],
     comparison?: (left: Key, right: Key) => boolean,
   ): ObjectMap<Key, Value> => {
-    const set = new ObjectMap<Key, Value>(items);
+    const set = new ObjectMap<Key, Value>(
+      items.map(([key, value]) => {
+        return { key, value };
+      }),
+    );
     if (comparison) set.#comparison = comparison;
 
     return set;
@@ -32,6 +36,9 @@ export class ObjectMap<Key, Value> extends Array<KeyValue<Key, Value>> {
 
   get = (key: Key): Value | null =>
     this.find((o) => this.#comparison(o.key, key))?.value ?? null;
+
+  getOrDefault = (key: Key, defaultValue: Value): Value =>
+    this.find((o) => this.#comparison(o.key, key))?.value ?? defaultValue;
 
   set = (key: Key, value: Value) => {
     const keyValue = this.find((o) => this.#comparison(o.key, key));
@@ -58,4 +65,8 @@ export class ObjectMap<Key, Value> extends Array<KeyValue<Key, Value>> {
   has = (key: Key): boolean => {
     return this.some((o) => this.#comparison(o.key, key));
   };
+
+  toMap = <OtherKey = Key, OtherValue = Value>(
+    tranform: (keyValue: KeyValue<Key, Value>) => [OtherKey, OtherValue],
+  ): Map<OtherKey, OtherValue> => new Map(this.map(tranform));
 }

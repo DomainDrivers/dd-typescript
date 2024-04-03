@@ -35,78 +35,114 @@
           {
             "target": "./src/allocation/*",
             "from": [
+              "./src/availability",
               // "./src/allocation", // allowed
               "./src/optimization",
               "./src/planning",
               // "./src/shared", // allowed
               // "./src/simulation", // allowed
-              "./src/sorter"
+              "./src/sorter",
+              "./src/sql",
+              "./src/storage"
+            ]
+          },
+          {
+            "target": "./src/availability/*",
+            "from": [
+              // "./src/availability", // allowed
+              "./src/allocation",
+              "./src/optimization",
+              "./src/planning",
+              // "./src/shared", // allowed
+              "./src/simulation",
+              "./src/sorter",
+              "./src/sql",
+              "./src/storage"
             ]
           },
           {
             "target": "./src/optimization/*",
             "from": [
+              "./src/availability",
               "./src/allocation",
               // "./src/optimization", // allowed
               "./src/planning",
               // "./src/shared", // allowed
               "./src/simulation",
-              "./src/sorter"
+              "./src/sorter",
+              "./src/sql",
+              "./src/storage"
             ]
           },
           {
             "target": "./src/planning/parallelization/*",
             "from": [
+              "./src/availability",
               "./src/allocation",
               "./src/optimization",
+              "./src/planning/schedule", // allowed
               // "./src/planning", // allowed
-              "./src/shared",
-              "./src/simulation"
-              // "./src/sorter" // allowed
+              //"./src/shared",  // allowed
+              "./src/simulation",
+              // "./src/sorter", // allowed
+              "./src/sql",
+              "./src/storage"
             ]
           },
           {
             "target": "./src/shared/*",
             "from": [
+              "./src/availability",
               "./src/allocation",
               "./src/optimization",
               "./src/planning",
               // "./src/shared", // allowed
               "./src/simulation",
-              "./src/sorter"
+              "./src/sorter",
+              "./src/sql",
+              "./src/storage"
             ]
           },
           {
             "target": "./src/simulation/*",
             "from": [
+              "./src/availability",
               "./src/allocation",
               // "./src/optimization", // allowed
               "./src/planning",
               // "./src/shared", // allowed
               // "./src/simulation", // allowed
-              "./src/sorter"
+              "./src/sorter",
+              "./src/sql",
+              "./src/storage"
             ]
           },
           {
             "target": "./src/sorter/*",
             "from": [
-              "./src/allocation",
-              "./src/optimization",
-              "./src/planning",
-              "./src/shared",
-              "./src/simulation"
-              // "./src/sorter" // allowed
-            ]
-          },
-          {
-            "target": "./src/utils/*",
-            "from": [
+              "./src/availability",
               "./src/allocation",
               "./src/optimization",
               "./src/planning",
               "./src/shared",
               "./src/simulation",
-              "./src/sorter"
+              // "./src/sorter", // allowed
+              "./src/sql",
+              "./src/storage"
+            ]
+          },
+          {
+            "target": "./src/utils/*",
+            "from": [
+              "./src/availability",
+              "./src/allocation",
+              "./src/optimization",
+              "./src/planning",
+              "./src/shared",
+              "./src/simulation",
+              "./src/sorter",
+              "./src/sql",
+              "./src/storage"
             ]
           }
         ]

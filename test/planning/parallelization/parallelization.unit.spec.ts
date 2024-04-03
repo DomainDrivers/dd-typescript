@@ -1,14 +1,15 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import { Stage, StageParallelization, type ResourceName } from '#planning';
+import { Stage, StageParallelization } from '#planning';
+import { ResourceName } from '#shared';
 import { ObjectSet } from '#utils';
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 describe('Parallelization', () => {
-  const LEON: ResourceName = { name: 'Leon' };
-  const ERYK: ResourceName = { name: 'Eric' };
-  const SLAWEK: ResourceName = { name: 'Sławek' };
-  const KUBA: ResourceName = { name: 'Kuba' };
+  const LEON: ResourceName = new ResourceName('Leon');
+  const ERYK: ResourceName = new ResourceName('Eric');
+  const SLAWEK: ResourceName = new ResourceName('Sławek');
+  const KUBA: ResourceName = new ResourceName('Kuba');
 
   it('everything can be done in parallel when there are no dependencies', () => {
     //given
@@ -16,7 +17,7 @@ describe('Parallelization', () => {
     const stage2 = new Stage('Stage2');
 
     //when
-    const sortedStages = StageParallelization.of(
+    const sortedStages = new StageParallelization().of(
       ObjectSet.from([stage1, stage2]),
     );
 
@@ -35,7 +36,7 @@ describe('Parallelization', () => {
     stage4 = stage4.dependsOn(stage2);
 
     //when
-    const sortedStages = StageParallelization.of(
+    const sortedStages = new StageParallelization().of(
       ObjectSet.from([stage1, stage2, stage3, stage4]),
     );
 
@@ -51,7 +52,7 @@ describe('Parallelization', () => {
     stage1 = stage1.dependsOn(stage2); // making it cyclic
 
     //when
-    const sortedStages = StageParallelization.of(
+    const sortedStages = new StageParallelization().of(
       ObjectSet.from([stage1, stage2]),
     );
 
@@ -73,7 +74,7 @@ describe('Parallelization', () => {
     );
 
     //when
-    const parallelStages = StageParallelization.of(
+    const parallelStages = new StageParallelization().of(
       ObjectSet.from([stage1, stage2, stage3, stage4]),
     );
 

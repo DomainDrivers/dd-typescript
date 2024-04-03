@@ -58,8 +58,8 @@ describe('PotentialTransferScenarios', () => {
     );
     const projects = new Projects(
       ObjectMap.from([
-        { key: BANKING_SOFT_ID, value: bankingSoft },
-        { key: INSURANCE_SOFT_ID, value: insuranceSoft },
+        [BANKING_SOFT_ID, bankingSoft],
+        [INSURANCE_SOFT_ID, insuranceSoft],
       ]),
     );
     //and
@@ -90,8 +90,8 @@ describe('PotentialTransferScenarios', () => {
     );
     const projects = new Projects(
       ObjectMap.from([
-        { key: BANKING_SOFT_ID, value: bankingSoft },
-        { key: INSURANCE_SOFT_ID, value: insuranceSoft },
+        [BANKING_SOFT_ID, bankingSoft],
+        [INSURANCE_SOFT_ID, insuranceSoft],
       ]),
     );
     //and
@@ -122,8 +122,8 @@ describe('PotentialTransferScenarios', () => {
     );
     const projects = new Projects(
       ObjectMap.from([
-        { key: BANKING_SOFT_ID, value: bankingSoft },
-        { key: INSURANCE_SOFT_ID, value: insuranceSoft },
+        [BANKING_SOFT_ID, bankingSoft],
+        [INSURANCE_SOFT_ID, insuranceSoft],
       ]),
     );
     //and

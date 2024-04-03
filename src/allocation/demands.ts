@@ -1,4 +1,4 @@
-import { deepEquals } from '../utils';
+import { deepEquals } from '#utils';
 import { Allocations } from './allocations';
 import type { Demand } from './demand';
 

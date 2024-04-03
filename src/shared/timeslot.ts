@@ -1,9 +1,10 @@
+import { Duration } from '#utils';
 import { UTCDate } from '@date-fns/utc';
 import {
   addDays,
+  addMilliseconds,
   addMonths,
-  interval,
-  intervalToDuration,
+  differenceInMilliseconds,
   isAfter,
   isBefore,
   isEqual,
@@ -15,6 +16,8 @@ export class TimeSlot {
     public readonly from: UTCDate,
     public readonly to: UTCDate,
   ) {}
+
+  public static empty = () => new TimeSlot(new UTCDate(0), new UTCDate(0));
 
   public static createDailyTimeSlotAtUTC = (
     year: number,
@@ -44,6 +47,17 @@ export class TimeSlot {
   public within = (other: TimeSlot) =>
     !isBefore(this.from, other.from) && !isAfter(this.to, other.to);
 
+  public commonPartWith = (other: TimeSlot): TimeSlot => {
+    if (!this.overlapsWith(other)) {
+      return TimeSlot.empty();
+    }
+    const commonStart = isAfter(this.from, other.from) ? this.from : other.from;
+    const commonEnd = isBefore(this.to, other.to) ? this.to : other.to;
+    return new TimeSlot(commonStart, commonEnd);
+  };
+
+  public isEmpty = () => isEqual(this.from, this.to);
+
   public leftoverAfterRemovingCommonWith = (other: TimeSlot): TimeSlot[] => {
     if (this.equals(other)) {
       return [];
@@ -68,8 +82,16 @@ export class TimeSlot {
     return result;
   };
 
+  public stretch = (duration: Duration) => {
+    return new TimeSlot(
+      addMilliseconds(this.from, -duration),
+      addMilliseconds(this.to, duration),
+    );
+  };
+
   equals = (other: TimeSlot) =>
     isEqual(this.from, other.from) && isEqual(this.to, other.to);
 
-  public duration = () => intervalToDuration(interval(this.from, this.to));
+  public duration = (): Duration =>
+    differenceInMilliseconds(this.to, this.from);
 }

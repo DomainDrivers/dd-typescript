@@ -15,4 +15,9 @@ export class ParallelStagesList {
 
     return new ParallelStagesList(result);
   };
+
+  public allSorted = (
+    comparing: (a: ParallelStages, b: ParallelStages) => number = (a, b) =>
+      a.print().localeCompare(b.print()),
+  ): ParallelStages[] => this.all.sort(comparing);
 }

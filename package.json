@@ -14,12 +14,13 @@
     "fix": "run-s fix:eslint fix:prettier",
     "fix:prettier": "prettier --write \"**/**/!(*.d).{ts,json,md}\"",
     "fix:eslint": "eslint '**/*.ts' --fix",
-    "test": "run-s test:unit",
+    "test": "run-s test:unit test:int",
     "test:unit": "glob -d -c \"node --import tsx --test\" **/*.unit.spec.ts",
-    "test:int": "glob -d -c \"node --import tsx --test\" **/*.int.spec.ts",
+    "test:int": "glob -d -c \"node --import tsx --test \" **/*.int.spec.ts",
     "test:watch": "run-p test:unit:watch test:int:watch",
     "test:unit:watch": "glob -d -c \"node --import tsx --test --watch\" **/*.unit.spec.ts",
-    "test:int:watch": "glob -d -c \"node --import tsx --test --watch\" **/*.int.spec.ts"
+    "test:int:watch": "glob -d -c \"node --import tsx --test --watch\" **/*.int.spec.ts",
+    "generate:migration": "drizzle-kit generate:pg"
   },
   "repository": {
     "type": "git",
@@ -28,13 +29,19 @@
   "dependencies": {
     "@date-fns/utc": "1.2.0",
     "bignumber.js": "9.1.2",
-    "date-fns": "3.6.0"
+    "date-fns": "3.6.0",
+    "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.30.7",
+    "pg": "^8.11.5"
   },
   "devDependencies": {
+    "@testcontainers/postgresql": "^10.8.1",
     "@types/bignumber.js": "5.0.0",
     "@types/node": "20.11.30",
+    "@types/pg": "^8.11.4",
     "@typescript-eslint/eslint-plugin": "7.4.0",
     "@typescript-eslint/parser": "7.4.0",
+    "drizzle-kit": "^0.20.14",
     "eslint": "8.57.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-import-resolver-typescript": "^3.6.1",

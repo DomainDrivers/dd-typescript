@@ -2,12 +2,36 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug All Tests (Node)",
+      "name": "Debug All Tests",
       "type": "node",
       "request": "launch",
       "skipFiles": ["<node_internals>/**"],
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run-script", "test", "--inspect-brk=9229"], // Use --inspect-brk for debugging
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "cwd": "${workspaceFolder}/src/",
+      "sourceMaps": true
+    },
+    {
+      "name": "Debug All Unit Tests",
+      "type": "node",
+      "request": "launch",
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run-script", "test:unit", "--inspect-brk=9229"], // Use --inspect-brk for debugging
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "cwd": "${workspaceFolder}/src/",
+      "sourceMaps": true
+    },
+    {
+      "name": "Debug All Integration Tests",
+      "type": "node",
+      "request": "launch",
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run-script", "test:int", "--inspect-brk=9229"], // Use --inspect-brk for debugging
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "cwd": "${workspaceFolder}/src/",
