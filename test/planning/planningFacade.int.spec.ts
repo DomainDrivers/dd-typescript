@@ -4,49 +4,31 @@ import {
   Demand,
   Demands,
   DemandsPerStage,
-  PlanningConfiguration,
   Schedule,
   Stage,
   type PlanningFacade,
 } from '#planning';
 import { Capability, ResourceName, TimeSlot } from '#shared';
-import { endPool } from '#storage';
 import { Duration, ObjectMap, ObjectSet, deepEquals } from '#utils';
 import { UTCDate } from '@date-fns/utc';
-import {
-  PostgreSqlContainer,
-  StartedPostgreSqlContainer,
-} from '@testcontainers/postgresql';
 import assert from 'assert';
-import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { after, before, describe, it } from 'node:test';
+import { PlannerTestEnvironment } from './setup';
 
 const demandFor = Demand.demandFor;
 const skill = Capability.skill;
 
 describe('PlanningFacade', () => {
-  let postgreSQLContainer: StartedPostgreSqlContainer;
+  const testEnvironment = PlannerTestEnvironment();
   let projectFacade: PlanningFacade;
-  let configuration: PlanningConfiguration;
 
   before(async () => {
-    postgreSQLContainer = await new PostgreSqlContainer().start();
-
-    configuration = new PlanningConfiguration(
-      postgreSQLContainer.getConnectionUri(),
-    );
-
-    const database = configuration.db();
-
-    await migrate(database, { migrationsFolder: './drizzle' });
+    const configuration = await testEnvironment.start();
 
     projectFacade = configuration.planningFacade();
   });
 
-  after(async () => {
-    await endPool(configuration.connectionString);
-    return postgreSQLContainer.stop();
-  });
+  after(testEnvironment.stop);
 
   it('can create project and load project card', async () => {
     //given

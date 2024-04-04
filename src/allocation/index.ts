@@ -5,3 +5,4 @@ export { Demand } from './demand';
 export { Demands } from './demands';
 export { Project } from './project';
 export { Projects } from './projects';
+export { ResourceId } from './resourceId';

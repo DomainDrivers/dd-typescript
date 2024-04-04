@@ -56,8 +56,4 @@ export class Stage {
       this.duration,
     );
   }
-
-  public equals(stage: Stage): boolean {
-    return this.stageName === stage.stageName;
-  }
 }

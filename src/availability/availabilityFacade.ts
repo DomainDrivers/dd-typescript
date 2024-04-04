@@ -1,5 +1,5 @@
-import type { Calendars } from './calendars';
+import { Calendars } from './calendars';
 
 export class AvailabilityFacade {
-  public availabilitiesOfResources = (): Calendars => null!;
+  public availabilitiesOfResources = (): Calendars => Calendars.of();
 }
