@@ -42,8 +42,8 @@
               // "./src/shared", // allowed
               // "./src/simulation", // allowed
               "./src/sorter",
-              "./src/sql",
-              "./src/storage"
+              "./src/sql"
+              //"./src/storage" // allowed
             ]
           },
           {
@@ -85,8 +85,8 @@
               //"./src/shared",  // allowed
               "./src/simulation",
               // "./src/sorter", // allowed
-              "./src/sql",
-              "./src/storage"
+              "./src/sql"
+              // "./src/storage" // allowed
             ]
           },
           {

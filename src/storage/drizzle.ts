@@ -1,5 +1,6 @@
 import {
   Column,
+  SQL,
   and,
   eq,
   type DrizzleConfig,
@@ -11,41 +12,33 @@ import {
   type NodePgQueryResultHKT,
 } from 'drizzle-orm/node-postgres';
 import type {
+  IndexColumn,
   PgInsertValue,
   PgTable,
   PgTransaction,
 } from 'drizzle-orm/pg-core';
 import pg from 'pg';
-import { schema } from '../planning';
+import { ObjectMap } from '../utils';
 import { type Repository } from './repository';
 
-const pools: Map<string, pg.Pool> = new Map();
+const pools: ObjectMap<string, pg.Pool> = ObjectMap.empty();
 
-export const getPool = (connectionString: string) => {
-  const existing = pools.get(connectionString);
+export const getPool = (connectionString: string) =>
+  pools.getOrSet(connectionString, () => new pg.Pool({ connectionString }));
 
-  if (existing) return existing;
-
-  const pool = new pg.Pool({ connectionString });
-
-  pools.set(connectionString, pool);
-
-  return pool;
-};
-
-export const endPool = (connectionString: string): Promise<void> => {
-  const existing = pools.get(connectionString);
-
-  if (!existing) return Promise.resolve();
-
-  return existing.end();
+export const endPool = async (connectionString: string): Promise<void> => {
+  const pool = pools.get(connectionString);
+  if (pool) {
+    await pool.end();
+    pools.delete(connectionString);
+  }
 };
 
 export const getDB = <
   TSchema extends Record<string, unknown> = Record<string, never>,
 >(
   connectionString: string,
-  config: DrizzleConfig<TSchema>,
+  config?: DrizzleConfig<TSchema>,
 ): NodePgDatabase<TSchema> => drizzle(getPool(connectionString), config);
 
 export type PostgresTransaction<
@@ -90,35 +83,44 @@ export abstract class DrizzleRepository<
   protected upsert = async <
     TTable extends PgTable,
     InsertSchema extends PgInsertValue<TTable>,
-    IdColumn extends Column,
+    IdColumn extends IndexColumn,
     VersionColumn extends Column,
   >(
     entity: InsertSchema,
     toUpdate: Partial<InsertSchema> & Record<string, unknown>,
     options: {
       id: [IdColumn, Id];
-      version: [VersionColumn, number];
+      version?: [VersionColumn, number];
     },
   ): Promise<void> => {
     const [idColumn, id] = options.id;
-    const [versionColumn, version] = options.version;
 
     const update = toUpdate;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (update[versionColumn.name] as any) = version + 1;
+
+    let set = toUpdate;
+    let where: SQL<unknown> | undefined = eq(idColumn, id);
+
+    if (options.version) {
+      const [versionColumn, version] = options.version;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (update[versionColumn.name] as any) = version + 1;
+
+      set = { ...update, versionColumn: version + 1 };
+      where = and(eq(idColumn, id), eq(versionColumn, version));
+    }
 
     const result = await this.db
       .insert(idColumn.table)
       .values(entity)
       .onConflictDoUpdate({
-        target: schema.projects.id,
-        set: { ...update, versionColumn: version + 1 },
-        where: and(eq(idColumn, id), eq(versionColumn, version)),
+        target: idColumn,
+        set,
+        where,
       });
 
     if (result.rowCount === 0)
       throw Error(
-        `Invalid version '${version} for record with id '${id?.toString()}`,
+        `Invalid version '${options.version?.[1] ?? ''} for record with id '${id?.toString()}`,
       );
   };
 }

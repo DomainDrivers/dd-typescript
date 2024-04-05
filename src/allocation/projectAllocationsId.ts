@@ -1,6 +1,6 @@
-import { UUID, type Brand } from '#utils';
+import { UUID } from '#utils';
 
-export type ProjectAllocationsId = Brand<UUID, 'ProjectAllocationsId'>;
+export type ProjectAllocationsId = UUID<'ProjectAllocationsId'>;
 
 export const ProjectAllocationsId = {
   newOne: (): ProjectAllocationsId => UUID.randomUUID() as ProjectAllocationsId,

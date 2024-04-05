@@ -4,9 +4,11 @@ import { ResourceId } from '#allocation';
 import { AvailabilityFacade } from '#availability';
 import {
   ParallelStagesList,
+  PlanningConfiguration,
   ProjectCard,
   ProjectId,
   Stage,
+  schema,
   type PlanningFacade,
 } from '#planning';
 import { Capability, ResourceName, TimeSlot } from '#shared';
@@ -14,14 +16,14 @@ import { Duration, ObjectSet, deepEquals } from '#utils';
 import { UTCDate } from '@date-fns/utc';
 import assert from 'node:assert';
 import { after, before, describe, it } from 'node:test';
+import { TestConfiguration } from '../setup';
 import { ScheduleAssert } from './schedule/assertions';
-import { PlannerTestEnvironment } from './setup';
 
 const ofDays = Duration.ofDays;
 const assertThat = ScheduleAssert.assertThat;
 
 describe('RD', () => {
-  const testEnvironment = PlannerTestEnvironment();
+  const testEnvironment = TestConfiguration();
   let projectFacade: PlanningFacade;
   let availabilityFacade: AvailabilityFacade;
 
@@ -55,7 +57,9 @@ describe('RD', () => {
   );
 
   before(async () => {
-    const configuration = await testEnvironment.start();
+    const connectionString = await testEnvironment.start({ schema });
+
+    const configuration = new PlanningConfiguration(connectionString);
 
     projectFacade = configuration.planningFacade();
     availabilityFacade = new AvailabilityFacade();

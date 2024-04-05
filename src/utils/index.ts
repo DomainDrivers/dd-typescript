@@ -1,3 +1,4 @@
+export { Clock } from './clock';
 export { Duration, compareDuration, fromInterval } from './duration';
 export { deepEquals, isEquatable, type Equatable } from './equatable';
 export { ObjectMap, type KeyValue } from './objectMap';

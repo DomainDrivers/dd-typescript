@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   AllocatedCapability,
-  AllocationFacade,
+  Allocations,
   Demand,
   Demands,
-  Project,
-  Projects,
+  PotentialTransfersService,
+  ProjectAllocationsId,
+  ProjectsAllocationsSummary,
 } from '#allocation';
 import { OptimizationFacade } from '#optimization';
 import { Capability, TimeSlot } from '#shared';
@@ -15,6 +16,7 @@ import BigNumber from 'bignumber.js';
 import { addMinutes } from 'date-fns';
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
+import { PotentialTransfers } from '../../src/allocation/potentialTransfers';
 const skill = Capability.skill;
 
 describe('PotentialTransferScenarios', () => {
@@ -34,39 +36,36 @@ describe('PotentialTransferScenarios', () => {
     new Demand(skill('PYTHON-MID'), JAN_1),
   ]);
 
-  const BANKING_SOFT_ID = UUID.randomUUID();
-  const INSURANCE_SOFT_ID = UUID.randomUUID();
+  const BANKING_SOFT_ID = ProjectAllocationsId.newOne();
+  const INSURANCE_SOFT_ID = ProjectAllocationsId.newOne();
   const STASZEK_JAVA_MID = new AllocatedCapability(
     UUID.randomUUID(),
     skill('JAVA-MID'),
     JAN_1,
   );
 
-  const simulationFacade = new AllocationFacade(
+  const potentialTransfers = new PotentialTransfersService(
     new SimulationFacade(new OptimizationFacade()),
   );
 
   it('simulates moving capabilities to different project', () => {
     //given
     const bankingSoft = new Project(
+      BANKING_SOFT_ID,
       DEMAND_FOR_JAVA_MID_IN_JAN,
       new BigNumber(9),
     );
     const insuranceSoft = new Project(
+      INSURANCE_SOFT_ID,
       DEMAND_FOR_JAVA_MID_IN_JAN,
       new BigNumber(90),
     );
-    const projects = new Projects(
-      ObjectMap.from([
-        [BANKING_SOFT_ID, bankingSoft],
-        [INSURANCE_SOFT_ID, insuranceSoft],
-      ]),
-    );
     //and
     bankingSoft.add(STASZEK_JAVA_MID);
+    const projects = toPotentialTransfers(bankingSoft, insuranceSoft);
 
     //when
-    const result: BigNumber = simulationFacade.checkPotentialTransfer(
+    const result: BigNumber = potentialTransfers.checkPotentialTransfer(
       projects,
       BANKING_SOFT_ID,
       INSURANCE_SOFT_ID,
@@ -81,24 +80,21 @@ describe('PotentialTransferScenarios', () => {
   it('simulates moving capabilities to different project just for awhile', () => {
     //given
     const bankingSoft = new Project(
+      BANKING_SOFT_ID,
       DEMAND_FOR_JAVA_MID_IN_JAN,
       new BigNumber(9),
     );
     const insuranceSoft = new Project(
+      INSURANCE_SOFT_ID,
       DEMAND_FOR_JAVA_JUST_FOR_15MIN_IN_JAN,
       new BigNumber(99),
     );
-    const projects = new Projects(
-      ObjectMap.from([
-        [BANKING_SOFT_ID, bankingSoft],
-        [INSURANCE_SOFT_ID, insuranceSoft],
-      ]),
-    );
     //and
     bankingSoft.add(STASZEK_JAVA_MID);
+    const projects = toPotentialTransfers(bankingSoft, insuranceSoft);
 
     //when
-    const result: BigNumber = simulationFacade.checkPotentialTransfer(
+    const result: BigNumber = potentialTransfers.checkPotentialTransfer(
       projects,
       BANKING_SOFT_ID,
       INSURANCE_SOFT_ID,
@@ -113,24 +109,21 @@ describe('PotentialTransferScenarios', () => {
   it('the move gives zero profit when there are still missing demands', () => {
     //given
     const bankingSoft = new Project(
+      BANKING_SOFT_ID,
       DEMAND_FOR_JAVA_MID_IN_JAN,
       new BigNumber(9),
     );
     const insuranceSoft = new Project(
+      INSURANCE_SOFT_ID,
       DEMANDS_FOR_JAVA_AND_PYTHON_IN_JAN,
       new BigNumber(99),
     );
-    const projects = new Projects(
-      ObjectMap.from([
-        [BANKING_SOFT_ID, bankingSoft],
-        [INSURANCE_SOFT_ID, insuranceSoft],
-      ]),
-    );
     //and
     bankingSoft.add(STASZEK_JAVA_MID);
+    const projects = toPotentialTransfers(bankingSoft, insuranceSoft);
 
     //when
-    const result: BigNumber = simulationFacade.checkPotentialTransfer(
+    const result: BigNumber = potentialTransfers.checkPotentialTransfer(
       projects,
       BANKING_SOFT_ID,
       INSURANCE_SOFT_ID,
@@ -142,3 +135,33 @@ describe('PotentialTransferScenarios', () => {
     assert.ok(result.eq(-9));
   });
 });
+
+const toPotentialTransfers = (...projects: Project[]) => {
+  const allocations = ObjectMap.empty<ProjectAllocationsId, Allocations>();
+  const demands = ObjectMap.empty<ProjectAllocationsId, Demands>();
+  const earnings = ObjectMap.empty<ProjectAllocationsId, BigNumber>();
+  for (const project of projects) {
+    allocations.set(project.id, project.allocations);
+    demands.set(project.id, project.demands);
+    earnings.set(project.id, project.earnings);
+  }
+  return new PotentialTransfers(
+    new ProjectsAllocationsSummary(ObjectMap.empty(), allocations, demands),
+    earnings,
+  );
+};
+
+class Project {
+  public allocations: Allocations = Allocations.none();
+
+  constructor(
+    public readonly id: ProjectAllocationsId,
+    public readonly demands: Demands,
+    public readonly earnings: BigNumber,
+  ) {}
+
+  add = (allocatedCapability: AllocatedCapability): Allocations => {
+    this.allocations = this.allocations.add(allocatedCapability);
+    return this.allocations;
+  };
+}

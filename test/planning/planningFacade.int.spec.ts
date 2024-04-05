@@ -4,31 +4,35 @@ import {
   Demand,
   Demands,
   DemandsPerStage,
+  PlanningConfiguration,
   Schedule,
   Stage,
   type PlanningFacade,
 } from '#planning';
+import * as schema from '#schema';
 import { Capability, ResourceName, TimeSlot } from '#shared';
 import { Duration, ObjectMap, ObjectSet, deepEquals } from '#utils';
 import { UTCDate } from '@date-fns/utc';
 import assert from 'assert';
 import { after, before, describe, it } from 'node:test';
-import { PlannerTestEnvironment } from './setup';
+import { TestConfiguration } from '../setup';
 
 const demandFor = Demand.demandFor;
 const skill = Capability.skill;
 
 describe('PlanningFacade', () => {
-  const testEnvironment = PlannerTestEnvironment();
+  const testEnvironment = TestConfiguration();
   let projectFacade: PlanningFacade;
 
   before(async () => {
-    const configuration = await testEnvironment.start();
+    const connectionString = await testEnvironment.start({ schema });
+
+    const configuration = new PlanningConfiguration(connectionString);
 
     projectFacade = configuration.planningFacade();
   });
 
-  after(testEnvironment.stop);
+  after(async () => await testEnvironment.stop());
 
   it('can create project and load project card', async () => {
     //given

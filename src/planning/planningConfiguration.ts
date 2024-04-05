@@ -14,14 +14,17 @@ export class PlanningConfiguration {
   constructor(
     public readonly connectionString: string,
     private readonly enableLogging: boolean = false,
-  ) {}
+  ) {
+    console.log('connectionstring: ' + this.connectionString);
+  }
+
+  public static readonly schema = schema;
 
   public planningFacade = (
     projectRepository?: ProjectRepository,
     planChosenResourcesService?: PlanChosenResources,
     getDatabase?: () => NodePgDatabase<typeof schema>,
   ) => {
-    console.log('connectionstring: ' + this.connectionString);
     const repository = projectRepository ?? this.projectRepository();
     const getDB = getDatabase ?? (() => this.db());
 

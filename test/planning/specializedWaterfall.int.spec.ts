@@ -1,18 +1,24 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import { ResourceId } from '#allocation';
-import { ProjectId, Stage, type PlanningFacade } from '#planning';
+import {
+  PlanningConfiguration,
+  ProjectId,
+  Stage,
+  schema,
+  type PlanningFacade,
+} from '#planning';
 import { Capability, ResourceName, TimeSlot } from '#shared';
 import { Duration } from '#utils';
 import { UTCDate } from '@date-fns/utc';
 import { after, before, describe, it } from 'node:test';
+import { TestConfiguration } from '../setup';
 import { ScheduleAssert } from './schedule/assertions';
-import { PlannerTestEnvironment } from './setup';
 
 const assertThat = ScheduleAssert.assertThat;
 
 describe('Specialized Waterfall', () => {
-  const testEnvironment = PlannerTestEnvironment();
+  const testEnvironment = TestConfiguration();
   let projectFacade: PlanningFacade;
 
   const JAN_1_2 = new TimeSlot(
@@ -37,7 +43,9 @@ describe('Specialized Waterfall', () => {
   );
 
   before(async () => {
-    const configuration = await testEnvironment.start();
+    const connectionString = await testEnvironment.start({ schema });
+
+    const configuration = new PlanningConfiguration(connectionString);
 
     projectFacade = configuration.planningFacade();
   });
