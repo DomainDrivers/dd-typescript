@@ -96,11 +96,7 @@ export class ProjectAllocations {
   };
 
   missingDemands = (): Demands =>
-    this.#demands.missingDemands(this.allocations);
-
-  public get allocations(): Allocations {
-    return this.#allocations;
-  }
+    this.#demands.missingDemands(this.#allocations);
 
   hasTimeSlot = () => !this.#timeSlot.equals(TimeSlot.empty());
 
@@ -127,4 +123,20 @@ export class ProjectAllocations {
       when,
     );
   };
+
+  public get id(): ProjectAllocationsId {
+    return this.#projectId;
+  }
+
+  public get demands(): Demands {
+    return this.#demands;
+  }
+
+  public get allocations(): Allocations {
+    return this.#allocations;
+  }
+
+  public get timeSlot(): TimeSlot {
+    return this.#timeSlot;
+  }
 }

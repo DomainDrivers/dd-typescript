@@ -40,7 +40,10 @@ export class ObjectMap<Key, Value> extends Array<KeyValue<Key, Value>> {
   getOrDefault = (key: Key, defaultValue: Value): Value =>
     this.find((o) => this.#comparison(o.key, key))?.value ?? defaultValue;
 
-  set = (key: Key, value: Value) => {
+  getOrSet = (key: Key, getValue: () => Value): Value =>
+    this.has(key) ? this.get(key)! : this.set(key, getValue());
+
+  set = (key: Key, value: Value): Value => {
     const keyValue = this.find((o) => this.#comparison(o.key, key));
 
     if (keyValue) {
@@ -48,6 +51,7 @@ export class ObjectMap<Key, Value> extends Array<KeyValue<Key, Value>> {
     } else {
       super.push({ key, value });
     }
+    return value;
   };
 
   push = (value: KeyValue<Key, Value>): number =>

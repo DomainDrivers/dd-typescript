@@ -4,8 +4,10 @@ import {
   Demand,
   Demands,
   DemandsPerStage,
+  PlanningConfiguration,
   ProjectId,
   Stage,
+  schema,
   type PlanningFacade,
 } from '#planning';
 import { Capability, ResourceName, TimeSlot } from '#shared';
@@ -13,8 +15,8 @@ import { Duration, ObjectMap } from '#utils';
 import { UTCDate } from '@date-fns/utc';
 import assert from 'node:assert';
 import { after, before, describe, it } from 'node:test';
+import { TestConfiguration } from '../setup';
 import { ScheduleAssert } from './schedule/assertions';
-import { PlannerTestEnvironment } from './setup';
 
 const ofDays = Duration.ofDays;
 const demandFor = Demand.demandFor;
@@ -22,7 +24,7 @@ const skill = Capability.skill;
 const assertThat = ScheduleAssert.assertThat;
 
 describe('Standard Waterfall', () => {
-  const testEnvironment = PlannerTestEnvironment();
+  const testEnvironment = TestConfiguration();
   let projectFacade: PlanningFacade;
 
   const JAN_1 = new UTCDate('2020-01-01T00:00:00.00Z');
@@ -43,7 +45,9 @@ describe('Standard Waterfall', () => {
   );
 
   before(async () => {
-    const configuration = await testEnvironment.start();
+    const connectionString = await testEnvironment.start({ schema });
+
+    const configuration = new PlanningConfiguration(connectionString);
 
     projectFacade = configuration.planningFacade();
   });
