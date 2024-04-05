@@ -15,6 +15,13 @@
       "when": 1712348469229,
       "tag": "0001_smiling_peter_parker",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1712378628365,
+      "tag": "0002_cheerful_goliath",
+      "breakpoints": true
     }
   ]
 }

@@ -1,3 +1,4 @@
+export { cashflows } from '../allocation/cashflow/schema';
 export {
   allocatableCapabilities,
   projectAllocations,

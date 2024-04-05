@@ -4,7 +4,6 @@ import {
   Demands as SimulatedDemands,
   SimulatedProject,
 } from '#simulation';
-import type BigNumber from 'bignumber.js';
 import {
   AllocatedCapability,
   ProjectAllocationsId,
@@ -12,11 +11,12 @@ import {
 } from '.';
 import type { TimeSlot } from '../shared';
 import { deepEquals, type ObjectMap } from '../utils';
+import type { Earnings } from './cashflow/earnings';
 
 export class PotentialTransfers {
   constructor(
     public readonly summary: ProjectsAllocationsSummary,
-    public readonly earnings: ObjectMap<ProjectAllocationsId, BigNumber>,
+    public readonly earnings: ObjectMap<ProjectAllocationsId, Earnings>,
   ) {}
 
   transfer = (

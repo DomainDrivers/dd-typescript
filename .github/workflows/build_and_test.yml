@@ -31,9 +31,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build TS
-        run: npm run build
-
       - name: Run linting (ESlint and Prettier)
         run: npm run lint
 

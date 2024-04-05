@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "setup": "cat .nvmrc | nvm install; nvm use",
-    "build": "run-s lint build:ts",
+    "build": "run-s build:ts",
     "build:ts": "tsc -b",
     "build:ts:watch": "tsc -b --watch",
     "lint": "npm run lint:eslint && npm run lint:prettier",
@@ -36,7 +36,6 @@
   },
   "devDependencies": {
     "@testcontainers/postgresql": "^10.8.1",
-    "@types/bignumber.js": "5.0.0",
     "@types/node": "20.11.30",
     "@types/pg": "^8.11.4",
     "@typescript-eslint/eslint-plugin": "7.4.0",
