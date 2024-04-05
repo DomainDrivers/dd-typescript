@@ -21,11 +21,14 @@ export class Project {
     capability: AllocatedCapability,
     forSlot: TimeSlot,
   ): AllocatedCapability | null => {
-    const toRemove = this.allocations.find(capability, forSlot);
+    const toRemove = this.allocations.find(capability.allocatedCapabilityID);
     if (toRemove == null) {
       return null;
     }
-    this.allocations = this.allocations.remove(capability, forSlot);
+    this.allocations = this.allocations.remove(
+      capability.allocatedCapabilityID,
+      forSlot,
+    );
     return toRemove;
   };
 

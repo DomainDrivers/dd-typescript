@@ -1,5 +1,5 @@
 import type { TimeSlot } from '#shared';
-import { ObjectSet, deepEquals } from '#utils';
+import { ObjectSet, UUID } from '#utils';
 import { AllocatedCapability } from './allocatedCapability';
 
 export class Allocations {
@@ -10,11 +10,8 @@ export class Allocations {
   public add = (newOne: AllocatedCapability) =>
     new Allocations(ObjectSet.from([...this.all, newOne]));
 
-  public remove = (
-    toRemove: AllocatedCapability,
-    slot: TimeSlot,
-  ): Allocations => {
-    const allocatedResource = this.find(toRemove, slot);
+  public remove = (toRemove: UUID, slot: TimeSlot): Allocations => {
+    const allocatedResource = this.find(toRemove);
 
     return allocatedResource !== null
       ? this.removeFromSlot(allocatedResource, slot)
@@ -44,10 +41,9 @@ export class Allocations {
     return new Allocations(newSlots);
   };
 
-  public find = (
-    capability: AllocatedCapability,
-    _timeSlot: TimeSlot,
-  ): AllocatedCapability | null =>
-    this.all.find((ar: AllocatedCapability) => deepEquals(ar, capability)) ??
-    null;
+  public find = (allocatedCapabilityID: UUID): AllocatedCapability | null =>
+    this.all.find(
+      (ar: AllocatedCapability) =>
+        ar.allocatedCapabilityID === allocatedCapabilityID,
+    ) ?? null;
 }

@@ -1,8 +1,8 @@
 import { AvailabilityFacade, type Calendars } from '#availability';
 import { ResourceName, TimeSlot } from '#shared';
 import { ProjectId } from '#simulation';
+import { transactional } from '#storage';
 import { ObjectSet } from '#utils';
-import { transactional } from '../storage';
 import { ChosenResources } from './chosenResources';
 import { Stage } from './parallelization';
 import type { ProjectRepository } from './projectRepository';

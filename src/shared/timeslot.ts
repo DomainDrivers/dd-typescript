@@ -89,8 +89,9 @@ export class TimeSlot {
     );
   };
 
-  equals = (other: TimeSlot) =>
-    isEqual(this.from, other.from) && isEqual(this.to, other.to);
+  public equals(other: TimeSlot) {
+    return isEqual(this.from, other.from) && isEqual(this.to, other.to);
+  }
 
   public duration = (): Duration =>
     differenceInMilliseconds(this.to, this.from);

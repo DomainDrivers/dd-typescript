@@ -1,5 +1,5 @@
+import type { KeyValue } from '#utils';
 import { bigserial, jsonb, pgTable, uuid, varchar } from 'drizzle-orm/pg-core';
-import type { KeyValue } from '../../utils';
 
 export type ResourceNameEntity = {
   name: string;

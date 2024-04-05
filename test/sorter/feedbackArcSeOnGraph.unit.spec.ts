@@ -2,6 +2,7 @@
 import { Edge, FeedbackArcSeOnGraph, Node } from '#sorter';
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
+import { deepEquals } from '../../src/utils';
 
 describe('FeedbackArcSetOnGraph', () => {
   it('can find minimum number of edges to remove to make the graph acyclic', () => {
@@ -27,7 +28,7 @@ describe('FeedbackArcSetOnGraph', () => {
     assert.equal(toRemove.length, 2);
     assert.ok(
       [new Edge(3, 1), new Edge(4, 3)].filter((e) =>
-        toRemove.some((t) => t.equals(e)),
+        toRemove.some((t) => deepEquals(t, e)),
       ).length === toRemove.length,
     );
   });
