@@ -1,16 +1,17 @@
 import { deepEquals } from './equatable';
 
 export class ObjectSet<T> extends Array<T> {
-  #comparison: (left: T, right: T) => boolean;
+  #comparison: (left: T, right: T) => boolean = deepEquals;
   constructor(...items: T[]);
   constructor(items: T[]);
   constructor(arrayLength: number);
   constructor(objectsOrLength: Array<T> | number) {
     if (objectsOrLength === undefined) super(0);
-    else if (objectsOrLength instanceof Array) super(...objectsOrLength);
-    else super(objectsOrLength);
+    else if (objectsOrLength instanceof Array) {
+      super(...[]);
 
-    this.#comparison = deepEquals;
+      this.pushAll(objectsOrLength);
+    } else super(objectsOrLength);
 
     Object.setPrototypeOf(this, ObjectSet.prototype);
   }

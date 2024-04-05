@@ -1,5 +1,5 @@
 import { Duration, ObjectMap, ObjectSet, compareDuration } from '#utils';
-import type { ParallelStages } from '.';
+import type { ParallelStages } from './parallelStages';
 import { Stage } from './stage';
 import { StageParallelization } from './stageParallelization';
 

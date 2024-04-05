@@ -1,9 +1,19 @@
+import { Capability, TimeSlot } from '#shared';
 import { deepEquals } from '#utils';
 import { Allocations } from './allocations';
-import type { Demand } from './demand';
+import { Demand } from './demand';
 
 export class Demands {
   constructor(public readonly all: Demand[]) {}
+
+  public static none = () => new Demands([]);
+
+  public static of = (...demands: Demand[]) => new Demands(demands);
+
+  public static allInSameTimeSlot = (
+    slot: TimeSlot,
+    ...capabilities: Capability[]
+  ) => new Demands(capabilities.map((c) => new Demand(c, slot)));
 
   public missingDemands = (allocations: Allocations) =>
     new Demands(this.all.filter((d) => !this.satisfiedBy(d, allocations)));
@@ -13,4 +23,7 @@ export class Demands {
       (ar) =>
         deepEquals(ar.capability, d.capability) && d.slot.within(ar.timeSlot),
     );
+
+  public withNew = (newDemands: Demands) =>
+    new Demands([...this.all, ...newDemands.all]);
 }

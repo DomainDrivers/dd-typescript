@@ -1,8 +1,12 @@
 export { AllocatedCapability } from './allocatedCapability';
 export { AllocationFacade } from './allocationFacade';
 export { Allocations } from './allocations';
+export { CapabilitiesAllocated } from './capabilitiesAllocated';
+export { CapabilityReleased } from './capabilitiesReleased';
 export { Demand } from './demand';
 export { Demands } from './demands';
 export { Project } from './project';
+export { ProjectAllocations } from './projectAllocations';
+export { ProjectAllocationsId } from './projectAllocationsId';
 export { Projects } from './projects';
 export { ResourceId } from './resourceId';
