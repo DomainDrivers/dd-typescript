@@ -1,9 +1,17 @@
 import { Capability, TimeSlot } from '#shared';
-import { UUID } from '#utils';
+import { UUID, deepEquals } from '#utils';
 import type { UTCDate } from '@date-fns/utc';
-import { Allocations, Demands, ProjectAllocationsId, ResourceId } from '.';
+import {
+  AllocatedCapability,
+  Allocations,
+  Demands,
+  ProjectAllocationScheduled,
+  ProjectAllocationsId,
+  ResourceId,
+} from '.';
 import { CapabilitiesAllocated } from './capabilitiesAllocated';
 import { CapabilityReleased } from './capabilitiesReleased';
+import { ProjectAllocationsDemandsScheduled } from './projectAllocationDemandsScheduled';
 
 export class ProjectAllocations {
   #projectId: ProjectAllocationsId;
@@ -37,39 +45,55 @@ export class ProjectAllocations {
   ) => new ProjectAllocations(projectId, Allocations.none(), demands);
 
   allocate = (
-    _resourceId: ResourceId,
-    _capability: Capability,
+    resourceId: ResourceId,
+    capability: Capability,
     requestedSlot: TimeSlot,
-    _when: UTCDate,
+    when: UTCDate,
   ): CapabilitiesAllocated | null => {
-    if (this.nothingAllocated() || !this.withinProjectTimeSlot(requestedSlot)) {
+    const allocatedCapability = new AllocatedCapability(
+      resourceId,
+      capability,
+      requestedSlot,
+    );
+    const newAllocations = this.#allocations.add(allocatedCapability);
+
+    if (
+      this.nothingAllocated(newAllocations) ||
+      !this.withinProjectTimeSlot(requestedSlot)
+    ) {
       return null;
     }
+    this.#allocations = newAllocations;
+
     return new CapabilitiesAllocated(
-      undefined!,
-      undefined!,
-      undefined!,
-      undefined!,
-      undefined,
+      allocatedCapability.allocatedCapabilityID,
+      this.#projectId,
+      this.missingDemands(),
+      when,
     );
   };
 
-  private nothingAllocated = (): boolean => false;
+  private nothingAllocated = (newAllocations: Allocations): boolean =>
+    deepEquals(this.#allocations, newAllocations);
 
-  private withinProjectTimeSlot = (_requestedSlot: TimeSlot) => false;
+  private withinProjectTimeSlot = (requestedSlot: TimeSlot) =>
+    !this.hasTimeSlot() || requestedSlot.within(this.#timeSlot);
 
   public release = (
-    _allocatedCapabilityId: UUID,
-    _timeSlot: TimeSlot,
-    _when: UTCDate,
+    allocatedCapabilityId: UUID,
+    timeSlot: TimeSlot,
+    when: UTCDate,
   ): CapabilityReleased | null => {
-    if (this.nothingReleased()) {
+    const newAllocations = this.#allocations.remove(
+      allocatedCapabilityId,
+      timeSlot,
+    );
+    if (deepEquals(newAllocations, this.#allocations)) {
       return null;
     }
-    return new CapabilityReleased(undefined!, undefined!, undefined!);
+    this.#allocations = newAllocations;
+    return new CapabilityReleased(this.#projectId, this.missingDemands(), when);
   };
-
-  private nothingReleased = (): boolean => false;
 
   missingDemands = (): Demands =>
     this.#demands.missingDemands(this.allocations);
@@ -79,4 +103,28 @@ export class ProjectAllocations {
   }
 
   hasTimeSlot = () => !this.#timeSlot.equals(TimeSlot.empty());
+
+  public defineSlot = (
+    timeSlot: TimeSlot,
+    when: UTCDate,
+  ): ProjectAllocationScheduled | null => {
+    this.#timeSlot = timeSlot;
+    return new ProjectAllocationScheduled(
+      this.#projectId,
+      this.#timeSlot,
+      when,
+    );
+  };
+
+  public addDemands = (
+    newDemands: Demands,
+    when: UTCDate,
+  ): ProjectAllocationsDemandsScheduled | null => {
+    this.#demands = this.#demands.withNew(newDemands);
+    return new ProjectAllocationsDemandsScheduled(
+      this.#projectId,
+      this.missingDemands(),
+      when,
+    );
+  };
 }
