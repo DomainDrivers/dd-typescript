@@ -51,6 +51,7 @@
     "paths": {
       "#allocation": ["./src/allocation"],
       "#availability": ["./src/availability"],
+      "#cashflow": ["src/allocation/cashflow"],
       "#optimization": ["./src/optimization"],
       "#planning": ["./src/planning"],
       "#shared": ["./src/shared"],

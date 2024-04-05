@@ -39,11 +39,12 @@
               // "./src/allocation", // allowed
               "./src/optimization",
               "./src/planning",
+              "./src/schema",
               // "./src/shared", // allowed
               // "./src/simulation", // allowed
               "./src/sorter",
               "./src/sql"
-              //"./src/storage" // allowed
+              // "./src/storage" // allowed
             ]
           },
           {
@@ -53,6 +54,7 @@
               "./src/allocation",
               "./src/optimization",
               "./src/planning",
+              "./src/schema",
               // "./src/shared", // allowed
               "./src/simulation",
               "./src/sorter",
@@ -65,8 +67,10 @@
             "from": [
               "./src/availability",
               "./src/allocation",
+
               // "./src/optimization", // allowed
               "./src/planning",
+              "./src/schema",
               // "./src/shared", // allowed
               "./src/simulation",
               "./src/sorter",
@@ -82,11 +86,27 @@
               "./src/optimization",
               "./src/planning/schedule", // allowed
               // "./src/planning", // allowed
+              "./src/schema",
               //"./src/shared",  // allowed
               "./src/simulation",
               // "./src/sorter", // allowed
               "./src/sql"
-              // "./src/storage" // allowed
+              // "./src/storage"
+            ]
+          },
+          {
+            "target": "./src/schema/*",
+            "from": [
+              "./src/availability",
+              // "./src/allocation",
+              "./src/optimization",
+              //"./src/planning",
+              // "./src/schema", // allowed
+              "./src/shared", // allowed
+              "./src/simulation",
+              "./src/sorter",
+              "./src/sql",
+              "./src/storage"
             ]
           },
           {
@@ -96,6 +116,7 @@
               "./src/allocation",
               "./src/optimization",
               "./src/planning",
+              "./src/schema",
               // "./src/shared", // allowed
               "./src/simulation",
               "./src/sorter",
@@ -110,6 +131,7 @@
               "./src/allocation",
               // "./src/optimization", // allowed
               "./src/planning",
+              "./src/schema",
               // "./src/shared", // allowed
               // "./src/simulation", // allowed
               "./src/sorter",
@@ -124,6 +146,7 @@
               "./src/allocation",
               "./src/optimization",
               "./src/planning",
+              "./src/schema",
               "./src/shared",
               "./src/simulation",
               // "./src/sorter", // allowed
@@ -138,6 +161,7 @@
               "./src/allocation",
               "./src/optimization",
               "./src/planning",
+              "./src/schema",
               "./src/shared",
               "./src/simulation",
               "./src/sorter",

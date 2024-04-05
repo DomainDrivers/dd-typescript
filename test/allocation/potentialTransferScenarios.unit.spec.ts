@@ -4,6 +4,7 @@ import {
   Allocations,
   Demand,
   Demands,
+  PotentialTransfers,
   PotentialTransfersService,
   ProjectAllocationsId,
   ProjectsAllocationsSummary,
@@ -16,7 +17,7 @@ import BigNumber from 'bignumber.js';
 import { addMinutes } from 'date-fns';
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
-import { PotentialTransfers } from '../../src/allocation/potentialTransfers';
+import { Earnings } from '../../src/allocation/cashflow/earnings';
 const skill = Capability.skill;
 
 describe('PotentialTransferScenarios', () => {
@@ -53,12 +54,12 @@ describe('PotentialTransferScenarios', () => {
     const bankingSoft = new Project(
       BANKING_SOFT_ID,
       DEMAND_FOR_JAVA_MID_IN_JAN,
-      new BigNumber(9),
+      Earnings.of(9),
     );
     const insuranceSoft = new Project(
       INSURANCE_SOFT_ID,
       DEMAND_FOR_JAVA_MID_IN_JAN,
-      new BigNumber(90),
+      Earnings.of(90),
     );
     //and
     bankingSoft.add(STASZEK_JAVA_MID);
@@ -82,12 +83,12 @@ describe('PotentialTransferScenarios', () => {
     const bankingSoft = new Project(
       BANKING_SOFT_ID,
       DEMAND_FOR_JAVA_MID_IN_JAN,
-      new BigNumber(9),
+      Earnings.of(9),
     );
     const insuranceSoft = new Project(
       INSURANCE_SOFT_ID,
       DEMAND_FOR_JAVA_JUST_FOR_15MIN_IN_JAN,
-      new BigNumber(99),
+      Earnings.of(99),
     );
     //and
     bankingSoft.add(STASZEK_JAVA_MID);
@@ -111,12 +112,12 @@ describe('PotentialTransferScenarios', () => {
     const bankingSoft = new Project(
       BANKING_SOFT_ID,
       DEMAND_FOR_JAVA_MID_IN_JAN,
-      new BigNumber(9),
+      Earnings.of(9),
     );
     const insuranceSoft = new Project(
       INSURANCE_SOFT_ID,
       DEMANDS_FOR_JAVA_AND_PYTHON_IN_JAN,
-      new BigNumber(99),
+      Earnings.of(99),
     );
     //and
     bankingSoft.add(STASZEK_JAVA_MID);
@@ -157,7 +158,7 @@ class Project {
   constructor(
     public readonly id: ProjectAllocationsId,
     public readonly demands: Demands,
-    public readonly earnings: BigNumber,
+    public readonly earnings: Earnings,
   ) {}
 
   add = (allocatedCapability: AllocatedCapability): Allocations => {
