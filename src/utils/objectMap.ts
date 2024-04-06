@@ -37,8 +37,8 @@ export class ObjectMap<Key, Value> extends Array<KeyValue<Key, Value>> {
   get = (key: Key): Value | null =>
     this.find((o) => this.#comparison(o.key, key))?.value ?? null;
 
-  getOrDefault = (key: Key, defaultValue: Value): Value =>
-    this.find((o) => this.#comparison(o.key, key))?.value ?? defaultValue;
+  getOrDefault = (key: Key, getDefaultValue: () => Value): Value =>
+    this.find((o) => this.#comparison(o.key, key))?.value ?? getDefaultValue();
 
   getOrSet = (key: Key, getValue: () => Value): Value =>
     this.has(key) ? this.get(key)! : this.set(key, getValue());

@@ -83,46 +83,39 @@ const getEnlistableInRawTransaction = (
   return enlistable;
 };
 
-export const transactional =
-  (repositoryFieldNames: string[] = ['repository']) =>
-  (
-    target: unknown,
-    key: string,
-    descriptor: PropertyDescriptor,
-  ): PropertyDescriptor => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const originalDef = descriptor.value;
+export const transactional = (
+  target: unknown,
+  key: string,
+  descriptor: PropertyDescriptor,
+): PropertyDescriptor => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const originalDef = descriptor.value;
 
-    descriptor.value = function (...args: unknown[]) {
-      const db = toDatabaseAware(this).___getDatabase();
+  descriptor.value = function (...args: unknown[]) {
+    const db = toDatabaseAware(this).___getDatabase();
 
-      return db.transaction((tx) => {
-        for (const repositoryFieldName of repositoryFieldNames) {
-          const repository =
-            getEnlistableInTransaction(this, repositoryFieldName) ??
-            getEnlistableInRawTransaction(this, repositoryFieldName);
+    return db.transaction((tx) => {
+      for (const repositoryFieldName in this) {
+        const repository =
+          getEnlistableInTransaction(this, repositoryFieldName) ??
+          getEnlistableInRawTransaction(this, repositoryFieldName);
 
-          if (repository !== null && 'enlist' in repository) {
-            repository.enlist(tx);
-            continue;
-          }
-
-          const client = (tx as { session?: { client: pg.Client } }).session
-            ?.client;
-
-          if (client && repository !== null && 'enlistRaw' in repository) {
-            repository.enlistRaw(client);
-            continue;
-          }
-
-          throw new Error(
-            `${repositoryFieldName} wasn't found, cannot enlist!`,
-          );
+        if (repository !== null && 'enlist' in repository) {
+          repository.enlist(tx);
+          continue;
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return originalDef.apply(this, args);
-      });
-    };
-    return descriptor;
+        const client = (tx as { session?: { client: pg.Client } }).session
+          ?.client;
+
+        if (client && repository !== null && 'enlistRaw' in repository) {
+          repository.enlistRaw(client);
+        }
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      return originalDef.apply(this, args);
+    });
   };
+  return descriptor;
+};

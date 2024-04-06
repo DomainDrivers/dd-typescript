@@ -17,7 +17,7 @@ export class PlanChosenResources {
     this.availabilityFacade = availabilityFacade;
   }
 
-  @transactional()
+  @transactional
   public async defineResourcesWithinDates(
     projectId: ProjectId,
     chosenResources: ObjectSet<ResourceId>,
@@ -31,7 +31,7 @@ export class PlanChosenResources {
     await this.repository.save(project);
   }
 
-  @transactional()
+  @transactional
   public async adjustStagesToResourceAvailability(
     projectId: ProjectId,
     timeBoundaries: TimeSlot,
