@@ -1,6 +1,5 @@
 import { ResourceName, TimeSlot } from '#shared';
-import { ObjectMap } from '#utils';
-import type { UUID } from 'crypto';
+import { ObjectMap, UUID } from '#utils';
 
 //those classes will be part of another module - possibly "availability"
 export class Calendars {
@@ -42,4 +41,6 @@ export class Owner {
   constructor(public readonly owner: UUID) {}
 
   public static none = () => new Owner(null!);
+
+  static newOne = () => new Owner(UUID.randomUUID());
 }
