@@ -5,6 +5,8 @@ export class Owner {
 
   public static none = () => new Owner(null!);
 
+  public static of = (id: UUID) => new Owner(id);
+
   static newOne = () => new Owner(UUID.randomUUID());
 
   public byNone = () => deepEquals(Owner.none(), this);

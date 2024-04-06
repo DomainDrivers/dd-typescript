@@ -67,6 +67,9 @@ export class AvailabilityFacade {
   ): Promise<boolean> {
     const toBlock = await this.findGrouped(resourceId, timeSlot);
 
+    if (toBlock.hasNoSlots()) {
+      return false;
+    }
     const result = toBlock.block(requester);
 
     if (result) {
@@ -82,6 +85,9 @@ export class AvailabilityFacade {
     requester: Owner,
   ): Promise<boolean> {
     const toRelease = await this.findGrouped(resourceId, timeSlot);
+    if (toRelease.hasNoSlots()) {
+      return false;
+    }
     const result = toRelease.release(requester);
     if (result) {
       return this.repository.saveGroupedCheckingVersion(toRelease);
@@ -96,6 +102,9 @@ export class AvailabilityFacade {
     requester: Owner,
   ): Promise<boolean> {
     const toDisable = await this.findGrouped(resourceId, timeSlot);
+    if (toDisable.hasNoSlots()) {
+      return false;
+    }
     let result = toDisable.disable(requester);
     if (result) {
       result = await this.repository.saveGroupedCheckingVersion(toDisable);

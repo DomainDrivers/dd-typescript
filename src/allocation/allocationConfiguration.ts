@@ -1,7 +1,8 @@
+import { AvailabilityConfiguration } from '#availability';
 import { getDB, injectDatabaseContext } from '#storage';
+import { Clock } from '#utils';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { AllocationFacade } from '.';
-import { Clock } from '../utils';
 import {
   DrizzleProjectAllocationsRepository,
   type ProjectAllocationsRepository,
@@ -26,7 +27,14 @@ export class AllocationConfiguration {
     const getDB = getDatabase ?? (() => this.db());
 
     return injectDatabaseContext(
-      new AllocationFacade(repository, clock),
+      new AllocationFacade(
+        repository,
+        new AvailabilityConfiguration(
+          this.connectionString,
+          this.enableLogging,
+        ).availabilityFacade(),
+        clock,
+      ),
       getDB,
     );
   };
