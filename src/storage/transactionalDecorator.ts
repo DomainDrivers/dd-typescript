@@ -18,7 +18,7 @@ export type EnlistableInRawTransaction = {
   enlistRaw: (client: pg.Client) => void;
 };
 
-export const injectTransactionContext = <
+export const injectDatabaseContext = <
   T,
   TSchema extends Record<string, unknown> = Record<string, never>,
 >(
@@ -33,7 +33,7 @@ const toDatabaseAware = (service: unknown): DatabaseAware => {
   const result = service as DatabaseAware;
   if (!result.___getDatabase)
     throw Error(
-      `Service is not transation aware, wrap your object with 'injectTransactionContext' call!`,
+      `Service is not transation aware, wrap your object with 'injectDatabaseContext' call!`,
     );
 
   return result;

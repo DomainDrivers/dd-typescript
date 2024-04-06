@@ -1,11 +1,11 @@
-import { getDB, injectTransactionContext } from '#storage';
+import { getDB, injectDatabaseContext } from '#storage';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { CashflowFacade } from './cashflowFacade';
 import {
   DrizzleCashflowRepository,
   type CashflowRepository,
 } from './cashflowRepository';
 import * as schema from './schema';
-import { CashflowFacade } from './cashflowFacade';
 
 export class CashflowConfiguration {
   constructor(
@@ -22,7 +22,7 @@ export class CashflowConfiguration {
     const repository = cashflowRepository ?? this.cashflowRepository();
     const getDB = getDatabase ?? (() => this.db());
 
-    return injectTransactionContext(new CashflowFacade(repository), getDB);
+    return injectDatabaseContext(new CashflowFacade(repository), getDB);
   };
 
   public cashflowRepository = (): CashflowRepository =>

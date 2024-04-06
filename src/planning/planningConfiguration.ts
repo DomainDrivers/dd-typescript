@@ -1,4 +1,4 @@
-import { getDB, injectTransactionContext } from '#storage';
+import { getDB, injectDatabaseContext } from '#storage';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { AvailabilityConfiguration } from '../availability';
 import { StageParallelization } from './parallelization';
@@ -26,14 +26,14 @@ export class PlanningConfiguration {
     getDatabase?: () => NodePgDatabase<typeof schema>,
   ) => {
     const repository = projectRepository ?? this.projectRepository();
-    const getDB = getDatabase ?? (() => this.db());
+    const getDB = getDatabase ?? this.db;
 
-    return injectTransactionContext(
+    return injectDatabaseContext(
       new PlanningFacade(
         repository,
         new StageParallelization(),
         planChosenResourcesService ??
-          injectTransactionContext(
+          injectDatabaseContext(
             this.planChosenResourcesService(repository),
             getDB,
           ),

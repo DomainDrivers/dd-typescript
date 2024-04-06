@@ -54,6 +54,7 @@
       "#cashflow": ["src/allocation/cashflow"],
       "#optimization": ["./src/optimization"],
       "#planning": ["./src/planning"],
+      "#resource": ["./src/resource"],
       "#shared": ["./src/shared"],
       "#schema": ["./src/schema"],
       "#simulation": ["./src/simulation"],

@@ -1,4 +1,4 @@
-import { getDB, injectTransactionContext } from '#storage';
+import { getDB, injectDatabaseContext } from '#storage';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { AllocationFacade } from '.';
 import { Clock } from '../utils';
@@ -25,7 +25,7 @@ export class AllocationConfiguration {
       projectAllocationsRepository ?? this.projectAllocationsRepository();
     const getDB = getDatabase ?? (() => this.db());
 
-    return injectTransactionContext(
+    return injectDatabaseContext(
       new AllocationFacade(repository, clock),
       getDB,
     );

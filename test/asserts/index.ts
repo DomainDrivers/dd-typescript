@@ -7,10 +7,14 @@ export const assertThat = <T>(item: T) => {
   };
 };
 
+export const assertEquals = <T>(item: T, other: T) => {
+  return assert.ok(deepEquals(item, other));
+};
+
 export const assertThatArray = <T>(array: T[]) => {
   return {
     isEmpty: () => assert.equal(array.length, 0),
-    containsElements: (other: T[]) => {
+    containsElements: (...other: T[]) => {
       assert.ok(other.every((ts) => other.some((o) => deepEquals(ts, o))));
     },
     containsExactlyInAnyOrderElementsOf: (other: T[]) => {
@@ -29,6 +33,13 @@ export const assertThatArray = <T>(array: T[]) => {
     },
     contains: (elem: T) => {
       assert.ok(array.some((a) => deepEquals(a, elem)));
+    },
+    containsOnlyOnceElementsOf: (other: T[]) => {
+      assert.ok(
+        other
+          .map((o) => array.filter((a) => deepEquals(a, o)).length)
+          .filter((a) => a === 1).length == other.length,
+      );
     },
   };
 };
