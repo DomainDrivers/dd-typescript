@@ -1,3 +1,10 @@
+export { AvailabilityConfiguration } from './availabilityConfiguration';
 export { AvailabilityFacade } from './availabilityFacade';
-export { Calendar, Calendars, Owner } from './calendars';
+export { Blockade } from './blockade';
+export { Calendar, Calendars } from './calendars';
+export { Owner } from './owner';
+export { ResourceAvailability } from './resourceAvailability';
 export { ResourceAvailabilityId } from './resourceAvailabilityId';
+export { ResourceAvailabilityRepository } from './resourceAvailabilityRepository';
+export { ResourceGroupedAvailability } from './resourceGroupedAvailability';
+export * from './segment';

@@ -62,7 +62,7 @@ describe('RD', () => {
     const configuration = new PlanningConfiguration(connectionString);
 
     projectFacade = configuration.planningFacade();
-    availabilityFacade = new AvailabilityFacade();
+    availabilityFacade = new AvailabilityFacade(null!);
   });
 
   after(testEnvironment.stop);

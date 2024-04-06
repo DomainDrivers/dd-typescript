@@ -24,7 +24,7 @@ describe('CapabilityAllocating', () => {
     cashflowFacade = configuration.cashflowFacade();
   });
 
-  after(async () => await testEnvironment.stop());
+  after(testEnvironment.stop);
 
   it('can allocate capability to project', async () => {
     //given

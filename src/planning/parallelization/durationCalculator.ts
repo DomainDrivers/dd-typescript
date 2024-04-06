@@ -1,4 +1,4 @@
-import { Duration, ObjectMap, ObjectSet, compareDuration } from '#utils';
+import { Duration, ObjectMap, ObjectSet } from '#utils';
 import type { ParallelStages } from './parallelStages';
 import { Stage } from './stage';
 import { StageParallelization } from './stageParallelization';
@@ -16,7 +16,7 @@ export const DurationCalculator = {
       .map((parallelStages: ParallelStages) => {
         const sorted = parallelStages.stages
           .map((stage) => durations.get(stage)!)
-          .sort(compareDuration);
+          .sort(Duration.compare);
 
         return sorted.length > 0 ? sorted[sorted.length - 1] : Duration.zero;
       })

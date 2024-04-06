@@ -17,6 +17,7 @@
     "test": "run-s test:unit test:int",
     "test:unit": "glob -d -c \"node --import tsx --test\" **/*.unit.spec.ts",
     "test:int": "glob -d -c \"node --import tsx --test \" **/*.int.spec.ts",
+    "test:singlefile": "node --import tsx --test",
     "test:watch": "run-p test:unit:watch test:int:watch",
     "test:unit:watch": "glob -d -c \"node --import tsx --test --watch\" **/*.unit.spec.ts",
     "test:int:watch": "glob -d -c \"node --import tsx --test --watch\" **/*.int.spec.ts",
@@ -32,12 +33,14 @@
     "date-fns": "3.6.0",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.30.7",
-    "pg": "^8.11.5"
+    "pg": "^8.11.5",
+    "pg-format": "^1.0.4"
   },
   "devDependencies": {
     "@testcontainers/postgresql": "^10.8.1",
     "@types/node": "20.11.30",
     "@types/pg": "^8.11.4",
+    "@types/pg-format": "^1.0.5",
     "@typescript-eslint/eslint-plugin": "7.4.0",
     "@typescript-eslint/parser": "7.4.0",
     "drizzle-kit": "^0.20.14",

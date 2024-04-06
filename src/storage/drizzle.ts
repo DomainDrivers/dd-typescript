@@ -17,22 +17,9 @@ import type {
   PgTable,
   PgTransaction,
 } from 'drizzle-orm/pg-core';
-import pg from 'pg';
-import { ObjectMap } from '../utils';
+import { getPool } from './rawPostgres';
 import { type Repository } from './repository';
-
-const pools: ObjectMap<string, pg.Pool> = ObjectMap.empty();
-
-export const getPool = (connectionString: string) =>
-  pools.getOrSet(connectionString, () => new pg.Pool({ connectionString }));
-
-export const endPool = async (connectionString: string): Promise<void> => {
-  const pool = pools.get(connectionString);
-  if (pool) {
-    await pool.end();
-    pools.delete(connectionString);
-  }
-};
+import type { EnlistableInTransaction } from './transactionalDecorator';
 
 export const getDB = <
   TSchema extends Record<string, unknown> = Record<string, never>,
@@ -50,10 +37,11 @@ export type PostgresTransaction<
 >;
 
 export abstract class DrizzleRepository<
-  Entity,
-  Id,
-  TSchema extends Record<string, unknown> = Record<string, never>,
-> implements Repository<Entity, Id>
+    Entity,
+    Id,
+    TSchema extends Record<string, unknown> = Record<string, never>,
+  >
+  implements Repository<Entity, Id>, EnlistableInTransaction<TSchema>
 {
   #db!: PostgresTransaction<TSchema>;
 

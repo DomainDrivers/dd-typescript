@@ -1,4 +1,4 @@
-import { Duration, ObjectSet, compareDuration } from '#utils';
+import { Duration, ObjectSet } from '#utils';
 import type { Stage } from './stage';
 
 export class ParallelStages {
@@ -15,7 +15,7 @@ export class ParallelStages {
     new ParallelStages(ObjectSet.from(stages));
 
   public duration = (): Duration => {
-    const ordered = this.stages.map((s) => s.duration).sort(compareDuration);
+    const ordered = this.stages.map((s) => s.duration).sort(Duration.compare);
 
     return ordered.length > 0 ? ordered[ordered.length - 1] : Duration.zero;
   };
