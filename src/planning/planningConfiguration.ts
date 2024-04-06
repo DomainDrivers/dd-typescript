@@ -1,6 +1,6 @@
 import { getDB, injectTransactionContext } from '#storage';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { AvailabilityFacade } from '../availability';
+import { AvailabilityConfiguration } from '../availability';
 import { StageParallelization } from './parallelization';
 import { PlanChosenResources } from './planChosenResources';
 import { PlanningFacade } from './planningFacade';
@@ -45,7 +45,10 @@ export class PlanningConfiguration {
   public planChosenResourcesService = (projectRepository?: ProjectRepository) =>
     new PlanChosenResources(
       projectRepository ?? this.projectRepository(),
-      new AvailabilityFacade(null!, null!),
+      new AvailabilityConfiguration(
+        this.connectionString,
+        this.enableLogging,
+      ).availabilityFacade(),
     );
 
   public projectRepository = (): ProjectRepository =>

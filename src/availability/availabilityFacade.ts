@@ -8,6 +8,7 @@ import {
   Segments,
   defaultSegment,
 } from '.';
+import { dbconnection } from '../storage/transactionalDecorator';
 import type { ObjectSet } from '../utils';
 import type { Owner } from './owner';
 import type { ResourceAvailabilityReadModel } from './resourceAvailabilityReadModel';
@@ -34,27 +35,29 @@ export class AvailabilityFacade {
     return this.repository.saveNewGrouped(groupedAvailability);
   }
 
-  public loadCalendar = (
+  @dbconnection
+  public loadCalendar(
     resourceId: ResourceId,
     within: TimeSlot,
-  ): Promise<Calendar> => {
+  ): Promise<Calendar> {
     const normalized = Segments.normalizeToSegmentBoundaries(
       within,
       defaultSegment(),
     );
     return this.availabilityReadModel.load(resourceId, normalized);
-  };
+  }
 
-  public loadCalendars = (
+  @dbconnection
+  public loadCalendars(
     resources: ObjectSet<ResourceId>,
     within: TimeSlot,
-  ): Promise<Calendars> => {
+  ): Promise<Calendars> {
     const normalized = Segments.normalizeToSegmentBoundaries(
       within,
       defaultSegment(),
     );
     return this.availabilityReadModel.loadAll(resources, normalized);
-  };
+  }
 
   @transactional
   public async block(
@@ -113,10 +116,11 @@ export class AvailabilityFacade {
     );
   };
 
-  public find = async (
+  @dbconnection
+  public async find(
     resourceId: ResourceId,
     within: TimeSlot,
-  ): Promise<ResourceGroupedAvailability> => {
+  ): Promise<ResourceGroupedAvailability> {
     const normalized = Segments.normalizeToSegmentBoundaries(
       within,
       defaultSegment(),
@@ -124,12 +128,13 @@ export class AvailabilityFacade {
     return new ResourceGroupedAvailability(
       await this.repository.loadAllWithinSlot(resourceId, normalized),
     );
-  };
+  }
 
-  public findByParentId = async (
+  @dbconnection
+  public async findByParentId(
     parentId: ResourceId,
     within: TimeSlot,
-  ): Promise<ResourceGroupedAvailability> => {
+  ): Promise<ResourceGroupedAvailability> {
     const normalized = Segments.normalizeToSegmentBoundaries(
       within,
       defaultSegment(),
@@ -137,5 +142,5 @@ export class AvailabilityFacade {
     return new ResourceGroupedAvailability(
       await this.repository.loadAllByParentIdWithinSlot(parentId, normalized),
     );
-  };
+  }
 }

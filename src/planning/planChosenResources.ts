@@ -38,19 +38,24 @@ export class PlanChosenResources {
     ...stages: Stage[]
   ): Promise<void> {
     const neededResources = this.neededResources(stages);
-    const project = await this.repository.getById(projectId);
+    let project = await this.repository.getById(projectId);
     await this.defineResourcesWithinDates(
       projectId,
       neededResources,
       timeBoundaries,
     );
-    //TODO when availability is implemented
-    const neededResourcesCalendars = Calendars.of();
+    const neededResourcesCalendars =
+      await this.availabilityFacade.loadCalendars(
+        neededResources,
+        timeBoundaries,
+      );
     const schedule = this.createScheduleAdjustingToCalendars(
       neededResourcesCalendars,
       stages,
     );
+    project = await this.repository.getById(projectId);
     project.addSchedule(schedule);
+    await this.repository.save(project);
   }
 
   private createScheduleAdjustingToCalendars = (

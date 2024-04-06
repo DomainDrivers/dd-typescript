@@ -43,13 +43,15 @@ export abstract class DrizzleRepository<
   >
   implements Repository<Entity, Id>, EnlistableInTransaction<TSchema>
 {
-  #db!: PostgresTransaction<TSchema>;
+  #db!: PostgresTransaction<TSchema> | NodePgDatabase<TSchema>;
 
   protected get db() {
     return this.#db;
   }
 
-  public enlist = (transaction: PostgresTransaction<TSchema>): void => {
+  public enlist = (
+    transaction: PostgresTransaction<TSchema> | NodePgDatabase<TSchema>,
+  ): void => {
     this.#db = transaction;
   };
 

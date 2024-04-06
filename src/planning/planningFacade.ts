@@ -1,5 +1,5 @@
 import type { ResourceId } from '#availability';
-import { ResourceName, TimeSlot } from '#shared';
+import { TimeSlot } from '#shared';
 import { transactional } from '#storage';
 import { Duration, ObjectSet } from '#utils';
 import type { UTCDate } from '@date-fns/utc';
@@ -111,7 +111,7 @@ export class PlanningFacade {
   public async planCriticalStageWithResource(
     projectId: ProjectId,
     criticalStage: Stage,
-    criticalResource: ResourceName,
+    criticalResource: ResourceId,
     stageTimeSlot: TimeSlot,
   ): Promise<void> {
     const project = await this.repository.getById(projectId);
