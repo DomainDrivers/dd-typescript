@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import { Edge, FeedbackArcSeOnGraph, Node } from '#sorter';
+import { Edge, Node } from '#sorter';
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
+import { feedbackArcSeOnGraph } from '../../src/sorter/feedbackArcSeOnGraph';
 import { deepEquals } from '../../src/utils';
 
 describe('FeedbackArcSetOnGraph', () => {
@@ -18,12 +19,7 @@ describe('FeedbackArcSetOnGraph', () => {
     node3 = node3.dependsOn(node1);
 
     //when
-    const toRemove: Edge[] = FeedbackArcSeOnGraph.calculate([
-      node1,
-      node2,
-      node3,
-      node4,
-    ]);
+    const toRemove: Edge[] = feedbackArcSeOnGraph([node1, node2, node3, node4]);
 
     assert.equal(toRemove.length, 2);
     assert.ok(
@@ -44,12 +40,7 @@ describe('FeedbackArcSetOnGraph', () => {
     node1 = node1.dependsOn(node4);
 
     //when
-    const toRemove: Edge[] = FeedbackArcSeOnGraph.calculate([
-      node1,
-      node2,
-      node3,
-      node4,
-    ]);
+    const toRemove: Edge[] = feedbackArcSeOnGraph([node1, node2, node3, node4]);
 
     //then
     assert.equal(toRemove.length, 0);
