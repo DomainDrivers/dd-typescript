@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import { ResourceId } from '#allocation';
-import { AvailabilityFacade } from '#availability';
+import { AvailabilityFacade, ResourceId } from '#availability';
 import {
   ParallelStagesList,
   PlanningConfiguration,
@@ -11,7 +10,7 @@ import {
   schema,
   type PlanningFacade,
 } from '#planning';
-import { Capability, ResourceName, TimeSlot } from '#shared';
+import { Capability, TimeSlot } from '#shared';
 import { Duration, ObjectSet, deepEquals } from '#utils';
 import { UTCDate } from '@date-fns/utc';
 import assert from 'node:assert';
@@ -75,19 +74,19 @@ describe('RD', () => {
       const projectId = await projectFacade.addNewProject('waterfall');
       //and
 
-      const r1 = new ResourceName('r1');
+      const r1 = ResourceId.newOne();
       const javaAvailableInJanuary = resourceAvailableForCapabilityInPeriod(
         r1,
         Capability.skill('JAVA'),
         JANUARY,
       );
-      const r2 = new ResourceName('r2');
+      const r2 = ResourceId.newOne();
       const phpAvailableInFebruary = resourceAvailableForCapabilityInPeriod(
         r2,
         Capability.skill('PHP'),
         FEBRUARY,
       );
-      const r3 = new ResourceName('r3');
+      const r3 = ResourceId.newOne();
       const csharpAvailableInMarch = resourceAvailableForCapabilityInPeriod(
         r3,
         Capability.skill('CSHARP'),
@@ -105,7 +104,7 @@ describe('RD', () => {
       //then
       verifyThatResourcesAreMissing(
         projectId,
-        ObjectSet.from(phpAvailableInFebruary, csharpAvailableInMarch),
+        ObjectSet.from([phpAvailableInFebruary, csharpAvailableInMarch]),
       );
 
       //when
@@ -118,7 +117,7 @@ describe('RD', () => {
       //then
       verifyThatResourcesAreMissing(
         projectId,
-        ObjectSet.from(javaAvailableInJanuary, csharpAvailableInMarch),
+        ObjectSet.from([javaAvailableInJanuary, csharpAvailableInMarch]),
       );
 
       //when
@@ -165,7 +164,7 @@ describe('RD', () => {
   );
 
   const resourceAvailableForCapabilityInPeriod = (
-    resource: ResourceName,
+    resource: ResourceId,
     capability: Capability,
     slot: TimeSlot,
   ): ResourceId => {

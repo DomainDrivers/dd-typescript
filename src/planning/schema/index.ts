@@ -1,14 +1,10 @@
 import type { KeyValue } from '#utils';
 import { bigserial, jsonb, pgTable, uuid, varchar } from 'drizzle-orm/pg-core';
 
-export type ResourceNameEntity = {
-  name: string;
-};
-
 export type StageEntity = {
   stageName: string;
   dependencies: StageEntity[];
-  resources: ResourceNameEntity[];
+  resources: string[];
   duration: number;
 };
 
@@ -19,7 +15,7 @@ export type ParallelStagesListEntity = {
 };
 
 export type ChosenResourcesEntity = {
-  resources: ResourceNameEntity[];
+  resources: string[];
   timeSlot: TimeSlotEntity;
 };
 

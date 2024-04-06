@@ -1,4 +1,5 @@
-import { Capability, ResourceName, TimeSlot } from '#shared';
+import { ResourceId } from '#availability';
+import { Capability, TimeSlot } from '#shared';
 import { DrizzleRepository, type Repository } from '#storage';
 import { ObjectMap, ObjectSet, UUID } from '#utils';
 import { UTCDate } from '@date-fns/utc';
@@ -75,8 +76,8 @@ const mapToChosenResources = (
 ): ChosenResources =>
   new ChosenResources(
     chosenResources
-      ? ObjectSet.from(chosenResources.resources.map(mapToResource))
-      : ObjectSet.empty<ResourceName>(),
+      ? ObjectSet.from(chosenResources.resources.map(mapToResourceId))
+      : ObjectSet.empty<ResourceId>(),
     chosenResources
       ? mapToTimeSlot(chosenResources.timeSlot)
       : TimeSlot.empty(),
@@ -117,7 +118,7 @@ const mapToStage = ({
   new Stage(
     stageName,
     ObjectSet.from(dependencies.map(mapToStage)),
-    ObjectSet.from(resources.map(mapToResource)),
+    ObjectSet.from(resources.map(mapToResourceId)),
     duration,
   );
 
@@ -130,8 +131,8 @@ const mapToTimeSlot = ({ from, to }: schema.TimeSlotEntity): TimeSlot =>
 const mapToCapability = ({ name, type }: schema.CapabilityEntity): Capability =>
   new Capability(name, type);
 
-const mapToResource = ({ name }: schema.ResourceNameEntity): ResourceName =>
-  new ResourceName(name);
+const mapToResourceId = (id: string): ResourceId =>
+  ResourceId.from(UUID.from(id));
 
 const mapFromProject = (
   project: Project,
@@ -170,7 +171,7 @@ const mapFromChosenResources = (
   chosenResources: ChosenResources,
 ): schema.ChosenResourcesEntity => {
   return {
-    resources: chosenResources.resources.map(mapFromResource),
+    resources: chosenResources.resources.map(mapFromResourceId),
     timeSlot: mapFromTimeSlot(chosenResources.timeSlot),
   };
 };
@@ -197,7 +198,7 @@ const mapFromStage = (stage: Stage): schema.StageEntity => {
   return {
     stageName: stage.name,
     dependencies: stage.dependencies.map(mapFromStage),
-    resources: stage.resources.map(mapFromResource),
+    resources: stage.resources.map(mapFromResourceId),
     duration: stage.duration,
   };
 };
@@ -219,6 +220,4 @@ const mapFromCapability = (capability: Capability): schema.CapabilityEntity => {
   };
 };
 
-const mapFromResource = (resource: ResourceName): schema.ResourceNameEntity => {
-  return { name: resource.name };
-};
+const mapFromResourceId = (resource: ResourceId): string => resource;

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import { ResourceId } from '#allocation';
+import { ResourceId } from '#availability';
 import {
   PlanningConfiguration,
   ProjectId,

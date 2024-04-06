@@ -3,6 +3,7 @@ import {
   Owner,
   ResourceAvailability,
   ResourceAvailabilityId,
+  ResourceId,
 } from '#availability';
 import { TimeSlot } from '#shared';
 import assert from 'node:assert';
@@ -16,7 +17,7 @@ describe('ResourceAvailability', () => {
   const getResourceAvailability = () =>
     new ResourceAvailability(
       resourceAvailability,
-      ResourceAvailabilityId.newOne(),
+      ResourceId.newOne(),
       TimeSlot.createDailyTimeSlotAtUTC(2000, 1, 1),
     );
 

@@ -35,7 +35,7 @@
           {
             "target": "./src/allocation/*",
             "from": [
-              "./src/availability",
+              // "./src/availability", // allowed
               // "./src/allocation", // allowed
               "./src/optimization",
               "./src/planning",
@@ -81,7 +81,7 @@
           {
             "target": "./src/planning/parallelization/*",
             "from": [
-              "./src/availability",
+              //"./src/availability", // allowed
               "./src/allocation",
               "./src/optimization",
               "./src/planning/schedule", // allowed

@@ -1,28 +1,28 @@
-import type { ResourceName } from '#shared';
+import type { ResourceId } from '#availability';
 import { Duration, ObjectSet } from '#utils';
 
 export class Stage {
   private readonly stageName: string;
   dependencies: ObjectSet<Stage>;
-  resources: ObjectSet<ResourceName>;
+  resources: ObjectSet<ResourceId>;
   duration: Duration;
 
   constructor(stageName: string);
   constructor(
     stageName: string,
     dependencies: ObjectSet<Stage>,
-    resources: ObjectSet<ResourceName>,
+    resources: ObjectSet<ResourceId>,
     duration: Duration,
   );
   constructor(
     stageName: string,
     dependencies?: ObjectSet<Stage>,
-    resources?: ObjectSet<ResourceName>,
+    resources?: ObjectSet<ResourceId>,
     duration?: Duration,
   ) {
     this.stageName = stageName;
     this.dependencies = dependencies ?? ObjectSet.empty<Stage>();
-    this.resources = resources ?? ObjectSet.empty<ResourceName>();
+    this.resources = resources ?? ObjectSet.empty<ResourceId>();
     this.duration = duration ?? Duration.zero;
   }
 
@@ -34,7 +34,7 @@ export class Stage {
   }
 
   public withChosenResourceCapabilities = (
-    ...resources: ResourceName[]
+    ...resources: ResourceId[]
   ): Stage => {
     return new Stage(
       this.stageName,

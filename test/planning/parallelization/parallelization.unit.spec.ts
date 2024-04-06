@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import { ResourceId } from '#availability';
 import { Stage, StageParallelization } from '#planning';
-import { ResourceName } from '#shared';
 import { ObjectSet } from '#utils';
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 describe('Parallelization', () => {
-  const LEON: ResourceName = new ResourceName('Leon');
-  const ERYK: ResourceName = new ResourceName('Eric');
-  const SLAWEK: ResourceName = new ResourceName('Sławek');
-  const KUBA: ResourceName = new ResourceName('Kuba');
+  const LEON = ResourceId.newOne();
+  const ERYK = ResourceId.newOne();
+  const SLAWEK = ResourceId.newOne();
+  const KUBA = ResourceId.newOne();
 
   it('everything can be done in parallel when there are no dependencies', () => {
     //given

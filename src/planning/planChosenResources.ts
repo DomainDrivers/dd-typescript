@@ -1,5 +1,5 @@
-import { AvailabilityFacade, Calendars } from '#availability';
-import { ResourceName, TimeSlot } from '#shared';
+import { AvailabilityFacade, Calendars, ResourceId } from '#availability';
+import { TimeSlot } from '#shared';
 import { ProjectId } from '#simulation';
 import { transactional } from '#storage';
 import { ObjectSet } from '#utils';
@@ -20,7 +20,7 @@ export class PlanChosenResources {
   @transactional()
   public async defineResourcesWithinDates(
     projectId: ProjectId,
-    chosenResources: ObjectSet<ResourceName>,
+    chosenResources: ObjectSet<ResourceId>,
     timeBoundaries: TimeSlot,
   ): Promise<void> {
     const project = await this.repository.getById(projectId);

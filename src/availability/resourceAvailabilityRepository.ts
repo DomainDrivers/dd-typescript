@@ -2,9 +2,10 @@ import { TimeSlot } from '#shared';
 import { PostgresRepository } from '#storage';
 import { ObjectSet, UUID } from '#utils';
 import { UTCDate } from '@date-fns/utc';
+import { parseJSON } from 'date-fns';
 import pg from 'pg';
 import format from 'pg-format';
-import { Blockade, Owner } from '.';
+import { Blockade, Owner, ResourceId } from '.';
 import { ResourceAvailability } from './resourceAvailability';
 import { ResourceAvailabilityId } from './resourceAvailabilityId';
 import { ResourceGroupedAvailability } from './resourceGroupedAvailability';
@@ -79,7 +80,7 @@ export class ResourceAvailabilityRepository extends PostgresRepository {
   };
 
   public loadAllWithinSlot = async (
-    resourceId: ResourceAvailabilityId,
+    resourceId: ResourceId,
     segment: TimeSlot,
   ): Promise<ResourceAvailability[]> => {
     const sql = format(
@@ -98,7 +99,7 @@ export class ResourceAvailabilityRepository extends PostgresRepository {
   };
 
   public loadAllByParentIdWithinSlot = async (
-    parentId: ResourceAvailabilityId,
+    parentId: ResourceId,
     segment: TimeSlot,
   ): Promise<ResourceAvailability[]> => {
     const sql = format(
@@ -107,8 +108,8 @@ export class ResourceAvailabilityRepository extends PostgresRepository {
       and from_date >= %L and to_date <= %L
     `,
       parentId,
-      segment.from,
-      segment.to,
+      segment.from.toUTCString(),
+      segment.to.toUTCString(),
     );
 
     const result = await this.client.query<ResourceAvailabilityEntity>(sql);
@@ -218,10 +219,13 @@ const mapToResourceAvailability = (
 ): ResourceAvailability =>
   new ResourceAvailability(
     ResourceAvailabilityId.from(UUID.from(entity.id)),
-    ResourceAvailabilityId.from(UUID.from(entity.resource_id)),
-    new TimeSlot(new UTCDate(entity.from_date), new UTCDate(entity.to_date)),
+    ResourceId.from(UUID.from(entity.resource_id)),
+    new TimeSlot(
+      new UTCDate(parseJSON(entity.from_date)),
+      new UTCDate(parseJSON(entity.to_date)),
+    ),
     entity.resource_parent_id
-      ? ResourceAvailabilityId.from(UUID.from(entity.resource_parent_id))
+      ? ResourceId.from(UUID.from(entity.resource_parent_id))
       : null,
     new Blockade(
       entity.taken_by ? new Owner(UUID.from(entity.taken_by)) : Owner.none(),
