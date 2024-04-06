@@ -1,4 +1,4 @@
-import { AvailabilityFacade, ResourceId } from '#availability';
+import { AvailabilityFacade, Owner, ResourceId } from '#availability';
 import { Capability, type TimeSlot } from '#shared';
 import { dbconnection, transactional } from '#storage';
 import { Clock, ObjectSet, type UUID } from '#utils';
@@ -47,12 +47,21 @@ export class AllocationFacade {
 
   @transactional
   public async allocateToProject(
-    //TODO WHAT TO DO WITH AVAILABILITY HERE? - implement
     projectId: ProjectAllocationsId,
     resourceId: ResourceId,
     capability: Capability,
     timeSlot: TimeSlot,
   ): Promise<UUID | null> {
+    //yes, one transaction crossing 2 modules.
+    if (
+      !(await this.availabilityFacade.block(
+        resourceId,
+        timeSlot,
+        Owner.of(projectId),
+      ))
+    ) {
+      return null;
+    }
     const allocations = await this.repository.getById(projectId);
     const event = allocations.allocate(
       resourceId,
