@@ -14,7 +14,7 @@ export class Calendars {
   };
 
   get = (resourceId: ResourceName): Calendar =>
-    this.calendars.getOrDefault(resourceId, Calendar.empty(resourceId));
+    this.calendars.getOrDefault(resourceId, () => Calendar.empty(resourceId));
 }
 
 export class Calendar {
@@ -33,7 +33,7 @@ export class Calendar {
     new Calendar(resourceId, ObjectMap.empty());
 
   availableSlots = (): TimeSlot[] =>
-    this.calendar.getOrDefault(Owner.none(), []);
+    this.calendar.getOrDefault(Owner.none(), () => []);
 }
 
 export class Owner {

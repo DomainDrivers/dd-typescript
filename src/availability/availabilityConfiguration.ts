@@ -1,5 +1,6 @@
 import { getDB, injectTransactionContext } from '#storage';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { ResourceAvailabilityReadModel } from '.';
 import { AvailabilityFacade } from './availabilityFacade';
 import { ResourceAvailabilityRepository } from './resourceAvailabilityRepository';
 
@@ -13,17 +14,27 @@ export class AvailabilityConfiguration {
 
   public availabilityFacade = (
     resourceAvailabilityRepository?: ResourceAvailabilityRepository,
+    resourceAvailabilityReadModel?: ResourceAvailabilityReadModel,
     getDatabase?: () => NodePgDatabase,
   ): AvailabilityFacade => {
+    const getDB = getDatabase ?? (() => this.db());
     const repository =
       resourceAvailabilityRepository ?? this.resourceAvailabilityRepository();
-    const getDB = getDatabase ?? (() => this.db());
 
-    return injectTransactionContext(new AvailabilityFacade(repository), getDB);
+    const readModel =
+      resourceAvailabilityReadModel ?? this.resourceAvailabilityReadModel();
+
+    return injectTransactionContext(
+      new AvailabilityFacade(repository, readModel),
+      getDB,
+    );
   };
 
   public resourceAvailabilityRepository = (): ResourceAvailabilityRepository =>
     new ResourceAvailabilityRepository();
+
+  public resourceAvailabilityReadModel = (): ResourceAvailabilityReadModel =>
+    new ResourceAvailabilityReadModel();
 
   public db = (cs?: string): NodePgDatabase =>
     getDB(cs ?? this.connectionString);

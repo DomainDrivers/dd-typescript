@@ -45,7 +45,7 @@ export class PlanningConfiguration {
   public planChosenResourcesService = (projectRepository?: ProjectRepository) =>
     new PlanChosenResources(
       projectRepository ?? this.projectRepository(),
-      new AvailabilityFacade(null!),
+      new AvailabilityFacade(null!, null!),
     );
 
   public projectRepository = (): ProjectRepository =>

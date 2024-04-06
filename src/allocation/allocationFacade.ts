@@ -17,7 +17,7 @@ export class AllocationFacade {
     private readonly clock: Clock,
   ) {}
 
-  @transactional()
+  @transactional
   public async createAllocation(
     timeSlot: TimeSlot,
     scheduledDemands: Demands,
@@ -43,7 +43,7 @@ export class AllocationFacade {
     );
   }
 
-  @transactional()
+  @transactional
   public async allocateToProject(
     projectId: ProjectAllocationsId,
     resourceId: ResourceId,
@@ -61,7 +61,7 @@ export class AllocationFacade {
     return event?.allocatedCapabilityId ?? null;
   }
 
-  @transactional()
+  @transactional
   public async releaseFromProject(
     projectId: ProjectAllocationsId,
     allocatableCapabilityId: UUID,
@@ -77,7 +77,7 @@ export class AllocationFacade {
     return event !== null;
   }
 
-  @transactional()
+  @transactional
   public async editProjectDates(
     projectId: ProjectAllocationsId,
     fromTo: TimeSlot,
@@ -87,7 +87,7 @@ export class AllocationFacade {
     await this.repository.save(projectAllocations);
   }
 
-  @transactional()
+  @transactional
   public async scheduleProjectAllocationDemands(
     projectId: ProjectAllocationsId,
     demands: Demands,

@@ -1,15 +1,26 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type { TimeSlot } from '#shared';
 import { transactional } from '#storage';
-import { ResourceGroupedAvailability, Segments, defaultSegment } from '.';
+import {
+  Calendar,
+  Calendars,
+  ResourceGroupedAvailability,
+  Segments,
+  defaultSegment,
+} from '.';
+import type { ObjectSet } from '../utils';
 import type { Owner } from './owner';
+import type { ResourceAvailabilityReadModel } from './resourceAvailabilityReadModel';
 import type { ResourceAvailabilityRepository } from './resourceAvailabilityRepository';
 import type { ResourceId } from './resourceId';
 
 export class AvailabilityFacade {
-  constructor(private readonly repository: ResourceAvailabilityRepository) {}
+  constructor(
+    private readonly repository: ResourceAvailabilityRepository,
+    private readonly availabilityReadModel: ResourceAvailabilityReadModel,
+  ) {}
 
-  @transactional()
+  @transactional
   public createResourceSlots(
     resourceId: ResourceId,
     timeslot: TimeSlot,
@@ -23,7 +34,29 @@ export class AvailabilityFacade {
     return this.repository.saveNewGrouped(groupedAvailability);
   }
 
-  @transactional()
+  public loadCalendar = (
+    resourceId: ResourceId,
+    within: TimeSlot,
+  ): Promise<Calendar> => {
+    const normalized = Segments.normalizeToSegmentBoundaries(
+      within,
+      defaultSegment(),
+    );
+    return this.availabilityReadModel.load(resourceId, normalized);
+  };
+
+  public loadCalendars = (
+    resources: ObjectSet<ResourceId>,
+    within: TimeSlot,
+  ): Promise<Calendars> => {
+    const normalized = Segments.normalizeToSegmentBoundaries(
+      within,
+      defaultSegment(),
+    );
+    return this.availabilityReadModel.loadAll(resources, normalized);
+  };
+
+  @transactional
   public async block(
     resourceId: ResourceId,
     timeSlot: TimeSlot,
@@ -39,7 +72,7 @@ export class AvailabilityFacade {
     return result;
   }
 
-  @transactional()
+  @transactional
   public async release(
     resourceId: ResourceId,
     timeSlot: TimeSlot,
@@ -53,7 +86,7 @@ export class AvailabilityFacade {
     return result;
   }
 
-  @transactional()
+  @transactional
   public async disable(
     resourceId: ResourceId,
     timeSlot: TimeSlot,

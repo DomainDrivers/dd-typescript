@@ -9,7 +9,7 @@ import type { Income } from './income';
 export class CashflowFacade {
   constructor(private readonly repository: CashflowRepository) {}
 
-  @transactional()
+  @transactional
   public async addIncomeAndCost(
     projectId: ProjectAllocationsId,
     income: Income,

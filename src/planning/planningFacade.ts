@@ -24,13 +24,13 @@ export class PlanningFacade {
     private readonly planChosenResourcesService: PlanChosenResources,
   ) {}
 
-  @transactional()
+  @transactional
   public addNewProject(name: string, ...stages: Stage[]): Promise<ProjectId> {
     const parallelizedStages = this.parallelization.of(ObjectSet.from(stages));
     return this.addNewProjectParalellized(name, parallelizedStages);
   }
 
-  @transactional()
+  @transactional
   public async addNewProjectParalellized(
     name: string,
     parallelizedStages: ParallelStagesList,
@@ -40,7 +40,7 @@ export class PlanningFacade {
     return project.getId();
   }
 
-  @transactional()
+  @transactional
   public async defineStartDate(
     projectId: ProjectId,
     possibleStartDate: UTCDate,
@@ -50,7 +50,7 @@ export class PlanningFacade {
     return this.repository.save(project);
   }
 
-  @transactional()
+  @transactional
   public async defineProjectStages(
     projectId: ProjectId,
     ...stages: Stage[]
@@ -61,7 +61,7 @@ export class PlanningFacade {
     return this.repository.save(project);
   }
 
-  @transactional()
+  @transactional
   public async addDemands(
     projectId: ProjectId,
     demands: Demands,
@@ -71,7 +71,7 @@ export class PlanningFacade {
     return this.repository.save(project);
   }
 
-  @transactional()
+  @transactional
   public async defineDemandsPerStage(
     projectId: ProjectId,
     demandsPerStage: DemandsPerStage,
@@ -81,7 +81,7 @@ export class PlanningFacade {
     return this.repository.save(project);
   }
 
-  @transactional()
+  @transactional
   public defineResourcesWithinDates(
     projectId: ProjectId,
     chosenResources: ObjectSet<ResourceId>,
@@ -94,7 +94,7 @@ export class PlanningFacade {
     );
   }
 
-  @transactional()
+  @transactional
   public async adjustStagesToResourceAvailability(
     projectId: ProjectId,
     timeBoundaries: TimeSlot,
@@ -107,7 +107,7 @@ export class PlanningFacade {
     );
   }
 
-  @transactional()
+  @transactional
   public async planCriticalStageWithResource(
     projectId: ProjectId,
     criticalStage: Stage,
@@ -121,7 +121,7 @@ export class PlanningFacade {
     );
   }
 
-  @transactional()
+  @transactional
   public async planCriticalStage(
     projectId: ProjectId,
     criticalStage: Stage,
@@ -134,7 +134,7 @@ export class PlanningFacade {
     );
   }
 
-  @transactional()
+  @transactional
   public async defineManualSchedule(
     projectId: ProjectId,
     schedule: Schedule,

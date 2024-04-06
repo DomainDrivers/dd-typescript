@@ -2,6 +2,7 @@
 import {
   AvailabilityConfiguration,
   AvailabilityFacade,
+  Calendar,
   Owner,
   ResourceId,
 } from '#availability';
@@ -10,6 +11,7 @@ import { TimeSlot } from '#shared';
 import { addMinutes } from 'date-fns';
 import assert from 'node:assert';
 import { after, before, describe, it } from 'node:test';
+import { assertThat, assertThatArray } from '../asserts';
 import { TestConfiguration } from '../setup';
 
 describe('AvailabilityFacade', () => {
@@ -38,6 +40,14 @@ describe('AvailabilityFacade', () => {
     assert.equal(
       (await availabilityFacade.find(resourceId, oneDay)).size(),
       96,
+    );
+    const entireMonth = TimeSlot.createMonthlyTimeSlotAtUTC(2021, 1);
+    const monthlyCalendar = await availabilityFacade.loadCalendar(
+      resourceId,
+      entireMonth,
+    );
+    assertThat(monthlyCalendar).isEqualTo(
+      Calendar.withAvailableSlots(resourceId, oneDay),
     );
   });
 
@@ -108,6 +118,13 @@ describe('AvailabilityFacade', () => {
     );
     assert.equal(resourceAvailabilities.size(), 96);
     assert.ok(resourceAvailabilities.isDisabledEntirelyBy(owner));
+    const entireMonth = TimeSlot.createMonthlyTimeSlotAtUTC(2021, 1);
+    const monthlyCalendar = await availabilityFacade.loadCalendar(
+      resourceId,
+      entireMonth,
+    );
+    assertThatArray(monthlyCalendar.availableSlots()).isEmpty();
+    assertThatArray(monthlyCalendar.takenBy(owner)).containsExactly(oneDay);
   });
 
   it('cant block even when just small segment of requested slot is blocked', async () => {
@@ -226,5 +243,17 @@ describe('AvailabilityFacade', () => {
     assert.equal(resourceAvailability.size(), 96);
     assert.equal(resourceAvailability.findBlockedBy(owner).length, 95);
     assert.equal(resourceAvailability.findBlockedBy(newRequester).length, 1);
+
+    const dailyCalendar = await availabilityFacade.loadCalendar(
+      resourceId,
+      oneDay,
+    );
+    assertThatArray(dailyCalendar.availableSlots()).isEmpty();
+    assertThatArray(dailyCalendar.takenBy(owner)).containsExactlyElementsOf(
+      oneDay.leftoverAfterRemovingCommonWith(fifteenMinutes),
+    );
+    assertThatArray(dailyCalendar.takenBy(newRequester)).containsExactly(
+      fifteenMinutes,
+    );
   });
 });
