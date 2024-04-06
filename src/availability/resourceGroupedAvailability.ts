@@ -1,5 +1,6 @@
+import type { ResourceId } from '.';
 import type { TimeSlot } from '../shared';
-import { ObjectSet, deepEquals } from '../utils';
+import { deepEquals } from '../utils';
 import { Owner } from './owner';
 import { ResourceAvailability } from './resourceAvailability';
 import { ResourceAvailabilityId } from './resourceAvailabilityId';
@@ -10,19 +11,10 @@ export class ResourceGroupedAvailability {
     private readonly resourceAvailabilities: ResourceAvailability[],
   ) {}
 
-  // static of = (resourceId: ResourceAvailabilityId , timeslot: TimeSlot): ResourceGroupedAvailability => {
-  //     const resourceAvailabilities =  Segments
-  //             .split(timeslot, defaultSegment())
-  //
-  //             .map(segment => new ResourceAvailability(ResourceAvailabilityId.newOne(), resourceId, segment))
-  //             .toList();
-  //     return new ResourceGroupedAvailability(resourceAvailabilities);
-  // }
-
   public static of = (
-    resourceId: ResourceAvailabilityId,
+    resourceId: ResourceId,
     timeslot: TimeSlot,
-    parentId: ResourceAvailabilityId | null = null,
+    parentId: ResourceId | null = null,
   ): ResourceGroupedAvailability => {
     const resourceAvailabilities = Segments.split(
       timeslot,
@@ -70,10 +62,7 @@ export class ResourceGroupedAvailability {
     return this.resourceAvailabilities;
   }
 
-  public owners = (): ObjectSet<Owner> =>
-    ObjectSet.from(this.resourceAvailabilities.map((r) => r.blockedBy()));
-
-  public resourceId = (): ResourceAvailabilityId | null =>
+  public resourceId = (): ResourceId | null =>
     //resourceId are the same;
     this.resourceAvailabilities.map((r) => r.resourceId)[0] ?? null;
 

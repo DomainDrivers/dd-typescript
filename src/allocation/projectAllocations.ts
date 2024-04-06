@@ -1,3 +1,4 @@
+import { ResourceId } from '#availability';
 import { Capability, TimeSlot } from '#shared';
 import { UUID, deepEquals } from '#utils';
 import type { UTCDate } from '@date-fns/utc';
@@ -7,7 +8,6 @@ import {
   Demands,
   ProjectAllocationScheduled,
   ProjectAllocationsId,
-  ResourceId,
 } from '.';
 import { CapabilitiesAllocated } from './capabilitiesAllocated';
 import { CapabilityReleased } from './capabilitiesReleased';

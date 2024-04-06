@@ -8,8 +8,8 @@ import {
   Demands,
   ProjectAllocations,
   ProjectAllocationsId,
-  ResourceId,
 } from '#allocation';
+import { ResourceId } from '#availability';
 import { Capability, TimeSlot } from '#shared';
 import { UUID, deepEquals } from '#utils';
 import { UTCDate } from '@date-fns/utc';

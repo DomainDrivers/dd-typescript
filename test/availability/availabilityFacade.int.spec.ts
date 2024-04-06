@@ -3,7 +3,7 @@ import {
   AvailabilityConfiguration,
   AvailabilityFacade,
   Owner,
-  ResourceAvailabilityId,
+  ResourceId,
 } from '#availability';
 import * as schema from '#schema';
 import { TimeSlot } from '#shared';
@@ -28,7 +28,7 @@ describe('AvailabilityFacade', () => {
 
   it('can create availability slots', async () => {
     //given
-    const resourceId = ResourceAvailabilityId.newOne();
+    const resourceId = ResourceId.newOne();
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
 
     //when
@@ -43,10 +43,10 @@ describe('AvailabilityFacade', () => {
 
   it('can create new availability slots with parent id', async () => {
     //given
-    const resourceId = ResourceAvailabilityId.newOne();
-    const resourceId2 = ResourceAvailabilityId.newOne();
-    const parentId = ResourceAvailabilityId.newOne();
-    const differentParentId = ResourceAvailabilityId.newOne();
+    const resourceId = ResourceId.newOne();
+    const resourceId2 = ResourceId.newOne();
+    const parentId = ResourceId.newOne();
+    const differentParentId = ResourceId.newOne();
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
 
     //when
@@ -72,7 +72,7 @@ describe('AvailabilityFacade', () => {
 
   it('can block availabilities', async () => {
     //given
-    const resourceId = ResourceAvailabilityId.newOne();
+    const resourceId = ResourceId.newOne();
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
     const owner = Owner.newOne();
     await availabilityFacade.createResourceSlots(resourceId, oneDay);
@@ -92,7 +92,7 @@ describe('AvailabilityFacade', () => {
 
   it('can disable availabilities', async () => {
     //given
-    const resourceId = ResourceAvailabilityId.newOne();
+    const resourceId = ResourceId.newOne();
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
     const owner = Owner.newOne();
     await availabilityFacade.createResourceSlots(resourceId, oneDay);
@@ -112,7 +112,7 @@ describe('AvailabilityFacade', () => {
 
   it('cant block even when just small segment of requested slot is blocked', async () => {
     //given
-    const resourceId = ResourceAvailabilityId.newOne();
+    const resourceId = ResourceId.newOne();
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
     const owner = Owner.newOne();
     await availabilityFacade.createResourceSlots(resourceId, oneDay);
@@ -141,7 +141,7 @@ describe('AvailabilityFacade', () => {
 
   it('can release availability', async () => {
     //given
-    const resourceId = ResourceAvailabilityId.newOne();
+    const resourceId = ResourceId.newOne();
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
     const fifteenMinutes = new TimeSlot(
       oneDay.from,
@@ -166,7 +166,7 @@ describe('AvailabilityFacade', () => {
 
   it(`can't release even when just part of slot is owned by the requester`, async () => {
     //given
-    const resourceId = ResourceAvailabilityId.newOne();
+    const resourceId = ResourceId.newOne();
     const jan_1 = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
     const jan_2 = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 2);
     const jan_1_2 = new TimeSlot(jan_1.from, jan_2.to);
@@ -196,7 +196,7 @@ describe('AvailabilityFacade', () => {
 
   it('one segment can be taken by someone else after realising', async () => {
     //given
-    const resourceId = ResourceAvailabilityId.newOne();
+    const resourceId = ResourceId.newOne();
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
     const fifteenMinutes = new TimeSlot(
       oneDay.from,

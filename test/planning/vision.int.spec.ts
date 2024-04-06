@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import { ResourceId } from '#availability';
 import {
   Demand,
   Demands,
@@ -9,7 +10,7 @@ import {
   schema,
   type PlanningFacade,
 } from '#planning';
-import { Capability, ResourceName, TimeSlot } from '#shared';
+import { Capability, TimeSlot } from '#shared';
 import { Duration } from '#utils';
 import { UTCDate } from '@date-fns/utc';
 import assert from 'node:assert';
@@ -39,9 +40,9 @@ describe('Vision', () => {
     new UTCDate('2020-01-02T00:00:00.00Z'),
     new UTCDate('2020-01-12T00:00:00.00Z'),
   );
-  const RESOURCE_1 = new ResourceName('r1');
-  const RESOURCE_2 = new ResourceName('r2');
-  const RESOURCE_4 = new ResourceName('r4');
+  const RESOURCE_1 = ResourceId.newOne();
+  const RESOURCE_2 = ResourceId.newOne();
+  const RESOURCE_4 = ResourceId.newOne();
 
   before(async () => {
     const connectionString = await testEnvironment.start({ schema });

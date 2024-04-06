@@ -11,9 +11,10 @@ import { getPool } from '#storage';
 import assert from 'node:assert';
 import { after, before, describe, it } from 'node:test';
 import pg from 'pg';
+import { deepEquals } from '../../src/utils';
 import { TestConfiguration } from '../setup';
 
-describe('ResourceAvailabilityUniqueness', () => {
+describe('ResourceAvailabilityLoading', () => {
   const ONE_MONTH = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
   const testEnvironment = TestConfiguration();
   let client: pg.PoolClient;
@@ -36,29 +37,26 @@ describe('ResourceAvailabilityUniqueness', () => {
     }
   });
 
-  it('Cant save two availabilities with same resource id and segment', async () => {
+  it('Can save and load by id', async () => {
     //given
-    const resourceId = ResourceId.newOne();
-    const anotherResourceId = ResourceId.newOne();
     const resourceAvailabilityId = ResourceAvailabilityId.newOne();
-
-    //when
-    await resourceAvailabilityRepository.saveNew(
-      new ResourceAvailability(resourceAvailabilityId, resourceId, ONE_MONTH),
+    const resourceId = ResourceId.newOne();
+    const resourceAvailability = new ResourceAvailability(
+      resourceAvailabilityId,
+      resourceId,
+      ONE_MONTH,
     );
 
-    //expect
-    try {
-      await resourceAvailabilityRepository.saveNew(
-        new ResourceAvailability(
-          resourceAvailabilityId,
-          anotherResourceId,
-          ONE_MONTH,
-        ),
-      );
-      assert.fail();
-    } catch (error) {
-      assert.ok(error);
-    }
+    //when
+    await resourceAvailabilityRepository.saveNew(resourceAvailability);
+
+    //then
+    const loaded = await resourceAvailabilityRepository.loadById(
+      resourceAvailability.id,
+    );
+    assert.ok(deepEquals(resourceAvailability, loaded));
+    assert.ok(deepEquals(resourceAvailability.segment, loaded.segment));
+    assert.ok(deepEquals(resourceAvailability.resourceId, loaded.resourceId));
+    assert.ok(deepEquals(resourceAvailability.blockedBy(), loaded.blockedBy()));
   });
 });

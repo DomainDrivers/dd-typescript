@@ -4,6 +4,7 @@ import {
   ResourceAvailability,
   ResourceAvailabilityId,
   ResourceAvailabilityRepository,
+  ResourceId,
 } from '#availability';
 import * as schema from '#schema';
 import { TimeSlot } from '#shared';
@@ -40,7 +41,7 @@ describe('ResourceAvailabilityOptimisticLocking', () => {
   it('Update bumps version', async () => {
     //given
     const resourceAvailabilityId = ResourceAvailabilityId.newOne();
-    const resourceId = ResourceAvailabilityId.newOne();
+    const resourceId = ResourceId.newOne();
     let resourceAvailability = new ResourceAvailability(
       resourceAvailabilityId,
       resourceId,
@@ -68,7 +69,7 @@ describe('ResourceAvailabilityOptimisticLocking', () => {
   it(`can't update concurrently`, async () => {
     //given
     const resourceAvailabilityId = ResourceAvailabilityId.newOne();
-    const resourceId = ResourceAvailabilityId.newOne();
+    const resourceId = ResourceId.newOne();
     const resourceAvailability = new ResourceAvailability(
       resourceAvailabilityId,
       resourceId,

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import { ResourceId } from '#availability';
 import {
   ChosenResources,
   Demand,
@@ -10,7 +11,7 @@ import {
   type PlanningFacade,
 } from '#planning';
 import * as schema from '#schema';
-import { Capability, ResourceName, TimeSlot } from '#shared';
+import { Capability, TimeSlot } from '#shared';
 import { Duration, ObjectMap, ObjectSet, deepEquals } from '#utils';
 import { UTCDate } from '@date-fns/utc';
 import assert from 'assert';
@@ -155,7 +156,7 @@ describe('PlanningFacade', () => {
     const projectId = await projectFacade.addNewProject('project');
 
     //when
-    const neededResources = ObjectSet.from([new ResourceName('resource1')]);
+    const neededResources = ObjectSet.from([ResourceId.newOne()]);
     const firstHalfOfTheYear = new TimeSlot(
       new UTCDate('2021-01-01T00:00:00.00Z'),
       new UTCDate('2021-06-01T00:00:00.00Z'),

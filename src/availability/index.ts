@@ -7,4 +7,5 @@ export { ResourceAvailability } from './resourceAvailability';
 export { ResourceAvailabilityId } from './resourceAvailabilityId';
 export { ResourceAvailabilityRepository } from './resourceAvailabilityRepository';
 export { ResourceGroupedAvailability } from './resourceGroupedAvailability';
+export { ResourceId } from './resourceId';
 export * from './segment';

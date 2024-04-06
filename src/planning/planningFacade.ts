@@ -1,14 +1,15 @@
+import type { ResourceId } from '#availability';
 import { ResourceName, TimeSlot } from '#shared';
 import { transactional } from '#storage';
 import { Duration, ObjectSet } from '#utils';
 import type { UTCDate } from '@date-fns/utc';
 import type { Demands, DemandsPerStage } from './demands';
 import {
+  DurationCalculator,
   ParallelStagesList,
   Stage,
   StageParallelization,
 } from './parallelization';
-import { DurationCalculator } from './parallelization/durationCalculator';
 import type { PlanChosenResources } from './planChosenResources';
 import { Project } from './project';
 import { ProjectCard } from './projectCard';
@@ -83,7 +84,7 @@ export class PlanningFacade {
   @transactional()
   public defineResourcesWithinDates(
     projectId: ProjectId,
-    chosenResources: ObjectSet<ResourceName>,
+    chosenResources: ObjectSet<ResourceId>,
     timeBoundaries: TimeSlot,
   ): Promise<void> {
     return this.planChosenResourcesService.defineResourcesWithinDates(

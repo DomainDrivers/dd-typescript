@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 
-import { Calendar, Calendars } from '#availability';
+import { Calendar, Calendars, ResourceId } from '#availability';
 import { ParallelStages, ParallelStagesList, Schedule, Stage } from '#planning';
-import { ResourceName, TimeSlot } from '#shared';
+import { TimeSlot } from '#shared';
 import { Duration } from '#utils';
 import { UTCDate } from '@date-fns/utc';
 import { describe, it } from 'node:test';
@@ -157,9 +157,9 @@ describe('ScheduleCalculation', () => {
 
   it('can adjust schedule to availability of needed resources', () => {
     //given
-    const r1: ResourceName = { name: 'r1' };
-    const r2: ResourceName = { name: 'r2' };
-    const r3: ResourceName = { name: 'r3' };
+    const r1 = ResourceId.newOne();
+    const r2 = ResourceId.newOne();
+    const r3 = ResourceId.newOne();
     //and
     const stage1 = new Stage('Stage1')
       .ofDuration(ofDays(3))

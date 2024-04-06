@@ -3,20 +3,21 @@ import { deepEquals } from '#utils';
 import { Blockade } from './blockade';
 import { Owner } from './owner';
 import type { ResourceAvailabilityId } from './resourceAvailabilityId';
+import type { ResourceId } from './resourceId';
 
 export class ResourceAvailability {
   #id: ResourceAvailabilityId;
-  #resourceId: ResourceAvailabilityId;
-  #resourceParentId: ResourceAvailabilityId | null;
+  #resourceId: ResourceId;
+  #resourceParentId: ResourceId | null;
   #segment: TimeSlot;
   #blockade: Blockade;
   #version: number;
 
   constructor(
     availabilityId: ResourceAvailabilityId,
-    resourceId: ResourceAvailabilityId,
+    resourceId: ResourceId,
     segment: TimeSlot,
-    resourceParentId: ResourceAvailabilityId | null = null,
+    resourceParentId: ResourceId | null = null,
     blockade?: Blockade,
     version?: number,
   ) {
@@ -77,11 +78,11 @@ export class ResourceAvailability {
     return this.#segment;
   }
 
-  public get resourceId(): ResourceAvailabilityId {
+  public get resourceId(): ResourceId {
     return this.#resourceId;
   }
 
-  public get resourceParentId(): ResourceAvailabilityId | null {
+  public get resourceParentId(): ResourceId | null {
     return this.#resourceParentId;
   }
 

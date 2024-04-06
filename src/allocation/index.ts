@@ -16,4 +16,3 @@ export { ProjectAllocations } from './projectAllocations';
 export { ProjectAllocationsId } from './projectAllocationsId';
 export { type ProjectAllocationsRepository } from './projectAllocationsRepository';
 export { ProjectsAllocationsSummary } from './projectsAllocationsSummary';
-export { ResourceId } from './resourceId';

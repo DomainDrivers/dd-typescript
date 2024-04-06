@@ -5,9 +5,9 @@ import {
   Demand,
   Demands,
   ProjectAllocationsId,
-  ResourceId,
   type AllocationFacade,
 } from '#allocation';
+import { ResourceId } from '#availability';
 import * as schema from '#schema';
 import { Capability, TimeSlot } from '#shared';
 import { deepEquals } from '#utils';

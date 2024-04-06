@@ -1,3 +1,4 @@
+import { ResourceId } from '#availability';
 import { Capability, type TimeSlot } from '#shared';
 import { transactional } from '#storage';
 import { Clock, ObjectSet, type UUID } from '#utils';
@@ -6,7 +7,6 @@ import {
   Demands,
   ProjectAllocations,
   ProjectAllocationsId,
-  ResourceId,
 } from '.';
 import type { ProjectAllocationsRepository } from './projectAllocationsRepository';
 import { ProjectsAllocationsSummary } from './projectsAllocationsSummary';

@@ -1,3 +1,4 @@
+import { ResourceId } from '#availability';
 import { Capability, TimeSlot } from '#shared';
 import { DrizzleRepository, type Repository } from '#storage';
 import { ObjectSet, UUID } from '#utils';
@@ -10,7 +11,6 @@ import {
   Demands,
   ProjectAllocations,
   ProjectAllocationsId,
-  ResourceId,
 } from '.';
 import * as schema from './schema';
 

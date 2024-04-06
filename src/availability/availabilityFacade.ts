@@ -3,17 +3,17 @@ import type { TimeSlot } from '#shared';
 import { transactional } from '#storage';
 import { ResourceGroupedAvailability, Segments, defaultSegment } from '.';
 import type { Owner } from './owner';
-import type { ResourceAvailabilityId } from './resourceAvailabilityId';
 import type { ResourceAvailabilityRepository } from './resourceAvailabilityRepository';
+import type { ResourceId } from './resourceId';
 
 export class AvailabilityFacade {
   constructor(private readonly repository: ResourceAvailabilityRepository) {}
 
   @transactional()
   public createResourceSlots(
-    resourceId: ResourceAvailabilityId,
+    resourceId: ResourceId,
     timeslot: TimeSlot,
-    parentId?: ResourceAvailabilityId,
+    parentId?: ResourceId,
   ): Promise<void> {
     const groupedAvailability = ResourceGroupedAvailability.of(
       resourceId,
@@ -25,7 +25,7 @@ export class AvailabilityFacade {
 
   @transactional()
   public async block(
-    resourceId: ResourceAvailabilityId,
+    resourceId: ResourceId,
     timeSlot: TimeSlot,
     requester: Owner,
   ): Promise<boolean> {
@@ -41,7 +41,7 @@ export class AvailabilityFacade {
 
   @transactional()
   public async release(
-    resourceId: ResourceAvailabilityId,
+    resourceId: ResourceId,
     timeSlot: TimeSlot,
     requester: Owner,
   ): Promise<boolean> {
@@ -55,7 +55,7 @@ export class AvailabilityFacade {
 
   @transactional()
   public async disable(
-    resourceId: ResourceAvailabilityId,
+    resourceId: ResourceId,
     timeSlot: TimeSlot,
     requester: Owner,
   ): Promise<boolean> {
@@ -68,7 +68,7 @@ export class AvailabilityFacade {
   }
 
   private findGrouped = async (
-    resourceId: ResourceAvailabilityId,
+    resourceId: ResourceId,
     within: TimeSlot,
   ): Promise<ResourceGroupedAvailability> => {
     const normalized = Segments.normalizeToSegmentBoundaries(
@@ -81,7 +81,7 @@ export class AvailabilityFacade {
   };
 
   public find = async (
-    resourceId: ResourceAvailabilityId,
+    resourceId: ResourceId,
     within: TimeSlot,
   ): Promise<ResourceGroupedAvailability> => {
     const normalized = Segments.normalizeToSegmentBoundaries(
@@ -94,7 +94,7 @@ export class AvailabilityFacade {
   };
 
   public findByParentId = async (
-    parentId: ResourceAvailabilityId,
+    parentId: ResourceId,
     within: TimeSlot,
   ): Promise<ResourceGroupedAvailability> => {
     const normalized = Segments.normalizeToSegmentBoundaries(
