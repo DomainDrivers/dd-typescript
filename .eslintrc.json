@@ -58,8 +58,8 @@
               // "./src/shared", // allowed
               "./src/simulation",
               "./src/sorter",
-              "./src/sql",
-              "./src/storage"
+              "./src/sql"
+              // "./src/storage" // allowed
             ]
           },
           {
@@ -97,7 +97,7 @@
           {
             "target": "./src/schema/*",
             "from": [
-              "./src/availability",
+              //"./src/availability",// allowed
               // "./src/allocation",
               "./src/optimization",
               //"./src/planning",

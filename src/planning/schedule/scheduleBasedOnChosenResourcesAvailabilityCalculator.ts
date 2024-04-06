@@ -1,11 +1,11 @@
 import { Calendars } from '#availability';
 import { TimeSlot } from '#shared';
-import { Duration, ObjectMap, compareDuration } from '#utils';
+import { Duration, ObjectMap } from '#utils';
 import { addMilliseconds, differenceInMilliseconds } from 'date-fns';
 import { Stage } from '../parallelization';
 
 const isSlotLongEnoughForStage = (stage: Stage, slot: TimeSlot): boolean =>
-  compareDuration(slot.duration(), stage.duration) >= 0;
+  Duration.compare(slot.duration(), stage.duration) >= 0;
 
 const findCommonPartOfSlots = (foundSlots: TimeSlot[]): TimeSlot =>
   foundSlots.length > 0

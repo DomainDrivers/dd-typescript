@@ -1,0 +1,230 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
+import {
+  AvailabilityConfiguration,
+  AvailabilityFacade,
+  Owner,
+  ResourceAvailabilityId,
+} from '#availability';
+import * as schema from '#schema';
+import { TimeSlot } from '#shared';
+import { addMinutes } from 'date-fns';
+import assert from 'node:assert';
+import { after, before, describe, it } from 'node:test';
+import { TestConfiguration } from '../setup';
+
+describe('AvailabilityFacade', () => {
+  const testEnvironment = TestConfiguration();
+  let availabilityFacade: AvailabilityFacade;
+
+  before(async () => {
+    const connectionString = await testEnvironment.start({ schema });
+
+    const configuration = new AvailabilityConfiguration(connectionString);
+
+    availabilityFacade = configuration.availabilityFacade();
+  });
+
+  after(testEnvironment.stop);
+
+  it('can create availability slots', async () => {
+    //given
+    const resourceId = ResourceAvailabilityId.newOne();
+    const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
+
+    //when
+    await availabilityFacade.createResourceSlots(resourceId, oneDay);
+
+    //then
+    assert.equal(
+      (await availabilityFacade.find(resourceId, oneDay)).size(),
+      96,
+    );
+  });
+
+  it('can create new availability slots with parent id', async () => {
+    //given
+    const resourceId = ResourceAvailabilityId.newOne();
+    const resourceId2 = ResourceAvailabilityId.newOne();
+    const parentId = ResourceAvailabilityId.newOne();
+    const differentParentId = ResourceAvailabilityId.newOne();
+    const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
+
+    //when
+    await availabilityFacade.createResourceSlots(resourceId, oneDay, parentId);
+    await availabilityFacade.createResourceSlots(
+      resourceId2,
+      oneDay,
+      differentParentId,
+    );
+
+    //then
+    assert.equal(
+      (await availabilityFacade.findByParentId(parentId, oneDay)).size(),
+      96,
+    );
+    assert.equal(
+      (
+        await availabilityFacade.findByParentId(differentParentId, oneDay)
+      ).size(),
+      96,
+    );
+  });
+
+  it('can block availabilities', async () => {
+    //given
+    const resourceId = ResourceAvailabilityId.newOne();
+    const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
+    const owner = Owner.newOne();
+    await availabilityFacade.createResourceSlots(resourceId, oneDay);
+
+    //when
+    const result = await availabilityFacade.block(resourceId, oneDay, owner);
+
+    //then
+    assert.ok(result);
+    const resourceAvailabilities = await availabilityFacade.find(
+      resourceId,
+      oneDay,
+    );
+    assert.equal(resourceAvailabilities.size(), 96);
+    assert.ok(resourceAvailabilities.blockedEntirelyBy(owner));
+  });
+
+  it('can disable availabilities', async () => {
+    //given
+    const resourceId = ResourceAvailabilityId.newOne();
+    const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
+    const owner = Owner.newOne();
+    await availabilityFacade.createResourceSlots(resourceId, oneDay);
+
+    //when
+    const result = await availabilityFacade.disable(resourceId, oneDay, owner);
+
+    //then
+    assert.ok(result);
+    const resourceAvailabilities = await availabilityFacade.find(
+      resourceId,
+      oneDay,
+    );
+    assert.equal(resourceAvailabilities.size(), 96);
+    assert.ok(resourceAvailabilities.isDisabledEntirelyBy(owner));
+  });
+
+  it('cant block even when just small segment of requested slot is blocked', async () => {
+    //given
+    const resourceId = ResourceAvailabilityId.newOne();
+    const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
+    const owner = Owner.newOne();
+    await availabilityFacade.createResourceSlots(resourceId, oneDay);
+    //and
+    await availabilityFacade.block(resourceId, oneDay, owner);
+    const fifteenMinutes = new TimeSlot(
+      oneDay.from,
+      addMinutes(oneDay.from, 15),
+    );
+
+    //when
+    const result = await availabilityFacade.block(
+      resourceId,
+      fifteenMinutes,
+      Owner.newOne(),
+    );
+
+    //then
+    assert.equal(result, false);
+    const resourceAvailabilities = await availabilityFacade.find(
+      resourceId,
+      oneDay,
+    );
+    assert.ok(resourceAvailabilities.blockedEntirelyBy(owner));
+  });
+
+  it('can release availability', async () => {
+    //given
+    const resourceId = ResourceAvailabilityId.newOne();
+    const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
+    const fifteenMinutes = new TimeSlot(
+      oneDay.from,
+      addMinutes(oneDay.from, 15),
+    );
+    const owner = Owner.newOne();
+    await availabilityFacade.createResourceSlots(resourceId, fifteenMinutes);
+    //and
+    await availabilityFacade.block(resourceId, fifteenMinutes, owner);
+
+    //when
+    const result = await availabilityFacade.release(resourceId, oneDay, owner);
+
+    //then
+    assert.ok(result);
+    const resourceAvailabilities = await availabilityFacade.find(
+      resourceId,
+      oneDay,
+    );
+    assert.ok(resourceAvailabilities.isEntirelyAvailable());
+  });
+
+  it(`can't release even when just part of slot is owned by the requester`, async () => {
+    //given
+    const resourceId = ResourceAvailabilityId.newOne();
+    const jan_1 = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
+    const jan_2 = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 2);
+    const jan_1_2 = new TimeSlot(jan_1.from, jan_2.to);
+    const jan1owner = Owner.newOne();
+    await availabilityFacade.createResourceSlots(resourceId, jan_1_2);
+    //and
+    await availabilityFacade.block(resourceId, jan_1, jan1owner);
+    //and
+    const jan2owner = Owner.newOne();
+    await availabilityFacade.block(resourceId, jan_2, jan2owner);
+
+    //when
+    const result = await availabilityFacade.release(
+      resourceId,
+      jan_1_2,
+      jan1owner,
+    );
+
+    //then
+    assert.equal(result, false);
+    const resourceAvailability = await availabilityFacade.find(
+      resourceId,
+      jan_1,
+    );
+    assert.ok(resourceAvailability.blockedEntirelyBy(jan1owner));
+  });
+
+  it('one segment can be taken by someone else after realising', async () => {
+    //given
+    const resourceId = ResourceAvailabilityId.newOne();
+    const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
+    const fifteenMinutes = new TimeSlot(
+      oneDay.from,
+      addMinutes(oneDay.from, 15),
+    );
+    const owner = Owner.newOne();
+    await availabilityFacade.createResourceSlots(resourceId, oneDay);
+    //and
+    await availabilityFacade.block(resourceId, oneDay, owner);
+    //and
+    await availabilityFacade.release(resourceId, fifteenMinutes, owner);
+
+    //when
+    const newRequester = Owner.newOne();
+    const result = await availabilityFacade.block(
+      resourceId,
+      fifteenMinutes,
+      newRequester,
+    );
+
+    //then
+    assert.ok(result);
+    const resourceAvailability = await availabilityFacade.find(
+      resourceId,
+      oneDay,
+    );
+    assert.equal(resourceAvailability.size(), 96);
+    assert.equal(resourceAvailability.findBlockedBy(owner).length, 95);
+    assert.equal(resourceAvailability.findBlockedBy(newRequester).length, 1);
+  });
+});

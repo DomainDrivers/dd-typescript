@@ -1,5 +1,6 @@
 import { ResourceName, TimeSlot } from '#shared';
-import { ObjectMap, UUID } from '#utils';
+import { ObjectMap } from '#utils';
+import { Owner } from './owner';
 
 //those classes will be part of another module - possibly "availability"
 export class Calendars {
@@ -35,12 +36,4 @@ export class Calendar {
 
   availableSlots = (): TimeSlot[] =>
     this.calendar.getOrDefault(Owner.none(), []);
-}
-
-export class Owner {
-  constructor(public readonly owner: UUID) {}
-
-  public static none = () => new Owner(null!);
-
-  static newOne = () => new Owner(UUID.randomUUID());
 }
