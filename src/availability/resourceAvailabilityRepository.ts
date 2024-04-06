@@ -50,6 +50,8 @@ export class ResourceAvailabilityRepository extends PostgresRepository {
   private saveAllNew = async (
     availabilities: ResourceAvailability[],
   ): Promise<void> => {
+    if (availabilities.length === 0) return;
+
     const params = availabilities.reduce<InsertResourceAvailability[]>(
       (params, ra) => [
         ...params,
@@ -133,6 +135,8 @@ export class ResourceAvailabilityRepository extends PostgresRepository {
   public saveAllCheckingVersion = async (
     resourceAvailabilities: ResourceAvailability[],
   ): Promise<boolean> => {
+    if (resourceAvailabilities.length === 0) return false;
+
     const params = resourceAvailabilities.reduce<UpdateResourceAvailability[]>(
       (params, ra) => [
         ...params,

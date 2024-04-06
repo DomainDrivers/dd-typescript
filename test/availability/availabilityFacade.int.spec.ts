@@ -11,7 +11,7 @@ import { TimeSlot } from '#shared';
 import { addMinutes } from 'date-fns';
 import assert from 'node:assert';
 import { after, before, describe, it } from 'node:test';
-import { assertThat, assertThatArray } from '../asserts';
+import { assertFalse, assertThat, assertThatArray } from '../asserts';
 import { TestConfiguration } from '../setup';
 
 describe('AvailabilityFacade', () => {
@@ -100,6 +100,19 @@ describe('AvailabilityFacade', () => {
     assert.ok(resourceAvailabilities.blockedEntirelyBy(owner));
   });
 
+  it('cant block when no slots created', async () => {
+    //given
+    const resourceId = ResourceId.newOne();
+    const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
+    const owner = Owner.newOne();
+
+    //when
+    const result = await availabilityFacade.block(resourceId, oneDay, owner);
+
+    //then
+    assertFalse(result);
+  });
+
   it('can disable availabilities', async () => {
     //given
     const resourceId = ResourceId.newOne();
@@ -125,6 +138,19 @@ describe('AvailabilityFacade', () => {
     );
     assertThatArray(monthlyCalendar.availableSlots()).isEmpty();
     assertThatArray(monthlyCalendar.takenBy(owner)).containsExactly(oneDay);
+  });
+
+  it(`can't disable when no slots created`, async () => {
+    //given
+    const resourceId = ResourceId.newOne();
+    const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
+    const owner = Owner.newOne();
+
+    //when
+    const result = await availabilityFacade.disable(resourceId, oneDay, owner);
+
+    //then
+    assertFalse(result);
   });
 
   it('cant block even when just small segment of requested slot is blocked', async () => {
@@ -179,6 +205,19 @@ describe('AvailabilityFacade', () => {
       oneDay,
     );
     assert.ok(resourceAvailabilities.isEntirelyAvailable());
+  });
+
+  it(`can't release when no slots created`, async () => {
+    //given
+    const resourceId = ResourceId.newOne();
+    const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
+    const owner = Owner.newOne();
+
+    //when
+    const result = await availabilityFacade.release(resourceId, oneDay, owner);
+
+    //then
+    assertFalse(result);
   });
 
   it(`can't release even when just part of slot is owned by the requester`, async () => {
