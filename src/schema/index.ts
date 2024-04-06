@@ -5,3 +5,4 @@ export {
 } from '../allocation/schema';
 export { availabilities } from '../availability/schema';
 export { projects } from '../planning/schema';
+export { devices, employees } from '../resource/schema';

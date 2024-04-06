@@ -1,4 +1,4 @@
-import { getDB, injectTransactionContext } from '#storage';
+import { getDB, injectDatabaseContext } from '#storage';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { ResourceAvailabilityReadModel } from '.';
 import { AvailabilityFacade } from './availabilityFacade';
@@ -24,7 +24,7 @@ export class AvailabilityConfiguration {
     const readModel =
       resourceAvailabilityReadModel ?? this.resourceAvailabilityReadModel();
 
-    return injectTransactionContext(
+    return injectDatabaseContext(
       new AvailabilityFacade(repository, readModel),
       getDB,
     );
