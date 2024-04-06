@@ -8,6 +8,7 @@ import {
   ProjectAllocations,
   ProjectAllocationsId,
 } from '.';
+import { dbconnection } from '../storage/transactionalDecorator';
 import type { ProjectAllocationsRepository } from './projectAllocationsRepository';
 import { ProjectsAllocationsSummary } from './projectsAllocationsSummary';
 
@@ -33,6 +34,7 @@ export class AllocationFacade {
     return projectId;
   }
 
+  @dbconnection
   public async findAllProjectsAllocations(
     projectIds?: ObjectSet<ProjectAllocationsId>,
   ): Promise<ProjectsAllocationsSummary> {

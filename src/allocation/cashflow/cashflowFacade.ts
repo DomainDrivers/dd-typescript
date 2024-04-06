@@ -1,5 +1,6 @@
 import { transactional } from '#storage';
 import type { ProjectAllocationsId } from '..';
+import { dbconnection } from '../../storage/transactionalDecorator';
 import { Cashflow } from './cashflow';
 import type { CashflowRepository } from './cashflowRepository';
 import type { Cost } from './cost';
@@ -21,8 +22,9 @@ export class CashflowFacade {
     await this.repository.save(cashflow);
   }
 
-  public find = async (projectId: ProjectAllocationsId): Promise<Earnings> => {
+  @dbconnection
+  public async find(projectId: ProjectAllocationsId): Promise<Earnings> {
     const byId = await this.repository.getById(projectId);
     return byId.earnings();
-  };
+  }
 }

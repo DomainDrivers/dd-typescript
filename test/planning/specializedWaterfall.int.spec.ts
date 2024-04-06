@@ -8,7 +8,7 @@ import {
   schema,
   type PlanningFacade,
 } from '#planning';
-import { Capability, ResourceName, TimeSlot } from '#shared';
+import { Capability, TimeSlot } from '#shared';
 import { Duration } from '#utils';
 import { UTCDate } from '@date-fns/utc';
 import { after, before, describe, it } from 'node:test';
@@ -78,7 +78,7 @@ describe('Specialized Waterfall', () => {
       );
 
       //and
-      const criticalResourceName = new ResourceName('criticalResourceName');
+      const criticalResourceName = ResourceId.newOne();
       const criticalCapabilityAvailability =
         resourceAvailableForCapabilityInPeriod(
           criticalResourceName,
@@ -143,7 +143,7 @@ describe('Specialized Waterfall', () => {
   };
 
   const resourceAvailableForCapabilityInPeriod = (
-    resource: ResourceName,
+    resource: ResourceId,
     capability: Capability,
     slot: TimeSlot,
   ): ResourceId => {

@@ -8,7 +8,11 @@ type DatabaseAware<
 
 export type EnlistableInTransaction<
   TSchema extends Record<string, unknown> = Record<string, never>,
-> = { enlist: (transaction: PostgresTransaction<TSchema>) => void };
+> = {
+  enlist: (
+    transaction: PostgresTransaction<TSchema> | NodePgDatabase<TSchema>,
+  ) => void;
+};
 
 export type EnlistableInRawTransaction = {
   enlistRaw: (client: pg.Client) => void;
@@ -81,6 +85,41 @@ const getEnlistableInRawTransaction = (
   }
 
   return enlistable;
+};
+
+export const dbconnection = (
+  target: unknown,
+  key: string,
+  descriptor: PropertyDescriptor,
+): PropertyDescriptor => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const originalDef = descriptor.value;
+
+  descriptor.value = function (...args: unknown[]) {
+    const db = toDatabaseAware(this).___getDatabase();
+
+    for (const repositoryFieldName in this) {
+      const repository =
+        getEnlistableInTransaction(this, repositoryFieldName) ??
+        getEnlistableInRawTransaction(this, repositoryFieldName);
+
+      if (repository !== null && 'enlist' in repository) {
+        repository.enlist(db);
+        continue;
+      }
+
+      const client = (db as { session?: { client: pg.Client } }).session
+        ?.client;
+
+      if (client && repository !== null && 'enlistRaw' in repository) {
+        repository.enlistRaw(client);
+      }
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    return originalDef.apply(this, args);
+  };
+  return descriptor;
 };
 
 export const transactional = (
