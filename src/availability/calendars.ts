@@ -5,7 +5,7 @@ import type { ResourceId } from './resourceId';
 
 //those classes will be part of another module - possibly "availability"
 export class Calendars {
-  constructor(private readonly calendars: ObjectMap<ResourceId, Calendar>) {}
+  constructor(public readonly calendars: ObjectMap<ResourceId, Calendar>) {}
 
   public static of = (...calendars: Calendar[]): Calendars => {
     const collect = ObjectMap.from(

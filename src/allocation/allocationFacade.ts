@@ -1,6 +1,6 @@
-import { ResourceId } from '#availability';
+import { AvailabilityFacade, ResourceId } from '#availability';
 import { Capability, type TimeSlot } from '#shared';
-import { transactional } from '#storage';
+import { dbconnection, transactional } from '#storage';
 import { Clock, ObjectSet, type UUID } from '#utils';
 import {
   Allocations,
@@ -8,13 +8,13 @@ import {
   ProjectAllocations,
   ProjectAllocationsId,
 } from '.';
-import { dbconnection } from '../storage/transactionalDecorator';
 import type { ProjectAllocationsRepository } from './projectAllocationsRepository';
 import { ProjectsAllocationsSummary } from './projectsAllocationsSummary';
 
 export class AllocationFacade {
   constructor(
     private readonly repository: ProjectAllocationsRepository,
+    private readonly availabilityFacade: AvailabilityFacade,
     private readonly clock: Clock,
   ) {}
 
@@ -47,6 +47,7 @@ export class AllocationFacade {
 
   @transactional
   public async allocateToProject(
+    //TODO WHAT TO DO WITH AVAILABILITY HERE? - implement
     projectId: ProjectAllocationsId,
     resourceId: ResourceId,
     capability: Capability,
@@ -69,6 +70,7 @@ export class AllocationFacade {
     allocatableCapabilityId: UUID,
     timeSlot: TimeSlot,
   ): Promise<boolean> {
+    //TODO WHAT TO DO WITH AVAILABILITY HERE? - just think about it, don't implement
     const allocations = await this.repository.getById(projectId);
     const event = allocations.release(
       allocatableCapabilityId,
