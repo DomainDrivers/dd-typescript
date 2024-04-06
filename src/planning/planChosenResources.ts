@@ -1,4 +1,4 @@
-import { AvailabilityFacade, type Calendars } from '#availability';
+import { AvailabilityFacade, Calendars } from '#availability';
 import { ResourceName, TimeSlot } from '#shared';
 import { ProjectId } from '#simulation';
 import { transactional } from '#storage';
@@ -45,8 +45,7 @@ export class PlanChosenResources {
       timeBoundaries,
     );
     //TODO when availability is implemented
-    const neededResourcesCalendars =
-      this.availabilityFacade.availabilitiesOfResources();
+    const neededResourcesCalendars = Calendars.of();
     const schedule = this.createScheduleAdjustingToCalendars(
       neededResourcesCalendars,
       stages,
