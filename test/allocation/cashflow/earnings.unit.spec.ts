@@ -4,7 +4,7 @@ import BigNumber from 'bignumber.js';
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
-describe('Eearnings', () => {
+describe('Earnings', () => {
   const TEN = new BigNumber(10);
 
   it('income minus cost test', () => {

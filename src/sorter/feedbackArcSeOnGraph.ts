@@ -1,3 +1,4 @@
+import { Edge } from './edge';
 import { Node } from './node';
 
 const createAdjacencyList = <T>(
@@ -21,36 +22,25 @@ const createAdjacencyList = <T>(
   return adjacencyList;
 };
 
-export const FeedbackArcSeOnGraph = {
-  calculate: <T>(initialNodes: Node<T>[]): Edge[] => {
-    const adjacencyList: Map<number, number[]> =
-      createAdjacencyList(initialNodes);
-    const feedbackEdges: Edge[] = [];
-    const visited: number[] = [];
-    const nodes = adjacencyList.keys();
+export const feedbackArcSeOnGraph = <T>(initialNodes: Node<T>[]): Edge[] => {
+  const adjacencyList: Map<number, number[]> =
+    createAdjacencyList(initialNodes);
+  const feedbackEdges: Edge[] = [];
+  const visited: number[] = [];
+  const nodes = adjacencyList.keys();
 
-    for (const i of nodes) {
-      const neighbours = adjacencyList.get(i)!;
-      if (neighbours.length != 0) {
-        visited[i] = 1;
-        for (let j = 0; j < neighbours.length; j++) {
-          if (visited[neighbours[j]] == 1) {
-            feedbackEdges.push(new Edge(i, neighbours[j]));
-          } else {
-            visited[neighbours[j]] = 1;
-          }
+  for (const i of nodes) {
+    const neighbours = adjacencyList.get(i)!;
+    if (neighbours.length != 0) {
+      visited[i] = 1;
+      for (let j = 0; j < neighbours.length; j++) {
+        if (visited[neighbours[j]] == 1) {
+          feedbackEdges.push(new Edge(i, neighbours[j]));
+        } else {
+          visited[neighbours[j]] = 1;
         }
       }
     }
-    return feedbackEdges;
-  },
+  }
+  return feedbackEdges;
 };
-
-export class Edge {
-  constructor(
-    public readonly source: number,
-    public readonly target: number,
-  ) {}
-
-  public toString = () => `(${this.source} -> ${this.target})`;
-}

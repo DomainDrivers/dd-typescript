@@ -14,7 +14,7 @@ export class Nodes<T> {
     }
   }
 
-  all = (): ReadonlyArray<Node<T>> => this.nodes;
+  all = (): Array<Node<T>> => this.nodes;
 
   add = (node: Node<T>): Nodes<T> => {
     const newNode = ObjectSet.from([...this.nodes, node]);
