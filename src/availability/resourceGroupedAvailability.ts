@@ -83,4 +83,6 @@ export class ResourceGroupedAvailability {
 
   public isEntirelyAvailable = (): boolean =>
     this.resourceAvailabilities.every((ra) => ra.blockedBy().byNone());
+
+  public hasNoSlots = (): boolean => this.resourceAvailabilities.length === 0;
 }

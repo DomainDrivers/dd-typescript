@@ -10,6 +10,9 @@ export const assertThat = <T>(item: T) => {
 export const assertEquals = <T>(item: T, other: T) => {
   return assert.ok(deepEquals(item, other));
 };
+export const assertFalse = (result: boolean) => {
+  assert.equal(result, false);
+};
 
 export const assertThatArray = <T>(array: T[]) => {
   return {
