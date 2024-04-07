@@ -1,22 +1,29 @@
+import { CapabilitySelector, SelectingPolicy } from '#allocation';
 import type { Capability, TimeSlot } from '#shared';
 import {
   AvailableResourceCapability,
   SimulatedCapabilities,
 } from '#simulation';
-import type { UUID } from '#utils';
+import { ObjectSet, type UUID } from '#utils';
 
 export class AvailableCapabilitiesBuilder {
   private readonly availabilities: AvailableResourceCapability[] = [];
   private currentResourceId?: UUID;
-  private capability?: Capability;
+  private capabilities?: ObjectSet<Capability>;
   private timeSlot?: TimeSlot;
+  private selectingPolicy?: SelectingPolicy;
 
   public withEmployee = (id: UUID) => {
-    if (this.currentResourceId && this.capability && this.timeSlot) {
+    if (
+      this.currentResourceId &&
+      this.capabilities &&
+      this.selectingPolicy &&
+      this.timeSlot
+    ) {
       this.availabilities.push(
         new AvailableResourceCapability(
           this.currentResourceId,
-          this.capability,
+          new CapabilitySelector(this.capabilities, this.selectingPolicy),
           this.timeSlot,
         ),
       );
@@ -26,7 +33,8 @@ export class AvailableCapabilitiesBuilder {
   };
 
   public thatBrings = (capability: Capability) => {
-    this.capability = capability;
+    this.capabilities = ObjectSet.of(capability);
+    this.selectingPolicy = SelectingPolicy.ONE_OF_ALL;
     return this;
   };
 
@@ -36,11 +44,16 @@ export class AvailableCapabilitiesBuilder {
   }
 
   public build() {
-    if (this.currentResourceId && this.capability && this.timeSlot) {
+    if (
+      this.currentResourceId &&
+      this.capabilities &&
+      this.selectingPolicy &&
+      this.timeSlot
+    ) {
       this.availabilities.push(
         new AvailableResourceCapability(
           this.currentResourceId,
-          this.capability,
+          new CapabilitySelector(this.capabilities, this.selectingPolicy),
           this.timeSlot,
         ),
       );

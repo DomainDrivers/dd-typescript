@@ -128,7 +128,7 @@
             "target": "./src/simulation/*",
             "from": [
               "./src/availability",
-              "./src/allocation",
+              // "./src/allocation",
               // "./src/optimization", // allowed
               "./src/planning",
               "./src/schema",
