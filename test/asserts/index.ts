@@ -14,6 +14,10 @@ export const assertFalse = (result: boolean) => {
   assert.equal(result, false);
 };
 
+export const assertTrue = (result: boolean) => {
+  assert.equal(result, true);
+};
+
 export const assertThatArray = <T>(array: T[]) => {
   return {
     isEmpty: () => assert.equal(array.length, 0),
