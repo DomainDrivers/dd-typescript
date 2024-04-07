@@ -4,10 +4,10 @@ import type { Earnings } from './earnings';
 import type { Income } from './income';
 
 export class Cashflow {
-  #projectId: ProjectAllocationsId;
-  #income: Income | null;
-  #cost: Cost | null;
-  #version: number;
+  private _projectId: ProjectAllocationsId;
+  private _income: Income | null;
+  private _cost: Cost | null;
+  private _version: number;
 
   constructor(
     projectId: ProjectAllocationsId,
@@ -15,29 +15,29 @@ export class Cashflow {
     cost: Cost | null = null,
     version: number = 0,
   ) {
-    this.#projectId = projectId;
-    this.#income = income;
-    this.#cost = cost;
-    this.#version = version;
+    this._projectId = projectId;
+    this._income = income;
+    this._cost = cost;
+    this._version = version;
   }
 
-  public earnings = (): Earnings => this.#income!.minus(this.#cost!);
+  public earnings = (): Earnings => this._income!.minus(this._cost!);
 
   public update = (income: Income, cost: Cost) => {
-    this.#income = income;
-    this.#cost = cost;
+    this._income = income;
+    this._cost = cost;
   };
 
   public get projectId() {
-    return this.#projectId;
+    return this._projectId;
   }
   public get income() {
-    return this.#income;
+    return this._income;
   }
   public get cost() {
-    return this.#cost;
+    return this._cost;
   }
   public get version() {
-    return this.#version;
+    return this._version;
   }
 }

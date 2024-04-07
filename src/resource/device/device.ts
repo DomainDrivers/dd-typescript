@@ -3,10 +3,10 @@ import type { ObjectSet } from '#utils';
 import type { DeviceId } from './deviceId';
 
 export class Device {
-  #id: DeviceId;
-  #model: string;
-  #capabilities: ObjectSet<Capability>;
-  #version: number;
+  private _id: DeviceId;
+  private _model: string;
+  private _capabilities: ObjectSet<Capability>;
+  private _version: number;
 
   constructor(
     id: DeviceId,
@@ -14,22 +14,22 @@ export class Device {
     capabilities: ObjectSet<Capability>,
     version: number = 0,
   ) {
-    this.#id = id;
-    this.#model = model;
-    this.#capabilities = capabilities;
-    this.#version = version;
+    this._id = id;
+    this._model = model;
+    this._capabilities = capabilities;
+    this._version = version;
   }
 
   public get id() {
-    return this.#id;
+    return this._id;
   }
   public get model() {
-    return this.#model;
+    return this._model;
   }
   public get capabilities() {
-    return this.#capabilities;
+    return this._capabilities;
   }
   public get version() {
-    return this.#version;
+    return this._version;
   }
 }

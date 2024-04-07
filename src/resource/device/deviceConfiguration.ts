@@ -1,3 +1,7 @@
+import {
+  CapabilityPlanningConfiguration,
+  CapabilityScheduler,
+} from '#allocation';
 import { getDB, injectDatabaseContext } from '#storage';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '../schema';
@@ -6,6 +10,7 @@ import {
   DrizzleDeviceRepository,
   type DeviceRepository,
 } from './deviceRepository';
+import { ScheduleDeviceCapabilities } from './scheduleDeviceCapabilities';
 
 export class DeviceConfiguration {
   constructor(
@@ -15,11 +20,26 @@ export class DeviceConfiguration {
     console.log('connectionstring: ' + this.connectionString);
   }
 
-  deviceFacade = (deviceRepository?: DeviceRepository): DeviceFacade =>
-    injectDatabaseContext(
-      new DeviceFacade(deviceRepository ?? this.deviceRepository()),
+  deviceFacade = (
+    deviceRepository?: DeviceRepository,
+    capabilityScheduler?: CapabilityScheduler,
+  ): DeviceFacade => {
+    deviceRepository = deviceRepository ?? this.deviceRepository();
+    return injectDatabaseContext(
+      new DeviceFacade(
+        deviceRepository,
+        new ScheduleDeviceCapabilities(
+          deviceRepository,
+          capabilityScheduler ??
+            new CapabilityPlanningConfiguration(
+              this.connectionString,
+              this.enableLogging,
+            ).capabilityScheduler(),
+        ),
+      ),
       this.db,
     );
+  };
 
   public deviceRepository = (): DeviceRepository =>
     new DrizzleDeviceRepository();

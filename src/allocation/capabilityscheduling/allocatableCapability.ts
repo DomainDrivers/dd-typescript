@@ -5,10 +5,10 @@ import type { AllocatableResourceId } from './allocatableResourceId';
 import type { CapabilitySelector } from './capabilitySelector';
 
 export class AllocatableCapability {
-  #id: AllocatableCapabilityId;
-  #resourceId: AllocatableResourceId;
-  #possibleCapabilities: CapabilitySelector;
-  #timeSlot: TimeSlot;
+  private _id: AllocatableCapabilityId;
+  private _resourceId: AllocatableResourceId;
+  private _possibleCapabilities: CapabilitySelector;
+  private _timeSlot: TimeSlot;
 
   constructor(
     resourceId: AllocatableResourceId,
@@ -16,27 +16,27 @@ export class AllocatableCapability {
     timeSlot: TimeSlot,
     id: AllocatableCapabilityId = AllocatableCapabilityId.newOne(),
   ) {
-    this.#id = id;
-    this.#resourceId = resourceId;
-    this.#possibleCapabilities = possibleCapabilities;
-    this.#timeSlot = timeSlot;
+    this._id = id;
+    this._resourceId = resourceId;
+    this._possibleCapabilities = possibleCapabilities;
+    this._timeSlot = timeSlot;
   }
 
   public canPerform = (capabilities: ObjectSet<Capability>): boolean =>
-    this.#possibleCapabilities.canPerform(...capabilities);
+    this._possibleCapabilities.canPerform(...capabilities);
 
   public get id() {
-    return this.#id;
+    return this._id;
   }
   public get resourceId() {
-    return this.#resourceId;
+    return this._resourceId;
   }
 
   public get slot() {
-    return this.#timeSlot;
+    return this._timeSlot;
   }
 
   public get capabilities() {
-    return this.#possibleCapabilities;
+    return this._possibleCapabilities;
   }
 }

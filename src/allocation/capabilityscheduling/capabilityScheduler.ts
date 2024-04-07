@@ -4,10 +4,7 @@ import { dbconnection, transactional } from '#storage';
 import type { ObjectSet } from '#utils';
 import { CapabilitySelector } from '.';
 import { AllocatableCapability } from './allocatableCapability';
-import {
-  toAvailabilityResourceId,
-  type AllocatableCapabilityId,
-} from './allocatableCapabilityId';
+import { AllocatableCapabilityId } from './allocatableCapabilityId';
 import type { AllocatableCapabilityRepository } from './allocatableCapabilityRepository';
 import { AllocatableResourceId } from './allocatableResourceId';
 
@@ -30,7 +27,7 @@ export class CapabilityScheduler {
     );
     for (const resource of allocatableResourceIds) {
       await this.availabilityFacade.createResourceSlots(
-        toAvailabilityResourceId(resource),
+        AllocatableCapabilityId.toAvailabilityResourceId(resource),
         timeSlot,
       );
     }
@@ -55,7 +52,7 @@ export class CapabilityScheduler {
 
     for (const resource of allocatableCapability) {
       await this.availabilityFacade.createResourceSlots(
-        toAvailabilityResourceId(resource.id),
+        AllocatableCapabilityId.toAvailabilityResourceId(resource.id),
         timeSlot,
       );
     }

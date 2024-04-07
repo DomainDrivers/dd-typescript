@@ -4,10 +4,7 @@ import { dbconnection } from '#storage';
 import { ObjectSet, deepEquals } from '#utils';
 import { AllocatableCapabilitiesSummary } from './allocatableCapabilitiesSummary';
 import type { AllocatableCapability } from './allocatableCapability';
-import {
-  toAvailabilityResourceId,
-  type AllocatableCapabilityId,
-} from './allocatableCapabilityId';
+import { AllocatableCapabilityId } from './allocatableCapabilityId';
 import type { AllocatableCapabilityRepository } from './allocatableCapabilityRepository';
 import { AllocatableCapabilitySummary } from './allocatableCapabilitySummary';
 
@@ -75,7 +72,9 @@ export class CapabilityFinder {
     timeSlot: TimeSlot,
   ): Promise<AllocatableCapability[]> {
     const resourceIds = ObjectSet.from(
-      findAllocatableCapability.map((a) => toAvailabilityResourceId(a.id)),
+      findAllocatableCapability.map((a) =>
+        AllocatableCapabilityId.toAvailabilityResourceId(a.id),
+      ),
     );
     const calendars = await this.availabilityFacade.loadCalendars(
       resourceIds,
@@ -83,7 +82,7 @@ export class CapabilityFinder {
     );
     return findAllocatableCapability.filter((ac) =>
       calendars
-        .get(toAvailabilityResourceId(ac.id))
+        .get(AllocatableCapabilityId.toAvailabilityResourceId(ac.id))
         .availableSlots()
         .some((a) => deepEquals(a, timeSlot)),
     );

@@ -4,12 +4,12 @@ import { EmployeeId } from './employeeId';
 import type { Seniority } from './seniority';
 
 export class Employee {
-  #id = EmployeeId.newOne();
-  #version: number;
-  #name: string;
-  #lastName: string;
-  #seniority: Seniority;
-  #capabilities: ObjectSet<Capability>;
+  private _id = EmployeeId.newOne();
+  private _version: number;
+  private _name: string;
+  private _lastName: string;
+  private _seniority: Seniority;
+  private _capabilities: ObjectSet<Capability>;
 
   constructor(
     id: EmployeeId,
@@ -19,30 +19,30 @@ export class Employee {
     capabilities: ObjectSet<Capability>,
     version: number = 0,
   ) {
-    this.#id = id;
-    this.#name = name;
-    this.#lastName = lastName;
-    this.#seniority = seniority;
-    this.#capabilities = capabilities;
-    this.#version = version;
+    this._id = id;
+    this._name = name;
+    this._lastName = lastName;
+    this._seniority = seniority;
+    this._capabilities = capabilities;
+    this._version = version;
   }
 
   public get id() {
-    return this.#id;
+    return this._id;
   }
   public get name() {
-    return this.#name;
+    return this._name;
   }
   public get lastName() {
-    return this.#lastName;
+    return this._lastName;
   }
   public get seniority() {
-    return this.#seniority;
+    return this._seniority;
   }
   public get capabilities() {
-    return this.#capabilities;
+    return this._capabilities;
   }
   public get version() {
-    return this.#version;
+    return this._version;
   }
 }

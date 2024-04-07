@@ -11,7 +11,6 @@ import {
   Demands,
   ProjectAllocations,
   ProjectAllocationsId,
-  toAvailabilityResourceId,
 } from '.';
 import type { ProjectAllocationsRepository } from './projectAllocationsRepository';
 import { ProjectsAllocationsSummary } from './projectsAllocationsSummary';
@@ -64,7 +63,9 @@ export class AllocationFacade {
     }
     if (
       !(await this.availabilityFacade.block(
-        toAvailabilityResourceId(allocatableCapabilityId),
+        AllocatableCapabilityId.toAvailabilityResourceId(
+          allocatableCapabilityId,
+        ),
         timeSlot,
         Owner.of(projectId),
       ))
@@ -107,7 +108,7 @@ export class AllocationFacade {
   ): Promise<boolean> {
     //can release not scheduled capability - at least for now. Hence no check to capabilityFinder
     await this.availabilityFacade.release(
-      toAvailabilityResourceId(allocatableCapabilityId),
+      AllocatableCapabilityId.toAvailabilityResourceId(allocatableCapabilityId),
       timeSlot,
       Owner.of(projectId),
     );
@@ -137,7 +138,7 @@ export class AllocationFacade {
     }
     const availabilityResourceIds = ObjectSet.from(
       proposedCapabilities.all.map((resource) =>
-        toAvailabilityResourceId(resource.id),
+        AllocatableCapabilityId.toAvailabilityResourceId(resource.id),
       ),
     );
     const chosen = await this.availabilityFacade.blockRandomAvailable(
@@ -165,8 +166,12 @@ export class AllocationFacade {
     return (
       proposedCapabilities.all
         .map((s) => s.id)
-        .filter((id) => deepEquals(toAvailabilityResourceId(id), chosen))[0] ??
-      null
+        .filter((id) =>
+          deepEquals(
+            AllocatableCapabilityId.toAvailabilityResourceId(id),
+            chosen,
+          ),
+        )[0] ?? null
     );
   }
 
