@@ -13,4 +13,4 @@ export { AllocatableResourceId } from './allocatableResourceId';
 export { CapabilityFinder } from './capabilityFinder';
 export { CapabilityPlanningConfiguration } from './capabilityPlanningConfiguration';
 export { CapabilityScheduler } from './capabilityScheduler';
-export { CapabilitySelector } from './capabilitySelector';
+export { CapabilitySelector, SelectingPolicy } from './capabilitySelector';

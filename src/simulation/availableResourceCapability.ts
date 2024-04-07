@@ -1,16 +1,24 @@
+import { CapabilitySelector } from '#allocation';
 import type { CapacityDimension } from '#optimization';
 import { Capability, TimeSlot } from '#shared';
-import { deepEquals, type UUID } from '#utils';
+import { type UUID } from '#utils';
 
 export class AvailableResourceCapability implements CapacityDimension {
   public readonly __brand = 'CapacityDimension';
 
+  public readonly capabilitySelector: CapabilitySelector;
+
   constructor(
     public readonly resourceId: UUID,
-    public readonly capability: Capability,
+    capabilityOrSelector: CapabilitySelector | Capability,
     public readonly timeSlot: TimeSlot,
-  ) {}
+  ) {
+    this.capabilitySelector =
+      capabilityOrSelector instanceof CapabilitySelector
+        ? capabilityOrSelector
+        : CapabilitySelector.canJustPerform(capabilityOrSelector);
+  }
 
   public performs = (capability: Capability) =>
-    deepEquals(capability, this.capability);
+    this.capabilitySelector.canPerform(capability);
 }
