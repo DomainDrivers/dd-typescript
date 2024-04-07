@@ -14,3 +14,4 @@ export { CapabilityFinder } from './capabilityFinder';
 export { CapabilityPlanningConfiguration } from './capabilityPlanningConfiguration';
 export { CapabilityScheduler } from './capabilityScheduler';
 export { CapabilitySelector, SelectingPolicy } from './capabilitySelector';
+export * from './legacyacl';
