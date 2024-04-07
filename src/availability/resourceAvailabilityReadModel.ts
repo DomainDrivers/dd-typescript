@@ -16,7 +16,7 @@ WITH AvailabilityWithLag AS (
         to_date,
         COALESCE(LAG(to_date) OVER (PARTITION BY resource_id, taken_by ORDER BY from_date), from_date) AS prev_to_date
     FROM  
-        availabilities
+        availability.availabilities
     WHERE
         from_date >= %L 
         AND to_date <= %L

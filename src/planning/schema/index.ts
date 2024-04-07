@@ -1,5 +1,5 @@
 import type { KeyValue } from '#utils';
-import { bigserial, jsonb, pgTable, uuid, varchar } from 'drizzle-orm/pg-core';
+import { bigserial, jsonb, pgSchema, uuid, varchar } from 'drizzle-orm/pg-core';
 
 export type StageEntity = {
   stageName: string;
@@ -43,7 +43,9 @@ export type DemandsPerStageEntity = {
   demands: KeyValue<string, DemandsEntity>[];
 };
 
-export const projects = pgTable('projects', {
+export const planning = pgSchema('planning');
+
+export const projects = planning.table('projects', {
   id: uuid('project_id').primaryKey(),
   version: bigserial('version', { mode: 'number' }).notNull(),
   name: varchar('name').notNull(),

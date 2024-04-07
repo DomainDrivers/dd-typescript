@@ -1,5 +1,5 @@
 import { Capability } from '#shared';
-import type { ObjectSet } from '../../utils';
+import type { ObjectSet } from '#utils';
 import { EmployeeId } from './employeeId';
 import type { Seniority } from './seniority';
 

@@ -1,5 +1,5 @@
-import type { Capability } from '../../shared';
-import type { ObjectSet } from '../../utils';
+import type { Capability } from '#shared';
+import type { ObjectSet } from '#utils';
 import type { DeviceId } from './deviceId';
 
 export class DeviceSummary {

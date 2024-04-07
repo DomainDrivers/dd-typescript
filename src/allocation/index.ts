@@ -4,6 +4,7 @@ export { AllocationFacade } from './allocationFacade';
 export { Allocations } from './allocations';
 export { CapabilitiesAllocated } from './capabilitiesAllocated';
 export { CapabilityReleased } from './capabilitiesReleased';
+export * from './capabilityscheduling';
 export * from './cashflow';
 export { Demand } from './demand';
 export { Demands } from './demands';

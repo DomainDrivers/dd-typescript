@@ -17,6 +17,7 @@ export const assertFalse = (result: boolean) => {
 export const assertThatArray = <T>(array: T[]) => {
   return {
     isEmpty: () => assert.equal(array.length, 0),
+    hasSize: (length: number) => assert.equal(array.length, length),
     containsElements: (...other: T[]) => {
       assert.ok(other.every((ts) => other.some((o) => deepEquals(ts, o))));
     },
@@ -43,6 +44,16 @@ export const assertThatArray = <T>(array: T[]) => {
           .map((o) => array.filter((a) => deepEquals(a, o)).length)
           .filter((a) => a === 1).length == other.length,
       );
+    },
+    allMatch: (matches: (item: T) => boolean) => {
+      assert.ok(array.every(matches));
+    },
+    allMatchAsync: async (
+      matches: (item: T) => Promise<boolean>,
+    ): Promise<void> => {
+      for (const item of array) {
+        assert.ok(await matches(item));
+      }
     },
   };
 };
