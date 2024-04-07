@@ -9,7 +9,7 @@ import {
   defaultSegment,
 } from '.';
 import { dbconnection } from '../storage/transactionalDecorator';
-import type { ObjectSet } from '../utils';
+import { type ObjectSet } from '../utils';
 import type { Owner } from './owner';
 import type { ResourceAvailabilityReadModel } from './resourceAvailabilityReadModel';
 import type { ResourceAvailabilityRepository } from './resourceAvailabilityRepository';
@@ -17,7 +17,7 @@ import type { ResourceId } from './resourceId';
 
 export class AvailabilityFacade {
   constructor(
-    private readonly repository: ResourceAvailabilityRepository,
+    private readonly availabilityRepository: ResourceAvailabilityRepository,
     private readonly availabilityReadModel: ResourceAvailabilityReadModel,
   ) {}
 
@@ -32,7 +32,7 @@ export class AvailabilityFacade {
       timeslot,
       parentId,
     );
-    return this.repository.saveNewGrouped(groupedAvailability);
+    return this.availabilityRepository.saveNewGrouped(groupedAvailability);
   }
 
   @dbconnection
@@ -67,16 +67,24 @@ export class AvailabilityFacade {
   ): Promise<boolean> {
     const toBlock = await this.findGrouped(resourceId, timeSlot);
 
+    return this.blockGrouped(requester, toBlock);
+  }
+
+  private blockGrouped = async (
+    requester: Owner,
+    toBlock: ResourceGroupedAvailability,
+  ): Promise<boolean> => {
     if (toBlock.hasNoSlots()) {
       return false;
     }
     const result = toBlock.block(requester);
-
     if (result) {
-      return this.repository.saveGroupedCheckingVersion(toBlock);
+      return await this.availabilityRepository.saveGroupedCheckingVersion(
+        toBlock,
+      );
     }
     return result;
-  }
+  };
 
   @transactional
   public async release(
@@ -90,7 +98,7 @@ export class AvailabilityFacade {
     }
     const result = toRelease.release(requester);
     if (result) {
-      return this.repository.saveGroupedCheckingVersion(toRelease);
+      return this.availabilityRepository.saveGroupedCheckingVersion(toRelease);
     }
     return result;
   }
@@ -107,9 +115,32 @@ export class AvailabilityFacade {
     }
     let result = toDisable.disable(requester);
     if (result) {
-      result = await this.repository.saveGroupedCheckingVersion(toDisable);
+      result =
+        await this.availabilityRepository.saveGroupedCheckingVersion(toDisable);
     }
     return result;
+  }
+
+  @transactional
+  public async blockRandomAvailable(
+    resourceIds: ObjectSet<ResourceId>,
+    within: TimeSlot,
+    owner: Owner,
+  ): Promise<ResourceId | null> {
+    const normalized = Segments.normalizeToSegmentBoundaries(
+      within,
+      defaultSegment(),
+    );
+    const groupedAvailability =
+      await this.availabilityRepository.loadAvailabilitiesOfRandomResourceWithin(
+        resourceIds,
+        normalized,
+      );
+    if (await this.blockGrouped(owner, groupedAvailability)) {
+      return groupedAvailability.resourceId();
+    } else {
+      return null;
+    }
   }
 
   private findGrouped = async (
@@ -121,7 +152,10 @@ export class AvailabilityFacade {
       defaultSegment(),
     );
     return new ResourceGroupedAvailability(
-      await this.repository.loadAllWithinSlot(resourceId, normalized),
+      await this.availabilityRepository.loadAllWithinSlot(
+        resourceId,
+        normalized,
+      ),
     );
   };
 
@@ -135,7 +169,10 @@ export class AvailabilityFacade {
       defaultSegment(),
     );
     return new ResourceGroupedAvailability(
-      await this.repository.loadAllWithinSlot(resourceId, normalized),
+      await this.availabilityRepository.loadAllWithinSlot(
+        resourceId,
+        normalized,
+      ),
     );
   }
 
@@ -149,7 +186,10 @@ export class AvailabilityFacade {
       defaultSegment(),
     );
     return new ResourceGroupedAvailability(
-      await this.repository.loadAllByParentIdWithinSlot(parentId, normalized),
+      await this.availabilityRepository.loadAllByParentIdWithinSlot(
+        parentId,
+        normalized,
+      ),
     );
   }
 }

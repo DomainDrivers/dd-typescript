@@ -9,7 +9,7 @@ export class Optional<T> {
   public get = () => this.value!;
 
   public orElseThrow = (): T => {
-    if (this.value == null)
+    if (this.value === null)
       throw new Error('Value in optional was not present!');
 
     return this.value;

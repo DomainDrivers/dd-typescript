@@ -10,21 +10,27 @@ export const assertThat = <T>(item: T) => {
 export const assertEquals = <T>(item: T, other: T) => {
   return assertTrue(deepEquals(item, other));
 };
-export const assertFalse = (result: boolean) => {
+export function assertFalse(result: boolean): asserts result is false {
   assert.equal(result, false);
-};
+}
 
-export const assertTrue = (result: boolean) => {
+export function assertTrue(result: boolean): asserts result is true {
   assert.equal(result, true);
-};
+  assert.ok(result);
+}
 
-export const assertIsNotNull = <T>(result: T) => {
+export function assertIsNotNull<T extends object>(
+  result: T | null,
+): asserts result is T {
   assert.notEqual(result, null);
-};
+  assert.ok(result);
+}
 
-export const assertIsNull = <T>(result: T) => {
+export function assertIsNull<T extends object>(
+  result: T | null,
+): asserts result is null {
   assert.equal(result, null);
-};
+}
 
 export const assertThatArray = <T>(array: T[]) => {
   return {
@@ -54,7 +60,7 @@ export const assertThatArray = <T>(array: T[]) => {
       assertTrue(
         other
           .map((o) => array.filter((a) => deepEquals(a, o)).length)
-          .filter((a) => a === 1).length == other.length,
+          .filter((a) => a === 1).length === other.length,
       );
     },
     containsAnyOf: (...other: T[]) => {

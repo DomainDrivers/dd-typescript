@@ -89,7 +89,7 @@ export const ScheduleBasedOnReferenceStageCalculator = {
       referenceStage,
       all,
     );
-    if (referenceStageIndex == -1) {
+    if (referenceStageIndex === -1) {
       return ObjectMap.empty();
     }
     const scheduleMap = ObjectMap.empty<string, TimeSlot>();

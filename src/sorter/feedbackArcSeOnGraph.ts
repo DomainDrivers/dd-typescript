@@ -34,7 +34,7 @@ export const feedbackArcSeOnGraph = <T>(initialNodes: Node<T>[]): Edge[] => {
     if (neighbours.length != 0) {
       visited[i] = 1;
       for (let j = 0; j < neighbours.length; j++) {
-        if (visited[neighbours[j]] == 1) {
+        if (visited[neighbours[j]] === 1) {
           feedbackEdges.push(new Edge(i, neighbours[j]));
         } else {
           visited[neighbours[j]] = 1;
