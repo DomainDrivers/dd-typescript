@@ -1,3 +1,7 @@
+import {
+  CapabilityPlanningConfiguration,
+  type CapabilityScheduler,
+} from '#allocation';
 import { getDB, injectDatabaseContext } from '#storage';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as schema from '../schema';
@@ -6,6 +10,7 @@ import {
   DrizzleEmployeeRepository,
   type EmployeeRepository,
 } from './employeeRepository';
+import { ScheduleEmployeeCapabilities } from './scheduleEmployeeCapabilities';
 
 export class EmployeeConfiguration {
   constructor(
@@ -15,11 +20,26 @@ export class EmployeeConfiguration {
     console.log('connectionstring: ' + this.connectionString);
   }
 
-  employeeFacade = (employeeRepository?: EmployeeRepository): EmployeeFacade =>
-    injectDatabaseContext(
-      new EmployeeFacade(employeeRepository ?? this.employeeRepository()),
+  employeeFacade = (
+    employeeRepository?: EmployeeRepository,
+    capabilityScheduler?: CapabilityScheduler,
+  ): EmployeeFacade => {
+    employeeRepository = employeeRepository ?? this.employeeRepository();
+    return injectDatabaseContext(
+      new EmployeeFacade(
+        employeeRepository,
+        new ScheduleEmployeeCapabilities(
+          employeeRepository,
+          capabilityScheduler ??
+            new CapabilityPlanningConfiguration(
+              this.connectionString,
+              this.enableLogging,
+            ).capabilityScheduler(),
+        ),
+      ),
       this.db,
     );
+  };
 
   public employeeRepository = (): EmployeeRepository =>
     new DrizzleEmployeeRepository();

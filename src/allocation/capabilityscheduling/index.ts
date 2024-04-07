@@ -1,9 +1,6 @@
 export { AllocatableCapabilitiesSummary } from './allocatableCapabilitiesSummary';
 export { AllocatableCapability } from './allocatableCapability';
-export {
-  AllocatableCapabilityId,
-  toAvailabilityResourceId,
-} from './allocatableCapabilityId';
+export { AllocatableCapabilityId } from './allocatableCapabilityId';
 export {
   DrizzleAllocatableCapabilityRepository,
   type AllocatableCapabilityRepository,

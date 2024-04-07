@@ -11,7 +11,6 @@ import {
   Demand,
   Demands,
   ProjectAllocationsId,
-  toAvailabilityResourceId,
 } from '#allocation';
 import {
   AvailabilityConfiguration,
@@ -31,6 +30,9 @@ import {
   assertTrue,
 } from '../asserts';
 import { TestConfiguration } from '../setup';
+
+const toAvailabilityResourceId =
+  AllocatableCapabilityId.toAvailabilityResourceId;
 
 describe('ResourceAllocating', () => {
   const testEnvironment = TestConfiguration();

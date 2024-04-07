@@ -8,7 +8,7 @@ export const AllocatableCapabilityId = {
     UUID.randomUUID() as AllocatableCapabilityId,
 
   from: (key: UUID): AllocatableCapabilityId => key as AllocatableCapabilityId,
-};
 
-export const toAvailabilityResourceId = (id: AllocatableCapabilityId) =>
-  ResourceId.from(id);
+  toAvailabilityResourceId: (id: AllocatableCapabilityId) =>
+    ResourceId.from(id),
+};

@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import {
+  AllocatableCapabilityId,
   AllocatableCapabilitySummary,
   AllocatableResourceId,
   CapabilityFinder,
   CapabilityPlanningConfiguration,
   CapabilityScheduler,
   CapabilitySelector,
-  toAvailabilityResourceId,
 } from '#allocation';
 import { AvailabilityFacade } from '#availability';
 import * as schema from '#schema';
@@ -45,7 +45,9 @@ describe('CapabilityScheduling', () => {
     oneDay: TimeSlot,
   ): Promise<boolean> => {
     const calendar = await availabilityFacade.loadCalendar(
-      toAvailabilityResourceId(allocatableCapability.id),
+      AllocatableCapabilityId.toAvailabilityResourceId(
+        allocatableCapability.id,
+      ),
       oneDay,
     );
     return deepEquals(calendar.availableSlots(), [oneDay]);

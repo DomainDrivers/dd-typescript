@@ -10,7 +10,6 @@ import {
   Demand,
   Demands,
   ProjectAllocationsId,
-  toAvailabilityResourceId,
 } from '#allocation';
 import {
   AvailabilityConfiguration,
@@ -222,7 +221,9 @@ describe('CapabilityAllocating', () => {
     projectId: ProjectAllocationsId,
   ): Promise<boolean> => {
     const calendars = await availabilityFacade.loadCalendars(
-      ObjectSet.from(capabilities.map(toAvailabilityResourceId)),
+      ObjectSet.from(
+        capabilities.map(AllocatableCapabilityId.toAvailabilityResourceId),
+      ),
       oneDay,
     );
     return calendars.calendars.every(({ value: calendar }) =>
