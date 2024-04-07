@@ -27,6 +27,10 @@ export class DrizzleProjectAllocationsRepository
   >
   implements ProjectAllocationsRepository
 {
+  constructor() {
+    super(schema.projectAllocations, schema.projectAllocations.id);
+  }
+
   public findById = async (
     id: ProjectAllocationsId,
   ): Promise<ProjectAllocations | null> => {
@@ -36,6 +40,7 @@ export class DrizzleProjectAllocationsRepository
 
     return result ? mapToProjectAllocations(result) : null;
   };
+
   public findAllById = async (
     ids: ProjectAllocationsId[],
   ): Promise<ProjectAllocations[]> => {
@@ -60,7 +65,7 @@ export class DrizzleProjectAllocationsRepository
     const { id: _id, ...toUpdate } = entity;
 
     return this.upsert(entity, toUpdate, {
-      id: [schema.projectAllocations.id, projectAllocations.id],
+      id: projectAllocations.id,
     });
   };
 }

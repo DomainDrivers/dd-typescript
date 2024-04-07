@@ -5,6 +5,7 @@ import { Clock, ObjectSet, type UUID } from '#utils';
 import {
   AllocatableCapabilityId,
   Allocations,
+  CapabilityFinder,
   Demands,
   ProjectAllocations,
   ProjectAllocationsId,
@@ -17,6 +18,7 @@ export class AllocationFacade {
   constructor(
     private readonly repository: ProjectAllocationsRepository,
     private readonly availabilityFacade: AvailabilityFacade,
+    private readonly capabilityFinder: CapabilityFinder,
     private readonly clock: Clock,
   ) {}
 
@@ -50,14 +52,17 @@ export class AllocationFacade {
   @transactional
   public async allocateToProject(
     projectId: ProjectAllocationsId,
-    resourceId: AllocatableCapabilityId,
+    allocatableCapabilityId: AllocatableCapabilityId,
     capability: Capability,
     timeSlot: TimeSlot,
   ): Promise<UUID | null> {
     //yes, one transaction crossing 2 modules.
+    if (!(await this.capabilityFinder.isPresent(allocatableCapabilityId))) {
+      return null;
+    }
     if (
       !(await this.availabilityFacade.block(
-        toAvailabilityResourceId(resourceId),
+        toAvailabilityResourceId(allocatableCapabilityId),
         timeSlot,
         Owner.of(projectId),
       ))
@@ -66,7 +71,7 @@ export class AllocationFacade {
     }
     const allocations = await this.repository.getById(projectId);
     const event = allocations.allocate(
-      resourceId,
+      allocatableCapabilityId,
       capability,
       timeSlot,
       this.clock.now(),
@@ -81,7 +86,12 @@ export class AllocationFacade {
     allocatableCapabilityId: AllocatableCapabilityId,
     timeSlot: TimeSlot,
   ): Promise<boolean> {
-    //TODO WHAT TO DO WITH AVAILABILITY HERE? - just think about it, don't implement
+    //can release not scheduled capability - at least for now. Hence no check to capabilityFinder
+    await this.availabilityFacade.release(
+      toAvailabilityResourceId(allocatableCapabilityId),
+      timeSlot,
+      Owner.of(projectId),
+    );
     const allocations = await this.repository.getById(projectId);
     const event = allocations.release(
       allocatableCapabilityId,

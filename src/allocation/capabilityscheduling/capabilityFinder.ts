@@ -61,6 +61,15 @@ export class CapabilityFinder {
     return this.createSummary(allByIdIn);
   }
 
+  @dbconnection
+  public isPresent(
+    allocatableCapabilityId: AllocatableCapabilityId,
+  ): Promise<boolean> {
+    return this.allocatableResourceRepository.existsById(
+      allocatableCapabilityId,
+    );
+  }
+
   private async filterAvailabilityInTimeSlot(
     findAllocatableCapability: AllocatableCapability[],
     timeSlot: TimeSlot,

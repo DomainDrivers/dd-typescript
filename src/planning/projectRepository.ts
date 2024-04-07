@@ -20,6 +20,10 @@ export class DrizzleProjectRepository extends DrizzleRepository<
   ProjectId,
   typeof schema
 > {
+  constructor() {
+    super(schema.projects, schema.projects.id, schema.projects.version);
+  }
+
   public findById = async (id: ProjectId): Promise<Project | null> => {
     const result = await this.db.query.projects.findFirst({
       where: eq(schema.projects.id, id),
@@ -40,8 +44,8 @@ export class DrizzleProjectRepository extends DrizzleRepository<
     const { id: _id, ...toUpdate } = entity;
 
     return this.upsert(entity, toUpdate, {
-      id: [schema.projects.id, project.getId()],
-      version: [schema.projects.version, entity.version],
+      id: project.getId(),
+      version: entity.version,
     });
   };
 }

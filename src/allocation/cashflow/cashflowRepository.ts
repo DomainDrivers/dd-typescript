@@ -14,6 +14,10 @@ export class DrizzleCashflowRepository
   extends DrizzleRepository<Cashflow, ProjectAllocationsId, typeof schema>
   implements CashflowRepository
 {
+  constructor() {
+    super(schema.cashflows, schema.cashflows.id, schema.cashflows.version);
+  }
+
   public findById = async (
     id: ProjectAllocationsId,
   ): Promise<Cashflow | null> => {
@@ -23,6 +27,7 @@ export class DrizzleCashflowRepository
 
     return result ? mapToCashflow(result) : null;
   };
+
   public findAllById = async (
     ids: ProjectAllocationsId[],
   ): Promise<Cashflow[]> => {
@@ -39,7 +44,7 @@ export class DrizzleCashflowRepository
     const { id: _id, ...toUpdate } = entity;
 
     return this.upsert(entity, toUpdate, {
-      id: [schema.cashflows.id, cashflow.projectId],
+      id: cashflow.projectId,
     });
   };
 }

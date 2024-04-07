@@ -2,7 +2,7 @@ import { AvailabilityConfiguration } from '#availability';
 import { getDB, injectDatabaseContext } from '#storage';
 import { Clock } from '#utils';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { AllocationFacade } from '.';
+import { AllocationFacade, CapabilityPlanningConfiguration } from '.';
 import {
   DrizzleProjectAllocationsRepository,
   type ProjectAllocationsRepository,
@@ -33,6 +33,10 @@ export class AllocationConfiguration {
           this.connectionString,
           this.enableLogging,
         ).availabilityFacade(),
+        new CapabilityPlanningConfiguration(
+          this.connectionString,
+          this.enableLogging,
+        ).capabilityFinder(),
         clock,
       ),
       getDB,
