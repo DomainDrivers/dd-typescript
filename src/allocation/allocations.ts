@@ -1,5 +1,6 @@
 import type { TimeSlot } from '#shared';
-import { ObjectSet, UUID } from '#utils';
+import { ObjectSet } from '#utils';
+import type { AllocatableCapabilityId } from '.';
 import { AllocatedCapability } from './allocatedCapability';
 
 export class Allocations {
@@ -10,7 +11,10 @@ export class Allocations {
   public add = (newOne: AllocatedCapability) =>
     new Allocations(ObjectSet.from([...this.all, newOne]));
 
-  public remove = (toRemove: UUID, slot: TimeSlot): Allocations => {
+  public remove = (
+    toRemove: AllocatableCapabilityId,
+    slot: TimeSlot,
+  ): Allocations => {
     const allocatedResource = this.find(toRemove);
 
     return allocatedResource !== null
@@ -19,31 +23,33 @@ export class Allocations {
   };
 
   private removeFromSlot = (
-    allocatedResource: AllocatedCapability,
+    allocatedCapability: AllocatedCapability,
     slot: TimeSlot,
   ): Allocations => {
     const leftOvers: ObjectSet<AllocatedCapability> = ObjectSet.from(
-      allocatedResource.timeSlot
+      allocatedCapability.timeSlot
         .leftoverAfterRemovingCommonWith(slot)
-        .filter((leftOver) => leftOver.within(allocatedResource.timeSlot))
+        .filter((leftOver) => leftOver.within(allocatedCapability.timeSlot))
         .map(
           (leftOver) =>
             new AllocatedCapability(
-              allocatedResource.resourceId,
-              allocatedResource.capability,
+              allocatedCapability.allocatedCapabilityId,
+              allocatedCapability.capability,
               leftOver,
             ),
         ),
     );
     const newSlots = ObjectSet.from(this.all);
-    newSlots.delete(allocatedResource);
+    newSlots.delete(allocatedCapability);
     newSlots.pushAll(leftOvers);
     return new Allocations(newSlots);
   };
 
-  public find = (allocatedCapabilityID: UUID): AllocatedCapability | null =>
+  public find = (
+    allocatedCapabilityID: AllocatableCapabilityId,
+  ): AllocatedCapability | null =>
     this.all.find(
       (ar: AllocatedCapability) =>
-        ar.allocatedCapabilityID === allocatedCapabilityID,
+        ar.allocatedCapabilityId === allocatedCapabilityID,
     ) ?? null;
 }

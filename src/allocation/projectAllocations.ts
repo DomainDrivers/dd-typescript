@@ -1,8 +1,8 @@
-import { ResourceId } from '#availability';
 import { Capability, TimeSlot } from '#shared';
-import { UUID, deepEquals } from '#utils';
+import { deepEquals } from '#utils';
 import type { UTCDate } from '@date-fns/utc';
 import {
+  AllocatableCapabilityId,
   AllocatedCapability,
   Allocations,
   Demands,
@@ -45,13 +45,13 @@ export class ProjectAllocations {
   ) => new ProjectAllocations(projectId, Allocations.none(), demands);
 
   allocate = (
-    resourceId: ResourceId,
+    allocatableCapabilityId: AllocatableCapabilityId,
     capability: Capability,
     requestedSlot: TimeSlot,
     when: UTCDate,
   ): CapabilitiesAllocated | null => {
     const allocatedCapability = new AllocatedCapability(
-      resourceId,
+      allocatableCapabilityId,
       capability,
       requestedSlot,
     );
@@ -66,7 +66,7 @@ export class ProjectAllocations {
     this.#allocations = newAllocations;
 
     return new CapabilitiesAllocated(
-      allocatedCapability.allocatedCapabilityID,
+      allocatedCapability.allocatedCapabilityId,
       this.#projectId,
       this.missingDemands(),
       when,
@@ -80,7 +80,7 @@ export class ProjectAllocations {
     !this.hasTimeSlot() || requestedSlot.within(this.#timeSlot);
 
   public release = (
-    allocatedCapabilityId: UUID,
+    allocatedCapabilityId: AllocatableCapabilityId,
     timeSlot: TimeSlot,
     when: UTCDate,
   ): CapabilityReleased | null => {

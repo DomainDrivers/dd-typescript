@@ -1,12 +1,14 @@
-import { AvailabilityFacade, Owner, ResourceId } from '#availability';
+import { AvailabilityFacade, Owner } from '#availability';
 import { Capability, type TimeSlot } from '#shared';
 import { dbconnection, transactional } from '#storage';
 import { Clock, ObjectSet, type UUID } from '#utils';
 import {
+  AllocatableCapabilityId,
   Allocations,
   Demands,
   ProjectAllocations,
   ProjectAllocationsId,
+  toAvailabilityResourceId,
 } from '.';
 import type { ProjectAllocationsRepository } from './projectAllocationsRepository';
 import { ProjectsAllocationsSummary } from './projectsAllocationsSummary';
@@ -48,14 +50,14 @@ export class AllocationFacade {
   @transactional
   public async allocateToProject(
     projectId: ProjectAllocationsId,
-    resourceId: ResourceId,
+    resourceId: AllocatableCapabilityId,
     capability: Capability,
     timeSlot: TimeSlot,
   ): Promise<UUID | null> {
     //yes, one transaction crossing 2 modules.
     if (
       !(await this.availabilityFacade.block(
-        resourceId,
+        toAvailabilityResourceId(resourceId),
         timeSlot,
         Owner.of(projectId),
       ))
@@ -76,7 +78,7 @@ export class AllocationFacade {
   @transactional
   public async releaseFromProject(
     projectId: ProjectAllocationsId,
-    allocatableCapabilityId: UUID,
+    allocatableCapabilityId: AllocatableCapabilityId,
     timeSlot: TimeSlot,
   ): Promise<boolean> {
     //TODO WHAT TO DO WITH AVAILABILITY HERE? - just think about it, don't implement
