@@ -1,4 +1,6 @@
 import { ObjectMap } from '#utils';
+import { UTCDate } from '@date-fns/utc';
+import { parseJSON } from 'date-fns';
 import pg from 'pg';
 import type { EnlistableInRawTransaction } from './transactionalDecorator';
 
@@ -32,3 +34,10 @@ export class PostgresRepository implements EnlistableInRawTransaction {
     this.#client = client;
   };
 }
+
+export const parseDBDate = (date: string | Date): UTCDate =>
+  new UTCDate(typeof date === 'string' ? parseJSON(date) : date);
+
+export const parseNullableDBDate = (
+  date: string | Date | null,
+): UTCDate | null => (date ? parseDBDate(date) : null);

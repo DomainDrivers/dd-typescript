@@ -5,6 +5,11 @@ export type CapabilityEntity = {
   type: string;
 };
 
+export type CapabilitySelectorEntity = {
+  capabilities: CapabilityEntity[];
+  selectingPolicy: string;
+};
+
 export const capabilityScheduling = pgSchema('capability-scheduling');
 
 export const capabilityAllocatableCapabilities = capabilityScheduling.table(
@@ -12,7 +17,9 @@ export const capabilityAllocatableCapabilities = capabilityScheduling.table(
   {
     id: uuid('id').primaryKey(),
     resourceId: uuid('resource_id').notNull(),
-    capability: jsonb('capability').$type<CapabilityEntity>().notNull(),
+    possibleCapabilities: jsonb('possible_capabilities')
+      .$type<CapabilitySelectorEntity>()
+      .notNull(),
     fromDate: timestamp('from_date').notNull(),
     toDate: timestamp('to_date').notNull(),
   },

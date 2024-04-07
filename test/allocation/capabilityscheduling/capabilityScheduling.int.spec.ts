@@ -5,6 +5,7 @@ import {
   CapabilityFinder,
   CapabilityPlanningConfiguration,
   CapabilityScheduler,
+  CapabilitySelector,
   toAvailabilityResourceId,
 } from '#allocation';
 import { AvailabilityFacade } from '#availability';
@@ -13,7 +14,12 @@ import { Capability, TimeSlot } from '#shared';
 import { ObjectSet, deepEquals } from '#utils';
 import { addSeconds } from 'date-fns';
 import { after, before, describe, it } from 'node:test';
-import { assertEquals, assertThatArray } from '../../asserts';
+import {
+  assertEquals,
+  assertIsNotNull,
+  assertIsNull,
+  assertThatArray,
+} from '../../asserts';
 import { TestConfiguration } from '../../setup';
 
 describe('CapabilityScheduling', () => {
@@ -47,8 +53,12 @@ describe('CapabilityScheduling', () => {
 
   it('can schedule allocatable capabilities', async () => {
     //given
-    const javaSkill = Capability.skill('JAVA');
-    const rustSkill = Capability.skill('RUST');
+    const javaSkill = CapabilitySelector.canJustPerform(
+      Capability.skill('JAVA'),
+    );
+    const rustSkill = CapabilitySelector.canJustPerform(
+      Capability.skill('RUST'),
+    );
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
 
     //when
@@ -70,7 +80,8 @@ describe('CapabilityScheduling', () => {
 
   it('capability is found when capability present in time slot', async () => {
     //given
-    const uniqueSkill = Capability.permission('FITNESS-CLASS');
+    const fitnessClass = Capability.permission('FITNESS-CLASS');
+    const uniqueSkill = CapabilitySelector.canJustPerform(fitnessClass);
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
     const anotherDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 2);
     //and
@@ -82,24 +93,26 @@ describe('CapabilityScheduling', () => {
 
     //when
     const found = await capabilityFinder.findAvailableCapabilities(
-      uniqueSkill,
+      fitnessClass,
       oneDay,
     );
     const notFound = await capabilityFinder.findAvailableCapabilities(
-      uniqueSkill,
+      fitnessClass,
       anotherDay,
     );
 
     //then
     assertEquals(found.all.length, 1);
     assertThatArray(notFound.all).isEmpty();
-    assertEquals(found.all[0].capability, uniqueSkill);
+    assertEquals(found.all[0].capabilities, uniqueSkill);
     assertEquals(found.all[0].timeSlot, oneDay);
   });
 
   it('capability not found when capability not present', async () => {
     //given
-    const admin = Capability.permission('ADMIN');
+    const admin = CapabilitySelector.canJustPerform(
+      Capability.permission('ADMIN'),
+    );
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
     //and
     await capabilityScheduler.scheduleResourceCapabilitiesForPeriod(
@@ -139,7 +152,8 @@ describe('CapabilityScheduling', () => {
 
   it('can find capability ignoring availability', async () => {
     //given
-    const admin = Capability.permission('REALLY_UNIQUE_ADMIN');
+    const adminPermission = Capability.permission('REALLY_UNIQUE_ADMIN');
+    const admin = CapabilitySelector.canJustPerform(adminPermission);
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(1111, 1, 1);
     const differentDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 2, 1);
     const hourWithinDay = new TimeSlot(
@@ -159,19 +173,19 @@ describe('CapabilityScheduling', () => {
 
     //when
     const onTheExactDay = await capabilityFinder.findCapabilities(
-      admin,
+      adminPermission,
       oneDay,
     );
     const onDifferentDay = await capabilityFinder.findCapabilities(
-      admin,
+      adminPermission,
       differentDay,
     );
     const inSlotWithin = await capabilityFinder.findCapabilities(
-      admin,
+      adminPermission,
       hourWithinDay,
     );
     const inOverlappingSlot = await capabilityFinder.findCapabilities(
-      admin,
+      adminPermission,
       partiallyOverlappingDay,
     );
 
@@ -180,5 +194,53 @@ describe('CapabilityScheduling', () => {
     assertThatArray(inSlotWithin.all).hasSize(1);
     assertThatArray(onDifferentDay.all).isEmpty();
     assertThatArray(inOverlappingSlot.all).isEmpty();
+  });
+
+  it('Finding takes into account simulations capabilities', async () => {
+    //given
+    const truckAssets = ObjectSet.of(
+      Capability.asset('LOADING'),
+      Capability.asset('CARRYING'),
+    );
+    const truckCapabilities =
+      CapabilitySelector.canPerformAllAtTheTime(truckAssets);
+    const oneDay = TimeSlot.createDailyTimeSlotAtUTC(1111, 1, 1);
+    //and
+    const truckResourceId = AllocatableResourceId.newOne();
+    await capabilityScheduler.scheduleResourceCapabilitiesForPeriod(
+      truckResourceId,
+      [truckCapabilities],
+      oneDay,
+    );
+
+    //when
+    const canPerformBoth = await capabilityScheduler.findResourceCapabilities(
+      truckResourceId,
+      truckAssets,
+      oneDay,
+    );
+    const canPerformJustLoading =
+      await capabilityScheduler.findResourceCapabilities(
+        truckResourceId,
+        Capability.asset('CARRYING'),
+        oneDay,
+      );
+    const canPerformJustCarrying =
+      await capabilityScheduler.findResourceCapabilities(
+        truckResourceId,
+        Capability.asset('LOADING'),
+        oneDay,
+      );
+    const cantPerformJava = await capabilityScheduler.findResourceCapabilities(
+      truckResourceId,
+      Capability.skill('JAVA'),
+      oneDay,
+    );
+
+    //then
+    assertIsNotNull(canPerformBoth);
+    assertIsNotNull(canPerformJustLoading);
+    assertIsNotNull(canPerformJustCarrying);
+    assertIsNull(cantPerformJava);
   });
 });

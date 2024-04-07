@@ -1,7 +1,5 @@
 import { TimeSlot } from '#shared';
-import { PostgresRepository } from '#storage';
-import { UTCDate } from '@date-fns/utc';
-import { parseJSON } from 'date-fns';
+import { PostgresRepository, parseDBDate } from '#storage';
 import pg from 'pg';
 import format from 'pg-format';
 import { Calendar, Calendars, Owner, ResourceId } from '.';
@@ -98,8 +96,8 @@ export class ResourceAvailabilityReadModel extends PostgresRepository {
       const takenByUuid = entity.taken_by ? UUID.from(entity.taken_by) : null;
       const takenBy =
         takenByUuid === null ? Owner.none() : new Owner(takenByUuid);
-      const fromDate = new UTCDate(parseJSON(entity.start_date));
-      const toDate = new UTCDate(parseJSON(entity.end_date));
+      const fromDate = parseDBDate(entity.start_date);
+      const toDate = parseDBDate(entity.end_date);
       const loadedSlot = new TimeSlot(fromDate, toDate);
 
       const calendar = calendars.getOrSet(key, () =>

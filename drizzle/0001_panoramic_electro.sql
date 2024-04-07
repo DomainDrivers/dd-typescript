@@ -1,0 +1,1 @@
+ALTER TABLE "capability-scheduling"."cap_allocatable_capabilities" RENAME COLUMN "capability" TO "possible_capabilities";

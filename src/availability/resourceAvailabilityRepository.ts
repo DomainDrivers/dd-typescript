@@ -1,8 +1,7 @@
 import { TimeSlot } from '#shared';
-import { PostgresRepository } from '#storage';
+import { PostgresRepository, parseDBDate } from '#storage';
 import { ObjectSet, UUID } from '#utils';
 import { UTCDate } from '@date-fns/utc';
-import { parseJSON } from 'date-fns';
 import pg from 'pg';
 import format from 'pg-format';
 import { Blockade, Owner, ResourceId } from '.';
@@ -224,10 +223,7 @@ const mapToResourceAvailability = (
   new ResourceAvailability(
     ResourceAvailabilityId.from(UUID.from(entity.id)),
     ResourceId.from(UUID.from(entity.resource_id)),
-    new TimeSlot(
-      new UTCDate(parseJSON(entity.from_date)),
-      new UTCDate(parseJSON(entity.to_date)),
-    ),
+    new TimeSlot(parseDBDate(entity.from_date), parseDBDate(entity.to_date)),
     entity.resource_parent_id
       ? ResourceId.from(UUID.from(entity.resource_parent_id))
       : null,
