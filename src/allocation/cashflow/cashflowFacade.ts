@@ -1,6 +1,5 @@
-import { transactional } from '#storage';
+import { dbconnection, transactional } from '#storage';
 import type { ProjectAllocationsId } from '..';
-import { dbconnection } from '../../storage/transactionalDecorator';
 import { Cashflow } from './cashflow';
 import type { CashflowRepository } from './cashflowRepository';
 import type { Cost } from './cost';

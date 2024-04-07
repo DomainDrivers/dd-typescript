@@ -1,6 +1,6 @@
 import { Capability } from '#shared';
+import { dbconnection, transactional } from '#storage';
 import { ObjectSet } from '#utils';
-import { dbconnection, transactional } from '../../storage';
 import { Employee } from './employee';
 import { EmployeeId } from './employeeId';
 import type { EmployeeRepository } from './employeeRepository';

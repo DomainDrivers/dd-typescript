@@ -1,5 +1,5 @@
 export { Edge } from './edge';
-export { feedbackArcSeOnGraph as FeedbackArcSeOnGraph } from './feedbackArcSeOnGraph';
+export { feedbackArcSeOnGraph } from './feedbackArcSeOnGraph';
 export { GraphTopologicalSort } from './graphTopologicalSort';
 export { Node } from './node';
 export { Nodes } from './nodes';

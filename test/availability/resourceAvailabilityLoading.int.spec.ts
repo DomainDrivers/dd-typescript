@@ -8,10 +8,10 @@ import {
 import * as schema from '#schema';
 import { TimeSlot } from '#shared';
 import { getPool } from '#storage';
+import { deepEquals } from '#utils';
 import assert from 'node:assert';
 import { after, before, describe, it } from 'node:test';
 import pg from 'pg';
-import { deepEquals } from '../../src/utils';
 import { TestConfiguration } from '../setup';
 
 describe('ResourceAvailabilityLoading', () => {

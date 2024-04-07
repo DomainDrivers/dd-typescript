@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import { Stage, StageParallelization } from '#planning';
+import { ObjectSet } from '#utils';
 import { describe, it } from 'node:test';
-import { ObjectSet } from '../../../src/utils';
 import { assertThat } from '../../asserts';
 
 describe('DependencyRemovalSuggesting', () => {
