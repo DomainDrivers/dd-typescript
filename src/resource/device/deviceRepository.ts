@@ -15,6 +15,10 @@ export class DrizzleDeviceRepository
   extends DrizzleRepository<Device, DeviceId, typeof schema>
   implements DeviceRepository
 {
+  constructor() {
+    super(schema.devices, schema.devices.id, schema.devices.version);
+  }
+
   public findById = async (id: DeviceId): Promise<Device | null> => {
     const result = await this.db.query.devices.findFirst({
       where: eq(schema.devices.id, id),
@@ -48,7 +52,7 @@ export class DrizzleDeviceRepository
     const { id: _id, ...toUpdate } = entity;
 
     return this.upsert(entity, toUpdate, {
-      id: [schema.devices.id, devices.id],
+      id: devices.id,
     });
   };
 }

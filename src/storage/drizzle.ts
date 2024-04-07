@@ -1,8 +1,8 @@
 import {
   Column,
-  SQL,
   and,
   eq,
+  sql,
   type DrizzleConfig,
   type ExtractTablesWithRelations,
 } from 'drizzle-orm';
@@ -45,6 +45,12 @@ export abstract class DrizzleRepository<
 {
   #db!: PostgresTransaction<TSchema> | NodePgDatabase<TSchema>;
 
+  constructor(
+    protected readonly table: PgTable,
+    protected readonly idColumn: IndexColumn,
+    protected readonly versionColumn?: Column | undefined,
+  ) {}
+
   protected get db() {
     return this.#db;
   }
@@ -66,6 +72,16 @@ export abstract class DrizzleRepository<
     return entity;
   };
 
+  public existsById = async (id: Id): Promise<boolean> =>
+    (
+      await this.db
+        .select({
+          exists: sql<number>`1`,
+        })
+        .from(this.table)
+        .where(eq(this.idColumn, id))
+    ).length > 0;
+
   public abstract findAllById(ids: Id[]): Promise<Entity[]>;
 
   public abstract save(entity: Entity): Promise<void>;
@@ -73,44 +89,44 @@ export abstract class DrizzleRepository<
   protected upsert = async <
     TTable extends PgTable,
     InsertSchema extends PgInsertValue<TTable>,
-    IdColumn extends IndexColumn,
-    VersionColumn extends Column,
   >(
     entity: InsertSchema,
     toUpdate: Partial<InsertSchema> & Record<string, unknown>,
     options: {
-      id: [IdColumn, Id];
-      version?: [VersionColumn, number];
+      id: Id;
+      version?: number;
     },
   ): Promise<void> => {
-    const [idColumn, id] = options.id;
+    const { id, version } = options;
 
     const update = toUpdate;
 
-    let set = toUpdate;
-    let where: SQL<unknown> | undefined = eq(idColumn, id);
-
-    if (options.version) {
-      const [versionColumn, version] = options.version;
+    if (version) {
+      if (!this.versionColumn) {
+        throw Error("You provided version but didn't define version column!");
+      }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (update[versionColumn.name] as any) = version + 1;
-
-      set = { ...update, versionColumn: version + 1 };
-      where = and(eq(idColumn, id), eq(versionColumn, version));
+      (update[this.versionColumn.name] as any) = version + 1;
     }
 
+    const set = version ? { ...update, versionColumn: version + 1 } : toUpdate;
+    const where =
+      version && this.versionColumn
+        ? and(eq(this.idColumn, id), eq(this.versionColumn, version))
+        : eq(this.idColumn, id);
+
     const result = await this.db
-      .insert(idColumn.table)
+      .insert(this.table)
       .values(entity)
       .onConflictDoUpdate({
-        target: idColumn,
+        target: this.idColumn,
         set,
         where,
       });
 
     if (result.rowCount === 0)
       throw Error(
-        `Invalid version '${options.version?.[1] ?? ''} for record with id '${id?.toString()}`,
+        `Invalid version '${version} for record with id '${id?.toString()}`,
       );
   };
 }

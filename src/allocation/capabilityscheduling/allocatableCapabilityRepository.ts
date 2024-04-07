@@ -56,6 +56,13 @@ export class DrizzleAllocatableCapabilityRepository
   >
   implements AllocatableCapabilityRepository
 {
+  constructor() {
+    super(
+      schema.capabilityAllocatableCapabilities,
+      schema.capabilityAllocatableCapabilities.id,
+    );
+  }
+
   public findById = async (
     id: AllocatableCapabilityId,
   ): Promise<AllocatableCapability | null> => {
@@ -146,10 +153,7 @@ export class DrizzleAllocatableCapabilityRepository
     const { id: _id, ...toUpdate } = entity;
 
     return this.upsert(entity, toUpdate, {
-      id: [
-        schema.capabilityAllocatableCapabilities.id,
-        allocatableCapability.id,
-      ],
+      id: allocatableCapability.id,
     });
   };
 }

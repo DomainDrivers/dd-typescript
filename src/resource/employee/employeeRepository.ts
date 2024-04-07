@@ -16,6 +16,10 @@ export class DrizzleEmployeeRepository
   extends DrizzleRepository<Employee, EmployeeId, typeof schema>
   implements EmployeeRepository
 {
+  constructor() {
+    super(schema.employees, schema.employees.id, schema.employees.version);
+  }
+
   public findById = async (id: EmployeeId): Promise<Employee | null> => {
     const result = await this.db.query.employees.findFirst({
       where: eq(schema.employees.id, id),
@@ -68,7 +72,7 @@ export class DrizzleEmployeeRepository
     const { id: _id, ...toUpdate } = entity;
 
     return this.upsert(entity, toUpdate, {
-      id: [schema.employees.id, employees.id],
+      id: employees.id,
     });
   };
 }

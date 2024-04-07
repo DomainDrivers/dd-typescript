@@ -144,7 +144,36 @@ describe('CapabilityAllocating', () => {
     assertThatArray(summary.projectAllocations.get(projectId)!.all).isEmpty();
   });
 
-  it('can release capability from project', async () => {
+  it('Cant allocate when capability has not been scheduled', async () => {
+    //given
+    const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
+    const skillJava = Capability.skill('JAVA');
+    const demand = new Demand(skillJava, oneDay);
+    //and
+    const notScheduledCapability = AllocatableCapabilityId.newOne();
+    //and
+    const projectId = ProjectAllocationsId.newOne();
+    //and
+    await allocationFacade.scheduleProjectAllocationDemands(
+      projectId,
+      Demands.of(demand),
+    );
+
+    //when
+    const result = await allocationFacade.allocateToProject(
+      projectId,
+      notScheduledCapability,
+      skillJava,
+      oneDay,
+    );
+
+    //then
+    assertIsNull(result);
+    const summary = await allocationFacade.findAllProjectsAllocations();
+    assertThatArray(summary.projectAllocations.get(projectId)!.all).isEmpty();
+  });
+
+  it('Can release capability from project', async () => {
     //given
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
     //and
