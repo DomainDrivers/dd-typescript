@@ -20,6 +20,12 @@ export class ObjectSet<T> extends Array<T> {
     comparison?: (left: T, right: T) => boolean,
   ): ObjectSet<T> => ObjectSet.from<T>([], comparison);
 
+  public static of = <T>(...items: T[]): ObjectSet<T> => {
+    const set = new ObjectSet<T>(items);
+
+    return set;
+  };
+
   public static from = <T>(
     items: T[],
     comparison?: (left: T, right: T) => boolean,
