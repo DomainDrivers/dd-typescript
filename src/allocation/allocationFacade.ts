@@ -1,10 +1,12 @@
-import { AvailabilityFacade, Owner } from '#availability';
+import { AvailabilityFacade, Owner, ResourceId } from '#availability';
 import { Capability, type TimeSlot } from '#shared';
 import { dbconnection, transactional } from '#storage';
-import { Clock, ObjectSet, type UUID } from '#utils';
+import { Clock, ObjectSet, deepEquals, type UUID } from '#utils';
 import {
+  AllocatableCapabilitiesSummary,
   AllocatableCapabilityId,
   Allocations,
+  CapabilitiesAllocated,
   CapabilityFinder,
   Demands,
   ProjectAllocations,
@@ -16,7 +18,7 @@ import { ProjectsAllocationsSummary } from './projectsAllocationsSummary';
 
 export class AllocationFacade {
   constructor(
-    private readonly repository: ProjectAllocationsRepository,
+    private readonly projectAllocationsRepository: ProjectAllocationsRepository,
     private readonly availabilityFacade: AvailabilityFacade,
     private readonly capabilityFinder: CapabilityFinder,
     private readonly clock: Clock,
@@ -34,7 +36,7 @@ export class AllocationFacade {
       scheduledDemands,
       timeSlot,
     );
-    await this.repository.save(projectAllocations);
+    await this.projectAllocationsRepository.save(projectAllocations);
     return projectId;
   }
 
@@ -44,8 +46,8 @@ export class AllocationFacade {
   ): Promise<ProjectsAllocationsSummary> {
     return ProjectsAllocationsSummary.of(
       projectIds
-        ? await this.repository.findAllById(projectIds)
-        : await this.repository.findAll(),
+        ? await this.projectAllocationsRepository.findAllById(projectIds)
+        : await this.projectAllocationsRepository.findAll(),
     );
   }
 
@@ -69,16 +71,33 @@ export class AllocationFacade {
     ) {
       return null;
     }
-    const allocations = await this.repository.getById(projectId);
+
+    const event = await this.allocate(
+      projectId,
+      allocatableCapabilityId,
+      capability,
+      timeSlot,
+    );
+    return event?.allocatedCapabilityId ?? null;
+  }
+
+  private allocate = async (
+    projectId: ProjectAllocationsId,
+    allocatableCapabilityId: AllocatableCapabilityId,
+    capability: Capability,
+    timeSlot: TimeSlot,
+  ): Promise<CapabilitiesAllocated | null> => {
+    const allocations =
+      await this.projectAllocationsRepository.getById(projectId);
     const event = allocations.allocate(
       allocatableCapabilityId,
       capability,
       timeSlot,
       this.clock.now(),
     );
-    await this.repository.save(allocations);
-    return event?.allocatedCapabilityId ?? null;
-  }
+    await this.projectAllocationsRepository.save(allocations);
+    return event;
+  };
 
   @transactional
   public async releaseFromProject(
@@ -92,14 +111,36 @@ export class AllocationFacade {
       timeSlot,
       Owner.of(projectId),
     );
-    const allocations = await this.repository.getById(projectId);
+    const allocations =
+      await this.projectAllocationsRepository.getById(projectId);
     const event = allocations.release(
       allocatableCapabilityId,
       timeSlot,
       this.clock.now(),
     );
-    await this.repository.save(allocations);
+    await this.projectAllocationsRepository.save(allocations);
     return event !== null;
+  }
+
+  @transactional
+  public allocateCapabilityToProjectForPeriod(
+    _projectId: ProjectAllocationsId,
+    _capability: Capability,
+    _timeSlot: TimeSlot,
+  ): Promise<boolean> {
+    return Promise.resolve(false);
+  }
+
+  private findChosenAllocatableCapability(
+    proposedCapabilities: AllocatableCapabilitiesSummary,
+    chosen: ResourceId,
+  ): AllocatableCapabilityId {
+    return (
+      proposedCapabilities.all
+        .map((s) => s.id)
+        .filter((id) => deepEquals(toAvailabilityResourceId(id), chosen))[0] ??
+      null
+    );
   }
 
   @transactional
@@ -107,9 +148,10 @@ export class AllocationFacade {
     projectId: ProjectAllocationsId,
     fromTo: TimeSlot,
   ): Promise<void> {
-    const projectAllocations = await this.repository.getById(projectId);
+    const projectAllocations =
+      await this.projectAllocationsRepository.getById(projectId);
     projectAllocations.defineSlot(fromTo, this.clock.now());
-    await this.repository.save(projectAllocations);
+    await this.projectAllocationsRepository.save(projectAllocations);
   }
 
   @transactional
@@ -118,9 +160,9 @@ export class AllocationFacade {
     demands: Demands,
   ): Promise<void> {
     const projectAllocations =
-      (await this.repository.findById(projectId)) ??
+      (await this.projectAllocationsRepository.findById(projectId)) ??
       ProjectAllocations.empty(projectId);
     projectAllocations.addDemands(demands, this.clock.now());
-    await this.repository.save(projectAllocations);
+    await this.projectAllocationsRepository.save(projectAllocations);
   }
 }
