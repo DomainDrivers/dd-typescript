@@ -1,5 +1,5 @@
+import { getDB, injectDatabaseContext } from '#storage';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { getDB, injectDatabaseContext } from '../../storage';
 import * as schema from '../schema';
 import { EmployeeFacade } from './employeeFacade';
 import {

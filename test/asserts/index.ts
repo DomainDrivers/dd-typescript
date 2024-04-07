@@ -1,5 +1,5 @@
+import { deepEquals } from '#utils';
 import assert from 'assert';
-import { deepEquals } from '../../src/utils';
 
 export const assertThat = <T>(item: T) => {
   return {

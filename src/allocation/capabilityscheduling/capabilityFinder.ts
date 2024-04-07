@@ -1,7 +1,7 @@
 import { AvailabilityFacade } from '#availability';
 import { Capability, TimeSlot } from '#shared';
+import { dbconnection } from '#storage';
 import { ObjectSet, deepEquals } from '#utils';
-import { dbconnection } from '../../storage';
 import { AllocatableCapabilitiesSummary } from './allocatableCapabilitiesSummary';
 import type { AllocatableCapability } from './allocatableCapability';
 import {

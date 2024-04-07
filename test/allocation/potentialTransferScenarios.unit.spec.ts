@@ -4,6 +4,7 @@ import {
   Allocations,
   Demand,
   Demands,
+  Earnings,
   PotentialTransfers,
   PotentialTransfersService,
   ProjectAllocationsId,
@@ -17,7 +18,6 @@ import BigNumber from 'bignumber.js';
 import { addMinutes } from 'date-fns';
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
-import { Earnings } from '../../src/allocation/cashflow/earnings';
 const skill = Capability.skill;
 
 describe('PotentialTransferScenarios', () => {

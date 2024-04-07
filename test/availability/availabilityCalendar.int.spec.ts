@@ -7,9 +7,9 @@ import {
 } from '#availability';
 import * as schema from '#schema';
 import { TimeSlot } from '#shared';
+import { ObjectSet } from '#utils';
 import { addMinutes } from 'date-fns';
 import { after, before, describe, it } from 'node:test';
-import { ObjectSet } from '../../src/utils';
 import { assertThatArray } from '../asserts';
 import { TestConfiguration } from '../setup';
 

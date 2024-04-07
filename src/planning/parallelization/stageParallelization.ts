@@ -1,6 +1,11 @@
-import { Edge, GraphTopologicalSort, Nodes, SortedNodes } from '#sorter';
+import {
+  Edge,
+  GraphTopologicalSort,
+  Nodes,
+  SortedNodes,
+  feedbackArcSeOnGraph,
+} from '#sorter';
 import type { ObjectSet } from '#utils';
-import { feedbackArcSeOnGraph } from '../../sorter/feedbackArcSeOnGraph';
 import type { ParallelStagesList } from './parallelStagesList';
 import { SortedNodesToParallelizedStages } from './sortedNodesToParallelizedStages';
 import type { Stage } from './stage';
