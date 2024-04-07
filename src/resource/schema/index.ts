@@ -1,11 +1,13 @@
-import { bigserial, jsonb, pgTable, uuid, varchar } from 'drizzle-orm/pg-core';
+import { bigserial, jsonb, pgSchema, uuid, varchar } from 'drizzle-orm/pg-core';
 
 export type CapabilityEntity = {
   name: string;
   type: string;
 };
 
-export const employees = pgTable('employees', {
+export const resources = pgSchema('resources');
+
+export const employees = resources.table('employees', {
   id: uuid('employee_id').primaryKey(),
   version: bigserial('version', { mode: 'number' }).notNull(),
   name: varchar('name').notNull(),
@@ -14,7 +16,7 @@ export const employees = pgTable('employees', {
   capabilities: jsonb('capabilities').$type<CapabilityEntity[]>().notNull(),
 });
 
-export const devices = pgTable('devices', {
+export const devices = resources.table('devices', {
   id: uuid('device_id').primaryKey(),
   version: bigserial('version', { mode: 'number' }).notNull(),
   model: varchar('model').notNull(),

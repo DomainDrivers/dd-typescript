@@ -1,13 +1,15 @@
 import {
   bigint,
   boolean,
-  pgTable,
+  pgSchema,
   timestamp,
   unique,
   uuid,
 } from 'drizzle-orm/pg-core';
 
-export const availabilities = pgTable(
+export const availability = pgSchema('availability');
+
+export const availabilities = availability.table(
   'availabilities',
   {
     id: uuid('id').primaryKey(),

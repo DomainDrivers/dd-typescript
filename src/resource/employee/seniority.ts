@@ -1,4 +1,4 @@
-import type { Brand } from '../../utils';
+import type { Brand } from '#utils';
 
 const JUNIOR = 'JUNIOR';
 const MID = 'MID';

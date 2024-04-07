@@ -71,7 +71,7 @@ export class ResourceAvailabilityRepository extends PostgresRepository {
 
     const sql = format(
       `
-    INSERT INTO  availabilities
+    INSERT INTO  availability.availabilities
     (id, resource_id, resource_parent_id, from_date, to_date, taken_by, disabled, version)
     VALUES %L
     `,
@@ -87,7 +87,7 @@ export class ResourceAvailabilityRepository extends PostgresRepository {
   ): Promise<ResourceAvailability[]> => {
     const sql = format(
       `
-    select * from availabilities where resource_id = %L
+    select * from availability.availabilities where resource_id = %L
     and from_date >= %L and to_date <= %L
     `,
       resourceId,
@@ -106,7 +106,7 @@ export class ResourceAvailabilityRepository extends PostgresRepository {
   ): Promise<ResourceAvailability[]> => {
     const sql = format(
       `
-      select * from availabilities where resource_parent_id = %L
+      select * from availability.availabilities where resource_parent_id = %L
       and from_date >= %L and to_date <= %L
     `,
       parentId,
@@ -152,7 +152,7 @@ export class ResourceAvailabilityRepository extends PostgresRepository {
 
     const sql = format(
       `
-      UPDATE availabilities AS a
+      UPDATE availability.availabilities AS a
       SET
         taken_by = v.taken_by::uuid,
         disabled = v.disabled::boolean,
@@ -171,7 +171,7 @@ export class ResourceAvailabilityRepository extends PostgresRepository {
     availabilityId: ResourceAvailabilityId,
   ): Promise<ResourceAvailability> => {
     const sql = format(
-      `select * from availabilities where id = %L`,
+      `select * from availability.availabilities where id = %L`,
       availabilityId,
     );
 
@@ -188,7 +188,7 @@ export class ResourceAvailabilityRepository extends PostgresRepository {
       `
       WITH AvailableResources AS (
         SELECT resource_id 
-        FROM availabilities
+        FROM availability.availabilities
         WHERE resource_id = ANY(%L)
         AND taken_by IS NULL
         AND from_date >= %L
@@ -202,7 +202,7 @@ export class ResourceAvailabilityRepository extends PostgresRepository {
         LIMIT 1
       )
       SELECT a.*
-      FROM availabilities a
+      FROM availability.availabilities a
       JOIN RandomResource r ON a.resource_id = r.resource_id
       `,
       resourceIds,
