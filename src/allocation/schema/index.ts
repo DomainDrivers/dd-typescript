@@ -12,7 +12,6 @@ export type CapabilityEntity = {
 
 export type AllocatedCapabilityEntity = {
   allocatedCapabilityID: string;
-  resourceId: string;
   capability: CapabilityEntity;
   timeSlot: TimeSlotEntity;
 };

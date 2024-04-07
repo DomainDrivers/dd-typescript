@@ -22,7 +22,7 @@ export class PotentialTransfers {
   transfer = (
     projectFrom: ProjectAllocationsId,
     projectTo: ProjectAllocationsId,
-    capability: AllocatedCapability,
+    allocatedCapability: AllocatedCapability,
     forSlot: TimeSlot,
   ): PotentialTransfers => {
     const from = this.summary.projectAllocations.get(projectFrom);
@@ -31,7 +31,7 @@ export class PotentialTransfers {
       return this;
     }
     const newAllocationsProjectFrom = from.remove(
-      capability.allocatedCapabilityID,
+      allocatedCapability.allocatedCapabilityId,
       forSlot,
     );
     if (deepEquals(newAllocationsProjectFrom, from)) {
@@ -40,8 +40,8 @@ export class PotentialTransfers {
     this.summary.projectAllocations.set(projectFrom, newAllocationsProjectFrom);
     const newAllocationsProjectTo = to.add(
       new AllocatedCapability(
-        capability.resourceId,
-        capability.capability,
+        allocatedCapability.allocatedCapabilityId,
+        allocatedCapability.capability,
         forSlot,
       ),
     );

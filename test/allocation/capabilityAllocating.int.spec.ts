@@ -1,11 +1,17 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import {
+  AllocatableCapabilityId,
+  AllocatableResourceId,
   AllocatedCapability,
   AllocationConfiguration,
+  AllocationFacade,
+  CapabilityPlanningConfiguration,
+  CapabilityScheduler,
+  CapabilitySelector,
   Demand,
   Demands,
   ProjectAllocationsId,
-  type AllocationFacade,
+  toAvailabilityResourceId,
 } from '#allocation';
 import {
   AvailabilityConfiguration,
@@ -18,13 +24,22 @@ import { Capability, TimeSlot } from '#shared';
 import { ObjectSet, deepEquals } from '#utils';
 import assert from 'node:assert';
 import { after, before, describe, it } from 'node:test';
-import { assertThatArray } from '../asserts';
+import {
+  assertEquals,
+  assertIsNotNull,
+  assertIsNull,
+  assertThatArray,
+  assertTrue,
+} from '../asserts';
 import { TestConfiguration } from '../setup';
 
 describe('CapabilityAllocating', () => {
   const testEnvironment = TestConfiguration();
   let allocationFacade: AllocationFacade;
   let availabilityFacade: AvailabilityFacade;
+  let capabilityScheduler: CapabilityScheduler;
+
+  const RESOURCE_ID = AllocatableResourceId.newOne();
 
   before(async () => {
     const connectionString = await testEnvironment.start({ schema });
@@ -35,6 +50,9 @@ describe('CapabilityAllocating', () => {
     availabilityFacade = new AvailabilityConfiguration(
       connectionString,
     ).availabilityFacade();
+    capabilityScheduler = new CapabilityPlanningConfiguration(
+      connectionString,
+    ).capabilityScheduler();
   });
 
   after(async () => await testEnvironment.stop());
@@ -45,7 +63,11 @@ describe('CapabilityAllocating', () => {
     const skillJava = Capability.skill('JAVA');
     const demand = new Demand(skillJava, oneDay);
     //and
-    const allocatableResourceId = await createAllocatableResource(oneDay);
+    const allocatableCapabilityId = await createAllocatableResource(
+      oneDay,
+      skillJava,
+      RESOURCE_ID,
+    );
     //and
 
     const projectId = ProjectAllocationsId.newOne();
@@ -58,25 +80,28 @@ describe('CapabilityAllocating', () => {
     //when
     const result = await allocationFacade.allocateToProject(
       projectId,
-      allocatableResourceId,
+      allocatableCapabilityId,
       skillJava,
       oneDay,
     );
 
     //then
-    assert.ok(result);
+    assertIsNotNull(result);
     const summary = await allocationFacade.findAllProjectsAllocations();
-    assert.equal(summary.projectAllocations.get(projectId)!.all.length, 1);
-    assert.ok(
-      deepEquals(
-        summary.projectAllocations.get(projectId)!.all[0],
-        new AllocatedCapability(allocatableResourceId, skillJava, oneDay),
-      ),
+    assertThatArray(
+      summary.projectAllocations.get(projectId)!.all,
+    ).containsExactly(
+      new AllocatedCapability(allocatableCapabilityId, skillJava, oneDay),
     );
-    assert.equal(summary.demands.get(projectId)!.all.length, 1);
-    assert.ok(deepEquals(demand, summary.demands.get(projectId)!.all[0]));
-    assert.ok(
-      await availabilityWasBlocked(allocatableResourceId, oneDay, projectId),
+    assertThatArray(summary.demands.get(projectId)!.all).containsExactly(
+      demand,
+    );
+    assertTrue(
+      await availabilityWasBlocked(
+        toAvailabilityResourceId(allocatableCapabilityId),
+        oneDay,
+        projectId,
+      ),
     );
   });
 
@@ -86,10 +111,14 @@ describe('CapabilityAllocating', () => {
     const skillJava = Capability.skill('JAVA');
     const demand = new Demand(skillJava, oneDay);
     //and
-    const allocatableResourceId = await createAllocatableResource(oneDay);
+    const allocatableCapabilityId = await createAllocatableResource(
+      oneDay,
+      skillJava,
+      RESOURCE_ID,
+    );
     //and
     await availabilityFacade.block(
-      allocatableResourceId,
+      toAvailabilityResourceId(allocatableCapabilityId),
       oneDay,
       Owner.newOne(),
     );
@@ -104,13 +133,13 @@ describe('CapabilityAllocating', () => {
     //when
     const result = await allocationFacade.allocateToProject(
       projectId,
-      allocatableResourceId,
+      allocatableCapabilityId,
       skillJava,
       oneDay,
     );
 
     //then
-    assert.equal(result, null);
+    assertIsNull(result);
     const summary = await allocationFacade.findAllProjectsAllocations();
     assertThatArray(summary.projectAllocations.get(projectId)!.all).isEmpty();
   });
@@ -119,7 +148,11 @@ describe('CapabilityAllocating', () => {
     //given
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
     //and
-    const allocatableResourceId = await createAllocatableResource(oneDay);
+    const allocatableCapabilityId = await createAllocatableResource(
+      oneDay,
+      Capability.skill('JAVA'),
+      RESOURCE_ID,
+    );
     //and
     const projectId = ProjectAllocationsId.newOne();
     //and
@@ -129,9 +162,9 @@ describe('CapabilityAllocating', () => {
     );
     //and
     const chosenCapability = Capability.skill('JAVA');
-    const allocatedId = await allocationFacade.allocateToProject(
+    await allocationFacade.allocateToProject(
       projectId,
-      allocatableResourceId,
+      allocatableCapabilityId,
       chosenCapability,
       oneDay,
     );
@@ -139,7 +172,7 @@ describe('CapabilityAllocating', () => {
     //when
     const result = await allocationFacade.releaseFromProject(
       projectId,
-      allocatedId!,
+      allocatableCapabilityId,
       oneDay,
     );
 
@@ -151,10 +184,18 @@ describe('CapabilityAllocating', () => {
 
   const createAllocatableResource = async (
     period: TimeSlot,
-  ): Promise<ResourceId> => {
-    const resourceId = ResourceId.newOne();
-    await availabilityFacade.createResourceSlots(resourceId, period);
-    return resourceId;
+    capability: Capability,
+    resourceId: AllocatableResourceId,
+  ): Promise<AllocatableCapabilityId> => {
+    const capabilities = [CapabilitySelector.canJustPerform(capability)];
+    const allocatableCapabilityIds =
+      await capabilityScheduler.scheduleResourceCapabilitiesForPeriod(
+        resourceId,
+        capabilities,
+        period,
+      );
+    assertEquals(allocatableCapabilityIds.length, 1);
+    return allocatableCapabilityIds[0];
   };
 
   const availabilityWasBlocked = async (

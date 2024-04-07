@@ -1,10 +1,10 @@
-import { ResourceId } from '#availability';
 import { Capability, TimeSlot } from '#shared';
 import { DrizzleRepository, type Repository } from '#storage';
 import { ObjectSet, UUID } from '#utils';
 import { UTCDate } from '@date-fns/utc';
 import { eq, inArray } from 'drizzle-orm';
 import {
+  AllocatableCapabilityId,
   AllocatedCapability,
   Allocations,
   Demand,
@@ -82,10 +82,9 @@ const mapToAllocatedCapability = (
   entity: schema.AllocatedCapabilityEntity,
 ): AllocatedCapability =>
   new AllocatedCapability(
-    ResourceId.from(UUID.from(entity.resourceId)),
+    AllocatableCapabilityId.from(UUID.from(entity.allocatedCapabilityID)),
     mapToCapability(entity.capability),
     mapToTimeSlot(entity.timeSlot),
-    UUID.from(entity.allocatedCapabilityID),
   );
 
 const mapToDemands = (demands: schema.DemandsEntity | null): Demands =>
@@ -134,8 +133,7 @@ const mapFromAllocatedCapability = (
   allocatedCapability: AllocatedCapability,
 ): schema.AllocatedCapabilityEntity => {
   return {
-    allocatedCapabilityID: allocatedCapability.allocatedCapabilityID,
-    resourceId: allocatedCapability.resourceId,
+    allocatedCapabilityID: allocatedCapability.allocatedCapabilityId,
     capability: mapFromCapability(allocatedCapability.capability),
     timeSlot: mapFromTimeSlot(allocatedCapability.timeSlot),
   };

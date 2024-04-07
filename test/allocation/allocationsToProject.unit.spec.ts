@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import {
+  AllocatableCapabilityId,
   AllocatedCapability,
   Allocations,
   CapabilitiesAllocated,
@@ -9,9 +10,8 @@ import {
   ProjectAllocations,
   ProjectAllocationsId,
 } from '#allocation';
-import { ResourceId } from '#availability';
 import { Capability, TimeSlot } from '#shared';
-import { UUID, deepEquals } from '#utils';
+import { deepEquals } from '#utils';
 import { UTCDate } from '@date-fns/utc';
 import { addHours } from 'date-fns';
 import assert from 'node:assert';
@@ -21,7 +21,7 @@ const permission = Capability.permission;
 describe('AllocationsToProject', () => {
   const WHEN = new UTCDate();
   const PROJECT_ID = ProjectAllocationsId.newOne();
-  const ADMIN_ID = ResourceId.newOne();
+  const ADMIN_ID = AllocatableCapabilityId.newOne();
   const FEB_1 = TimeSlot.createDailyTimeSlotAtUTC(2020, 2, 1);
   const FEB_2 = TimeSlot.createDailyTimeSlotAtUTC(2020, 2, 2);
   const JANUARY = TimeSlot.createDailyTimeSlotAtUTC(2020, 1, 1);
@@ -180,13 +180,12 @@ describe('AllocationsToProject', () => {
       FEB_1,
       WHEN,
     );
+    const adminId = AllocatableCapabilityId.from(
+      allocatedAdmin!.allocatedCapabilityId,
+    );
     //when
     assert.ok(allocatedAdmin);
-    const event = allocations.release(
-      allocatedAdmin.allocatedCapabilityId,
-      FEB_1,
-      WHEN,
-    );
+    const event = allocations.release(adminId, FEB_1, WHEN);
 
     //then
     assert.ok(event);
@@ -203,7 +202,11 @@ describe('AllocationsToProject', () => {
     const allocations = ProjectAllocations.empty(PROJECT_ID);
 
     //when
-    const event = allocations.release(UUID.randomUUID(), FEB_1, WHEN);
+    const event = allocations.release(
+      AllocatableCapabilityId.newOne(),
+      FEB_1,
+      WHEN,
+    );
 
     //then
     assert.equal(event, null);
@@ -225,11 +228,16 @@ describe('AllocationsToProject', () => {
       WHEN,
     );
     assert.ok(allocatedAdmin);
-    allocations.allocate(ADMIN_ID, Capability.skill('JAVA'), FEB_1, WHEN);
+    allocations.allocate(
+      AllocatableCapabilityId.newOne(),
+      Capability.skill('JAVA'),
+      FEB_1,
+      WHEN,
+    );
     //when
     assert.ok(allocatedAdmin);
     const event = allocations.release(
-      allocatedAdmin.allocatedCapabilityId,
+      AllocatableCapabilityId.from(allocatedAdmin.allocatedCapabilityId),
       FEB_1,
       WHEN,
     );
@@ -263,7 +271,7 @@ describe('AllocationsToProject', () => {
 
     //when
     const event = allocations.release(
-      allocatedAdmin.allocatedCapabilityId,
+      AllocatableCapabilityId.from(allocatedAdmin.allocatedCapabilityId),
       FEB_2,
       WHEN,
     );
@@ -294,7 +302,7 @@ describe('AllocationsToProject', () => {
 
     //when
     const event = allocations.release(
-      allocatedAdmin.allocatedCapabilityId,
+      AllocatableCapabilityId.from(allocatedAdmin.allocatedCapabilityId),
       fifteenMinutesIn1Feb,
       WHEN,
     );

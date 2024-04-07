@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import {
+  AllocatableCapabilityId,
   AllocatedCapability,
   Allocations,
   Demand,
@@ -13,7 +14,7 @@ import {
 import { OptimizationFacade } from '#optimization';
 import { Capability, TimeSlot } from '#shared';
 import { SimulationFacade } from '#simulation';
-import { ObjectMap, UUID } from '#utils';
+import { ObjectMap } from '#utils';
 import BigNumber from 'bignumber.js';
 import { addMinutes } from 'date-fns';
 import assert from 'node:assert';
@@ -40,7 +41,7 @@ describe('PotentialTransferScenarios', () => {
   const BANKING_SOFT_ID = ProjectAllocationsId.newOne();
   const INSURANCE_SOFT_ID = ProjectAllocationsId.newOne();
   const STASZEK_JAVA_MID = new AllocatedCapability(
-    UUID.randomUUID(),
+    AllocatableCapabilityId.newOne(),
     skill('JAVA-MID'),
     JAN_1,
   );
