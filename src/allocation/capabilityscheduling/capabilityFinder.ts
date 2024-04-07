@@ -89,7 +89,7 @@ export class CapabilityFinder {
           new AllocatableCapabilitySummary(
             allocatableCapability.id,
             allocatableCapability.resourceId,
-            allocatableCapability.capability,
+            allocatableCapability.capabilities,
             allocatableCapability.slot,
           ),
       ),

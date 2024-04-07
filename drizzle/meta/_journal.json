@@ -8,6 +8,13 @@
       "when": 1712471940391,
       "tag": "0000_large_morg",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1712492758640,
+      "tag": "0001_panoramic_electro",
+      "breakpoints": true
     }
   ]
 }

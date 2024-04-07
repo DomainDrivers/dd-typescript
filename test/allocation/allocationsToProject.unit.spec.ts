@@ -39,7 +39,7 @@ describe('AllocationsToProject', () => {
     );
 
     //then
-    assert.ok(event);
+    assert(event);
     const capabilitiesAllocated = event;
     assert.ok(
       deepEquals(

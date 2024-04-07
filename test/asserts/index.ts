@@ -18,6 +18,14 @@ export const assertTrue = (result: boolean) => {
   assert.equal(result, true);
 };
 
+export const assertIsNotNull = <T>(result: T) => {
+  assert.notEqual(result, null);
+};
+
+export const assertIsNull = <T>(result: T) => {
+  assert.equal(result, null);
+};
+
 export const assertThatArray = <T>(array: T[]) => {
   return {
     isEmpty: () => assert.equal(array.length, 0),

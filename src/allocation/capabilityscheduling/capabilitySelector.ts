@@ -1,5 +1,5 @@
 import { Capability } from '#shared';
-import type { Brand, ObjectSet } from '#utils';
+import { ObjectSet, type Brand } from '#utils';
 
 export type SelectingPolicy = Brand<
   'ALL_SIMULTANEOUSLY' | 'ONE_OF_ALL',
@@ -17,6 +17,7 @@ export class CapabilitySelector {
     public readonly capabilities: ObjectSet<Capability>,
     public readonly selectingPolicy: SelectingPolicy,
   ) {}
+
   public static canPerformOneOf = (
     capabilities: ObjectSet<Capability>,
   ): CapabilitySelector =>
@@ -26,6 +27,12 @@ export class CapabilitySelector {
     capabilities: ObjectSet<Capability>,
   ): CapabilitySelector =>
     new CapabilitySelector(capabilities, SelectingPolicy.ALL_SIMULTANEOUSLY);
+
+  public static canJustPerform = (capability: Capability) =>
+    new CapabilitySelector(
+      ObjectSet.of(capability),
+      SelectingPolicy.ONE_OF_ALL,
+    );
 
   public canPerform = (...capabilities: Capability[]): boolean => {
     if (capabilities.length == 1) {

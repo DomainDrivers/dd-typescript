@@ -1,28 +1,29 @@
 import type { Capability, TimeSlot } from '#shared';
-import { deepEquals } from '#utils';
+import type { ObjectSet } from '#utils';
 import { AllocatableCapabilityId } from './allocatableCapabilityId';
 import type { AllocatableResourceId } from './allocatableResourceId';
+import type { CapabilitySelector } from './capabilitySelector';
 
 export class AllocatableCapability {
   #id: AllocatableCapabilityId;
   #resourceId: AllocatableResourceId;
-  #capability: Capability;
+  #possibleCapabilities: CapabilitySelector;
   #timeSlot: TimeSlot;
 
   constructor(
     resourceId: AllocatableResourceId,
-    capability: Capability,
+    possibleCapabilities: CapabilitySelector,
     timeSlot: TimeSlot,
     id: AllocatableCapabilityId = AllocatableCapabilityId.newOne(),
   ) {
     this.#id = id;
     this.#resourceId = resourceId;
-    this.#capability = capability;
+    this.#possibleCapabilities = possibleCapabilities;
     this.#timeSlot = timeSlot;
   }
 
-  public canPerform = (capability: Capability): boolean =>
-    deepEquals(capability, capability);
+  public canPerform = (capabilities: ObjectSet<Capability>): boolean =>
+    this.#possibleCapabilities.canPerform(...capabilities);
 
   public get id() {
     return this.#id;
@@ -35,7 +36,7 @@ export class AllocatableCapability {
     return this.#timeSlot;
   }
 
-  public get capability() {
-    return this.#capability;
+  public get capabilities() {
+    return this.#possibleCapabilities;
   }
 }

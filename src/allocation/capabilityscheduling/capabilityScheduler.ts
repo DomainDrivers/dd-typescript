@@ -1,7 +1,8 @@
 import { AvailabilityFacade } from '#availability';
 import { Capability, TimeSlot } from '#shared';
-import { transactional } from '#storage';
+import { dbconnection, transactional } from '#storage';
 import type { ObjectSet } from '#utils';
+import { CapabilitySelector } from '.';
 import { AllocatableCapability } from './allocatableCapability';
 import {
   toAvailabilityResourceId,
@@ -19,7 +20,7 @@ export class CapabilityScheduler {
   @transactional
   public async scheduleResourceCapabilitiesForPeriod(
     resourceId: AllocatableResourceId,
-    capabilities: Capability[],
+    capabilities: CapabilitySelector[],
     timeSlot: TimeSlot,
   ): Promise<AllocatableCapabilityId[]> {
     const allocatableResourceIds = await this.createAllocatableResources(
@@ -43,7 +44,12 @@ export class CapabilityScheduler {
     timeSlot: TimeSlot,
   ): Promise<AllocatableCapabilityId[]> {
     const allocatableCapability = resources.map(
-      (resource) => new AllocatableCapability(resource, capability, timeSlot),
+      (resource) =>
+        new AllocatableCapability(
+          resource,
+          CapabilitySelector.canJustPerform(capability),
+          timeSlot,
+        ),
     );
     await this.allocatableResourceRepository.saveAll(allocatableCapability);
 
@@ -58,7 +64,7 @@ export class CapabilityScheduler {
 
   private async createAllocatableResources(
     resourceId: AllocatableResourceId,
-    capabilities: Capability[],
+    capabilities: CapabilitySelector[],
     timeSlot: TimeSlot,
   ): Promise<AllocatableCapabilityId[]> {
     const allocatableResources = capabilities.map(
@@ -67,5 +73,32 @@ export class CapabilityScheduler {
     );
     await this.allocatableResourceRepository.saveAll(allocatableResources);
     return allocatableResources.map((a) => a.id);
+  }
+
+  @dbconnection
+  public async findResourceCapabilities(
+    allocatableResourceId: AllocatableResourceId,
+    capabilities: Capability | ObjectSet<Capability>,
+    period: TimeSlot,
+  ): Promise<AllocatableCapabilityId | null> {
+    return Array.isArray(capabilities)
+      ? (
+          await this.allocatableResourceRepository.findByResourceIdAndTimeSlot(
+            allocatableResourceId,
+            period.from,
+            period.to,
+          )
+        )
+          .filter((ac) => ac.canPerform(capabilities))
+          .map((ac) => ac.id)[0] ?? null
+      : (
+          await this.allocatableResourceRepository.findByResourceIdAndCapabilityAndTimeSlot(
+            allocatableResourceId,
+            capabilities.name,
+            capabilities.type,
+            period.from,
+            period.to,
+          )
+        )?.id ?? null;
   }
 }
