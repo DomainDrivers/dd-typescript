@@ -180,7 +180,7 @@ export class ResourceAvailabilityRepository extends PostgresRepository {
   };
 
   public loadAvailabilitiesOfRandomResourceWithin = async (
-    resourceIds: ObjectSet<ResourceAvailabilityId>,
+    resourceIds: ObjectSet<ResourceId>,
     normalized: TimeSlot,
   ): Promise<ResourceGroupedAvailability> => {
     const sql = format(
@@ -188,7 +188,7 @@ export class ResourceAvailabilityRepository extends PostgresRepository {
       WITH AvailableResources AS (
         SELECT resource_id 
         FROM availability.availabilities
-        WHERE resource_id = ANY(%L)
+        WHERE resource_id = ANY(ARRAY[%L]::uuid[])
         AND taken_by IS NULL
         AND from_date >= %L
         AND to_date <= %L
@@ -197,7 +197,7 @@ export class ResourceAvailabilityRepository extends PostgresRepository {
       RandomResource AS (
         SELECT resource_id
         FROM AvailableResources
-        RDER BY RANDOM()
+        ORDER BY RANDOM()
         LIMIT 1
       )
       SELECT a.*

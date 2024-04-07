@@ -123,12 +123,39 @@ export class AllocationFacade {
   }
 
   @transactional
-  public allocateCapabilityToProjectForPeriod(
-    _projectId: ProjectAllocationsId,
-    _capability: Capability,
-    _timeSlot: TimeSlot,
+  public async allocateCapabilityToProjectForPeriod(
+    projectId: ProjectAllocationsId,
+    capability: Capability,
+    timeSlot: TimeSlot,
   ): Promise<boolean> {
-    return Promise.resolve(false);
+    const proposedCapabilities = await this.capabilityFinder.findCapabilities(
+      capability,
+      timeSlot,
+    );
+    if (proposedCapabilities.all.length === 0) {
+      return false;
+    }
+    const availabilityResourceIds = ObjectSet.from(
+      proposedCapabilities.all.map((resource) =>
+        toAvailabilityResourceId(resource.id),
+      ),
+    );
+    const chosen = await this.availabilityFacade.blockRandomAvailable(
+      availabilityResourceIds,
+      timeSlot,
+      Owner.of(projectId),
+    );
+    if (chosen === null) {
+      return false;
+    }
+    const toAllocate = this.findChosenAllocatableCapability(
+      proposedCapabilities,
+      chosen,
+    );
+    return (
+      (await this.allocate(projectId, toAllocate, capability, timeSlot)) !==
+      null
+    );
   }
 
   private findChosenAllocatableCapability(
