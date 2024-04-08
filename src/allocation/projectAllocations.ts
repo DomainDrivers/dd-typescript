@@ -1,10 +1,11 @@
-import { Capability, TimeSlot } from '#shared';
+import { TimeSlot } from '#shared';
 import { UUID, deepEquals, event } from '#utils';
 import type { UTCDate } from '@date-fns/utc';
 import {
   AllocatableCapabilityId,
   AllocatedCapability,
   Allocations,
+  CapabilitySelector,
   Demands,
   ProjectAllocationsId,
   type ProjectAllocationScheduled,
@@ -46,7 +47,7 @@ export class ProjectAllocations {
 
   allocate = (
     allocatableCapabilityId: AllocatableCapabilityId,
-    capability: Capability,
+    capability: CapabilitySelector,
     requestedSlot: TimeSlot,
     when: UTCDate,
   ): CapabilitiesAllocated | null => {

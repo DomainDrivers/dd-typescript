@@ -12,8 +12,10 @@ import {
 import {
   AllocatableCapabilitiesSummary,
   AllocatableCapabilityId,
+  AllocatableCapabilitySummary,
   Allocations,
   CapabilityFinder,
+  CapabilitySelector,
   Demands,
   ProjectAllocations,
   ProjectAllocationsId,
@@ -74,9 +76,13 @@ export class AllocationFacade {
   public async allocateToProject(
     projectId: ProjectAllocationsId,
     allocatableCapabilityId: AllocatableCapabilityId,
-    capability: Capability,
     timeSlot: TimeSlot,
   ): Promise<UUID | null> {
+    const capability = await this.capabilityFinder.findById(
+      allocatableCapabilityId,
+    );
+    if (capability == null) return null;
+
     //yes, one transaction crossing 2 modules.
     if (!(await this.capabilityFinder.isPresent(allocatableCapabilityId))) {
       return null;
@@ -96,7 +102,7 @@ export class AllocationFacade {
     const event = await this.allocate(
       projectId,
       allocatableCapabilityId,
-      capability,
+      capability.capabilities,
       timeSlot,
     );
     return event?.data.allocatedCapabilityId ?? null;
@@ -105,7 +111,7 @@ export class AllocationFacade {
   private allocate = async (
     projectId: ProjectAllocationsId,
     allocatableCapabilityId: AllocatableCapabilityId,
-    capability: Capability,
+    capability: CapabilitySelector,
     timeSlot: TimeSlot,
   ): Promise<CapabilitiesAllocated | null> => {
     const allocations =
@@ -174,24 +180,26 @@ export class AllocationFacade {
       chosen,
     );
     return (
-      (await this.allocate(projectId, toAllocate, capability, timeSlot)) !==
-      null
+      (await this.allocate(
+        projectId,
+        toAllocate.id,
+        toAllocate.capabilities,
+        timeSlot,
+      )) !== null
     );
   }
 
   private findChosenAllocatableCapability(
     proposedCapabilities: AllocatableCapabilitiesSummary,
     chosen: ResourceId,
-  ): AllocatableCapabilityId {
+  ): AllocatableCapabilitySummary {
     return (
-      proposedCapabilities.all
-        .map((s) => s.id)
-        .filter((id) =>
-          deepEquals(
-            AllocatableCapabilityId.toAvailabilityResourceId(id),
-            chosen,
-          ),
-        )[0] ?? null
+      proposedCapabilities.all.filter((summary) =>
+        deepEquals(
+          AllocatableCapabilityId.toAvailabilityResourceId(summary.id),
+          chosen,
+        ),
+      )[0] ?? null
     );
   }
 

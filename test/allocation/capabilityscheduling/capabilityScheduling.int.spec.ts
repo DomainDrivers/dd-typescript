@@ -72,7 +72,7 @@ describe('CapabilityScheduling', () => {
       );
 
     //then
-    const loaded = await capabilityFinder.findById(allocatable);
+    const loaded = await capabilityFinder.findAllById(allocatable);
     assertEquals(allocatable.length, loaded.all.length);
 
     await assertThatArray(loaded.all).allMatchAsync((allocatableCapability) =>

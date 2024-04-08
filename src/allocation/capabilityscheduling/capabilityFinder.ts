@@ -30,7 +30,7 @@ export class CapabilityFinder {
       findAllocatableCapability,
       timeSlot,
     );
-    return this.createSummary(found);
+    return this.createCapabilitiesSummary(found);
   }
 
   @dbconnection
@@ -45,17 +45,27 @@ export class CapabilityFinder {
         timeSlot.from,
         timeSlot.to,
       );
-    return this.createSummary(found);
+    return this.createCapabilitiesSummary(found);
   }
 
   @dbconnection
   public async findById(
+    allocatableCapabilityId: AllocatableCapabilityId,
+  ): Promise<AllocatableCapabilitySummary | null> {
+    const found = await this.allocatableResourceRepository.findById(
+      allocatableCapabilityId,
+    );
+    return found !== null ? this.createCapabilitySummary(found) : null;
+  }
+
+  @dbconnection
+  public async findAllById(
     allocatableCapabilityIds: AllocatableCapabilityId[],
   ): Promise<AllocatableCapabilitiesSummary> {
     const allByIdIn = await this.allocatableResourceRepository.findAllById(
       allocatableCapabilityIds,
     );
-    return this.createSummary(allByIdIn);
+    return this.createCapabilitiesSummary(allByIdIn);
   }
 
   @dbconnection
@@ -88,10 +98,10 @@ export class CapabilityFinder {
     );
   }
 
-  private createSummary(
+  private createCapabilitiesSummary = (
     from: AllocatableCapability[],
-  ): AllocatableCapabilitiesSummary {
-    return new AllocatableCapabilitiesSummary(
+  ): AllocatableCapabilitiesSummary =>
+    new AllocatableCapabilitiesSummary(
       from.map(
         (allocatableCapability) =>
           new AllocatableCapabilitySummary(
@@ -102,5 +112,14 @@ export class CapabilityFinder {
           ),
       ),
     );
-  }
+
+  private createCapabilitySummary = (
+    from: AllocatableCapability,
+  ): AllocatableCapabilitySummary =>
+    new AllocatableCapabilitySummary(
+      from.id,
+      from.resourceId,
+      from.capabilities,
+      from.slot,
+    );
 }

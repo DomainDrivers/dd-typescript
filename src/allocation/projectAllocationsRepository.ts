@@ -7,10 +7,12 @@ import {
   AllocatableCapabilityId,
   AllocatedCapability,
   Allocations,
+  CapabilitySelector,
   Demand,
   Demands,
   ProjectAllocations,
   ProjectAllocationsId,
+  SelectingPolicy,
 } from '.';
 import * as schema from './schema';
 
@@ -88,9 +90,26 @@ const mapToAllocatedCapability = (
 ): AllocatedCapability =>
   new AllocatedCapability(
     AllocatableCapabilityId.from(UUID.from(entity.allocatedCapabilityID)),
-    mapToCapability(entity.capability),
+    mapToCapabilitySelector(entity.capability),
     mapToTimeSlot(entity.timeSlot),
   );
+
+const mapToCapabilitySelector = (
+  entity: schema.CapabilitySelectorEntity,
+): CapabilitySelector =>
+  new CapabilitySelector(
+    ObjectSet.from(entity.capabilities.map(mapToCapability)),
+    SelectingPolicy.from(entity.selectingPolicy),
+  );
+
+const mapFromCapabilitySelector = (
+  capabilitySelector: CapabilitySelector,
+): schema.CapabilitySelectorEntity => {
+  return {
+    capabilities: capabilitySelector.capabilities.map(mapFromCapability),
+    selectingPolicy: capabilitySelector.selectingPolicy,
+  };
+};
 
 const mapToDemands = (demands: schema.DemandsEntity | null): Demands =>
   new Demands(demands ? demands.all.map(mapToDemand) : []);
@@ -139,7 +158,7 @@ const mapFromAllocatedCapability = (
 ): schema.AllocatedCapabilityEntity => {
   return {
     allocatedCapabilityID: allocatedCapability.allocatedCapabilityId,
-    capability: mapFromCapability(allocatedCapability.capability),
+    capability: mapFromCapabilitySelector(allocatedCapability.capability),
     timeSlot: mapFromTimeSlot(allocatedCapability.timeSlot),
   };
 };

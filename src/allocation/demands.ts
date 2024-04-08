@@ -1,5 +1,4 @@
 import { Capability, TimeSlot } from '#shared';
-import { deepEquals } from '#utils';
 import { Allocations } from './allocations';
 import { Demand } from './demand';
 
@@ -21,7 +20,7 @@ export class Demands {
   public satisfiedBy = (d: Demand, allocations: Allocations): boolean =>
     allocations.all.some(
       (ar) =>
-        deepEquals(ar.capability, d.capability) && d.slot.within(ar.timeSlot),
+        ar.capability.canPerform(d.capability) && d.slot.within(ar.timeSlot),
     );
 
   public withNew = (newDemands: Demands) =>
