@@ -22,7 +22,10 @@ describe('ScheduleEmployeeCapabilities', () => {
   before(async () => {
     const connectionString = await testEnvironment.start({ schema });
 
-    const configuration = new EmployeeConfiguration(connectionString);
+    const configuration = new EmployeeConfiguration(
+      connectionString,
+      testEnvironment.utilsConfiguration,
+    );
 
     employeeFacade = configuration.employeeFacade();
     capabilityFinder = new CapabilityPlanningConfiguration(

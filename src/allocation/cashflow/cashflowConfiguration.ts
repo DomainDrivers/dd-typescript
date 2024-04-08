@@ -1,4 +1,4 @@
-import { getDB, injectDatabaseContext } from '#storage';
+import { getDB, injectDatabase } from '#storage';
 import { UtilsConfiguration } from '#utils';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { CashFlowFacade } from './cashflowFacade';
@@ -22,9 +22,10 @@ export class CashflowConfiguration {
     const repository = cashflowRepository ?? this.cashflowRepository();
     const getDB = getDatabase ?? (() => this.db());
 
-    return injectDatabaseContext(
+    return injectDatabase(
       new CashFlowFacade(repository, this.utils.eventBus, this.utils.clock),
-      getDB,
+      getDB(),
+      this.utils.eventBus.commit,
     );
   };
 

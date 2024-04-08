@@ -46,6 +46,7 @@ export class AllocationFacade {
       scheduledDemands,
       timeSlot,
     );
+    await this.projectAllocationsRepository.save(projectAllocations);
 
     await this.eventsPublisher.publish(
       event<ProjectAllocationScheduled>(
@@ -57,7 +58,6 @@ export class AllocationFacade {
         this.clock,
       ),
     );
-    await this.projectAllocationsRepository.save(projectAllocations);
     return projectId;
   }
 

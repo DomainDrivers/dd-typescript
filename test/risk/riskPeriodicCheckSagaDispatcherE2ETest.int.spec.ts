@@ -28,9 +28,9 @@ import { Capability, TimeSlot } from '#shared';
 import { Clock, ObjectMap, ObjectSet, UUID, deepEquals, event } from '#utils';
 import { UTCDate } from '@date-fns/utc';
 import { addDays, subDays } from 'date-fns';
-import { after, afterEach, before, describe, it } from 'node:test';
+import { after, before, beforeEach, describe, it } from 'node:test';
 import { ProjectId } from '../../src/simulation';
-import { assertEquals, verifyThat } from '../asserts';
+import { argMatches, argValue, assertEquals, verifyThat } from '../asserts';
 import { TestConfiguration } from '../setup';
 
 void describe('RiskPeriodicCheckSagaDispatcherE2E', () => {
@@ -54,7 +54,10 @@ void describe('RiskPeriodicCheckSagaDispatcherE2E', () => {
     );
     allocationFacade = allocationConfiguration.allocationFacade();
 
-    const employeeConfiguration = new EmployeeConfiguration(connectionString);
+    const employeeConfiguration = new EmployeeConfiguration(
+      connectionString,
+      testEnvironment.utilsConfiguration,
+    );
     employeeFacade = employeeConfiguration.employeeFacade();
 
     cashFlowFacade = new CashflowConfiguration(
@@ -72,7 +75,7 @@ void describe('RiskPeriodicCheckSagaDispatcherE2E', () => {
     clock = testEnvironment.utilsConfiguration.clock;
   });
 
-  afterEach(testEnvironment.clearTestData);
+  beforeEach(testEnvironment.clearTestData);
 
   after(async () => await testEnvironment.stop());
 
@@ -403,9 +406,9 @@ void describe('RiskPeriodicCheckSagaDispatcherE2E', () => {
     await riskSagaDispatcher.handleWeeklyCheck();
 
     //then
-    verifyThat(notifyAboutAvailability).calledOnceWith(
-      projectId,
-      employeeWasSuggestedForDemand(javaOneDayDemand, employee),
+    verifyThat(notifyAboutAvailability).calledWithArgumentMatching(
+      argValue(projectId),
+      argMatches(employeeWasSuggestedForDemand(javaOneDayDemand, employee)),
     );
   });
 

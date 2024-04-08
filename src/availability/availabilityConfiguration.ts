@@ -1,4 +1,4 @@
-import { getDB, injectDatabaseContext } from '#storage';
+import { getDB, injectDatabase } from '#storage';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { ResourceAvailabilityReadModel } from '.';
 import { UtilsConfiguration } from '../utils';
@@ -9,7 +9,7 @@ import * as schema from './schema';
 export class AvailabilityConfiguration {
   constructor(
     public readonly connectionString: string,
-    private readonly utilsConfiguration: UtilsConfiguration = new UtilsConfiguration(),
+    private readonly utils: UtilsConfiguration = new UtilsConfiguration(),
   ) {}
 
   public availabilityFacade = (
@@ -24,14 +24,15 @@ export class AvailabilityConfiguration {
     const readModel =
       resourceAvailabilityReadModel ?? this.resourceAvailabilityReadModel();
 
-    return injectDatabaseContext(
+    return injectDatabase(
       new AvailabilityFacade(
         repository,
         readModel,
-        this.utilsConfiguration.eventBus,
-        this.utilsConfiguration.clock,
+        this.utils.eventBus,
+        this.utils.clock,
       ),
-      getDB,
+      getDB(),
+      this.utils.eventBus.commit,
     );
   };
 

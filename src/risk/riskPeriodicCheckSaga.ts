@@ -10,8 +10,10 @@ import {
 } from '#allocation';
 
 import type { UTCDate } from '@date-fns/utc';
+import { isAfter } from 'date-fns';
 import { RiskPeriodicCheckSagaId, type RiskPeriodicCheckSagaStep } from '.';
 import type { ResourceTakenOver } from '../availability';
+import { Duration } from '../utils';
 
 export type RiskPeriodicCheckSagaEvent =
   | EarningsRecalculated
@@ -21,11 +23,11 @@ export type RiskPeriodicCheckSagaEvent =
   | ResourceTakenOver
   | CapabilityReleased;
 
-export class RiskPeriodicCheckSaga {
-  static readonly RISK_THRESHOLD_VALUE = Earnings.of(1000);
-  static readonly UPCOMING_DEADLINE_AVAILABILITY_SEARCH = 30;
-  static readonly UPCOMING_DEADLINE_REPLACEMENT_SUGGESTION = 15;
+const RISK_THRESHOLD_VALUE = Earnings.of(1000);
+const UPCOMING_DEADLINE_AVAILABILITY_SEARCH = 30;
+const UPCOMING_DEADLINE_REPLACEMENT_SUGGESTION = 15;
 
+export class RiskPeriodicCheckSaga {
   #id: RiskPeriodicCheckSagaId;
   #projectId: ProjectAllocationsId;
   #missingDemands: Demands | null;
@@ -60,16 +62,67 @@ export class RiskPeriodicCheckSaga {
     this.#deadline = deadline;
     this.#version = version;
   }
-  areDemandsSatisfied = (): boolean => false;
+  areDemandsSatisfied = (): boolean => this.#missingDemands?.all.length === 0;
 
-  public handle = (
-    _event: RiskPeriodicCheckSagaEvent,
-  ): RiskPeriodicCheckSagaStep => {
-    return null!;
+  public handle = ({
+    type,
+    data: event,
+  }: RiskPeriodicCheckSagaEvent): RiskPeriodicCheckSagaStep => {
+    switch (type) {
+      case 'EarningsRecalculated': {
+        this.#earnings = event.earnings;
+        return 'DO_NOTHING';
+      }
+      case 'ProjectAllocationsDemandsScheduled': {
+        this.#missingDemands = event.missingDemands;
+        if (this.areDemandsSatisfied()) {
+          return 'NOTIFY_ABOUT_DEMANDS_SATISFIED';
+        }
+        return 'DO_NOTHING';
+      }
+      case 'ProjectAllocationScheduled': {
+        this.#deadline = event.fromTo.to;
+        return 'DO_NOTHING';
+      }
+      case 'CapabilitiesAllocated': {
+        this.#missingDemands = event.missingDemands;
+        if (this.areDemandsSatisfied()) {
+          return 'NOTIFY_ABOUT_DEMANDS_SATISFIED';
+        }
+        return 'DO_NOTHING';
+      }
+      case 'CapabilityReleased': {
+        this.#missingDemands = event.missingDemands;
+        return 'DO_NOTHING';
+      }
+      case 'ResourceTakenOver': {
+        if (this.#deadline && isAfter(event.occurredAt, this.#deadline)) {
+          return 'DO_NOTHING';
+        }
+        return 'NOTIFY_ABOUT_POSSIBLE_RISK';
+      }
+    }
   };
 
-  public handleWeeklyCheck = (_when: UTCDate): RiskPeriodicCheckSagaStep => {
-    return null!;
+  public handleWeeklyCheck = (when: UTCDate): RiskPeriodicCheckSagaStep => {
+    if (this.#deadline == null || isAfter(when, this.#deadline)) {
+      return 'DO_NOTHING';
+    }
+    if (this.areDemandsSatisfied()) {
+      return 'DO_NOTHING';
+    }
+    const daysToDeadline =
+      Duration.between(when, this.#deadline) / Duration.day;
+    if (daysToDeadline > UPCOMING_DEADLINE_AVAILABILITY_SEARCH) {
+      return 'DO_NOTHING';
+    }
+    if (daysToDeadline > UPCOMING_DEADLINE_REPLACEMENT_SUGGESTION) {
+      return 'FIND_AVAILABLE';
+    }
+    if (this.#earnings != null && this.#earnings > RISK_THRESHOLD_VALUE) {
+      return 'SUGGEST_REPLACEMENT';
+    }
+    return 'DO_NOTHING';
   };
 
   public get id() {

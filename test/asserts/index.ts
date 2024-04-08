@@ -39,6 +39,18 @@ type Call = {
   this: unknown;
 };
 
+export type ArgumentMatcher = (arg: unknown) => boolean;
+
+export const argValue =
+  <T>(value: T): ArgumentMatcher =>
+  (arg) =>
+    deepEquals(arg, value);
+
+export const argMatches =
+  <T>(matches: (arg: T) => boolean): ArgumentMatcher =>
+  (arg) =>
+    matches(arg as T);
+
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type MockedFunction = Function & { mock?: { calls: Call[] } };
 
@@ -60,6 +72,31 @@ export function verifyThat(fn: MockedFunction) {
         fn.mock?.calls.length !== undefined &&
           fn.mock.calls.length === 1 &&
           deepEquals(fn.mock.calls[0].arguments, args),
+      );
+    },
+    calledWithArgumentMatching: (...matches: ArgumentMatcher[]) => {
+      assertTrue(
+        fn.mock?.calls.length !== undefined && fn.mock.calls.length >= 1,
+      );
+      assertTrue(
+        fn.mock?.calls.length !== undefined &&
+          fn.mock.calls.length >= 1 &&
+          fn.mock.calls[0].arguments &&
+          fn.mock.calls[0].arguments.length >= matches.length &&
+          matches.every((match, index) =>
+            match(fn.mock!.calls[0].arguments[index]),
+          ),
+      );
+    },
+    notCalledWithArgumentMatching: (...matches: ArgumentMatcher[]) => {
+      assertFalse(
+        fn.mock?.calls.length !== undefined &&
+          fn.mock.calls.length >= 1 &&
+          fn.mock.calls[0].arguments &&
+          fn.mock.calls[0].arguments.length >= matches.length &&
+          matches.every((match, index) =>
+            match(fn.mock!.calls[0].arguments[index]),
+          ),
       );
     },
   };

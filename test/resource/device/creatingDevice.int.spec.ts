@@ -15,7 +15,10 @@ describe('CreatingDevice', () => {
   before(async () => {
     const connectionString = await testEnvironment.start({ schema });
 
-    const configuration = new DeviceConfiguration(connectionString);
+    const configuration = new DeviceConfiguration(
+      connectionString,
+      testEnvironment.utilsConfiguration,
+    );
 
     deviceFacade = configuration.deviceFacade();
   });

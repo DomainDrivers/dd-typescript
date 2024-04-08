@@ -12,10 +12,12 @@ export {
 } from './event';
 export {
   getInMemoryEventsBus,
+  getTransactionAwareEventBus,
   type EventBus,
   type EventHandler,
   type EventsPublisher,
   type EventsSubscriber,
+  type TransactionAwareEventBus,
 } from './eventsPublisher';
 export { ObjectMap, type KeyValue } from './objectMap';
 export { ObjectSet } from './objectSet';

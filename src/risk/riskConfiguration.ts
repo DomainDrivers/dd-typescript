@@ -12,7 +12,7 @@ import {
 } from '#planning';
 import { ResourceConfiguration } from '#resource';
 import { SimulationConfiguration } from '#simulation';
-import { getDB, injectDatabaseContext } from '#storage';
+import { getDB, injectDatabase } from '#storage';
 import { Clock, UtilsConfiguration } from '#utils';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import {
@@ -76,7 +76,8 @@ export class RiskConfiguration {
     this.#simmulationConfiguration =
       simmulationConfiguration ?? new SimulationConfiguration();
     this.#resourceConfiguration =
-      resourceConfiguration ?? new ResourceConfiguration(connectionString);
+      resourceConfiguration ??
+      new ResourceConfiguration(connectionString, this.#utilsConfiguration);
     this.#allocationConfiguration =
       allocationConfiguration ??
       new AllocationConfiguration(
@@ -126,7 +127,7 @@ export class RiskConfiguration {
   ): RiskPeriodicCheckSagaDispatcher => {
     const getDB = getDatabase ?? (() => this.db());
 
-    return injectDatabaseContext(
+    return injectDatabase(
       new RiskPeriodicCheckSagaDispatcher(
         stateRepository ?? this.riskPeriodicCheckSagaRepository(),
         potentialTransfersService ??
@@ -135,37 +136,41 @@ export class RiskConfiguration {
         riskPushNotification ?? this.riskPushNotification(),
         clock ?? this.#utilsConfiguration.clock,
       ),
-      getDB,
+      getDB(),
+      this.#utilsConfiguration.eventBus.commit,
     );
   };
 
   public verifyCriticalResourceAvailableDuringPlanning = () =>
-    injectDatabaseContext(
+    injectDatabase(
       new VerifyCriticalResourceAvailableDuringPlanning(
         this.#availabilityConfiguration.availabilityFacade(),
         this.riskPushNotification(),
       ),
-      this.db,
+      this.db(),
+      this.#utilsConfiguration.eventBus.commit,
     );
 
   public verifyEnoughDemandsDuringPlanning = () =>
-    injectDatabaseContext(
+    injectDatabase(
       new VerifyEnoughDemandsDuringPlanning(
         this.#planningConfiguration.planningFacade(),
         this.#simmulationConfiguration.simulationFacade(),
         this.#resourceConfiguration.resourceFacade(),
         this.riskPushNotification(),
       ),
-      this.db,
+      this.db(),
+      this.#utilsConfiguration.eventBus.commit,
     );
 
   public verifyNeededResourcesAvailableInTimeSlot = () =>
-    injectDatabaseContext(
+    injectDatabase(
       new VerifyNeededResourcesAvailableInTimeSlot(
         this.#availabilityConfiguration.availabilityFacade(),
         this.riskPushNotification(),
       ),
-      this.db,
+      this.db(),
+      this.#utilsConfiguration.eventBus.commit,
     );
 
   public riskPushNotification = () =>

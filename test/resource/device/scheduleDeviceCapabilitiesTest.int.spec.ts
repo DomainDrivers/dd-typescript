@@ -18,7 +18,10 @@ describe('ScheduleDeviceCapabilities', () => {
   before(async () => {
     const connectionString = await testEnvironment.start({ schema });
 
-    const configuration = new DeviceConfiguration(connectionString);
+    const configuration = new DeviceConfiguration(
+      connectionString,
+      testEnvironment.utilsConfiguration,
+    );
 
     capabilityFinder = new CapabilityPlanningConfiguration(
       connectionString,

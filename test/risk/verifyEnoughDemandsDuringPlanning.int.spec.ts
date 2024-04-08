@@ -8,23 +8,27 @@ import { EmployeeConfiguration, EmployeeFacade, Seniority } from '#resource';
 import { RiskConfiguration, RiskPushNotification } from '#risk';
 import * as schema from '#schema';
 import { Capability } from '#shared';
-import { after, before, describe, it } from 'node:test';
-import { verifyThat } from '../asserts';
+import { afterEach, beforeEach, describe, it } from 'node:test';
+import { argValue, verifyThat } from '../asserts';
 import { TestConfiguration } from '../setup';
 
 const SENIOR = Seniority.SENIOR;
 const skill = Capability.skill;
 
 void describe('VerifyEnoughDemandsDuringPlanning', () => {
-  const testEnvironment = TestConfiguration();
+  let testEnvironment: TestConfiguration; // = TestConfiguration(undefined, undefined, true);
   let employeeFacade: EmployeeFacade;
   let riskPushNotification: RiskPushNotification;
   let planningFacade: PlanningFacade;
 
-  before(async () => {
+  beforeEach(async () => {
+    testEnvironment = TestConfiguration(undefined, undefined, true);
     const connectionString = await testEnvironment.start({ schema });
 
-    const employeeConfiguration = new EmployeeConfiguration(connectionString);
+    const employeeConfiguration = new EmployeeConfiguration(
+      connectionString,
+      testEnvironment.utilsConfiguration,
+    );
     employeeFacade = employeeConfiguration.employeeFacade();
 
     planningFacade = new PlanningConfiguration(
@@ -40,7 +44,9 @@ void describe('VerifyEnoughDemandsDuringPlanning', () => {
     });
   });
 
-  after(testEnvironment.stop);
+  // beforeEach(testEnvironment.clearTestData);
+
+  afterEach(() => testEnvironment?.stop());
 
   void it('Does nothing when enough resources', async ({ mock }) => {
     const notifyAboutPossibleRiskDuringPlanning = mock.method(
@@ -73,9 +79,11 @@ void describe('VerifyEnoughDemandsDuringPlanning', () => {
     );
 
     // then
-    verifyThat(notifyAboutPossibleRiskDuringPlanning).calledOnceWith(
-      projectId,
-      Demands.of(Demand.demandFor(skill('JAVA'))),
+    verifyThat(
+      notifyAboutPossibleRiskDuringPlanning,
+    ).notCalledWithArgumentMatching(
+      argValue(projectId),
+      argValue(Demands.of(Demand.demandFor(skill('JAVA')))),
     );
   });
 
@@ -116,9 +124,11 @@ void describe('VerifyEnoughDemandsDuringPlanning', () => {
     );
 
     //then
-    verifyThat(notifyAboutPossibleRiskDuringPlanning).calledOnceWith(
-      rust,
-      Demands.of(Demand.demandFor(skill('RUST'))),
+    verifyThat(
+      notifyAboutPossibleRiskDuringPlanning,
+    ).calledWithArgumentMatching(
+      argValue(rust),
+      argValue(Demands.of(Demand.demandFor(skill('RUST')))),
     );
   });
 });

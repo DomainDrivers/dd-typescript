@@ -1,6 +1,6 @@
 import { AvailabilityConfiguration } from '#availability';
 import { SimulationConfiguration } from '#simulation';
-import { getDB, injectDatabaseContext } from '#storage';
+import { getDB, injectDatabase } from '#storage';
 import {
   Clock,
   UtilsConfiguration,
@@ -49,7 +49,7 @@ export class AllocationConfiguration {
       projectAllocationsRepository ?? this.projectAllocationsRepository();
     const getDB = getDatabase ?? (() => this.db());
 
-    return injectDatabaseContext(
+    return injectDatabase(
       new AllocationFacade(
         repository,
         this.availabilityConfiguration.availabilityFacade(),
@@ -57,29 +57,29 @@ export class AllocationConfiguration {
         eventPublisher ?? this.eventPublisher(),
         clock,
       ),
-      getDB,
+      getDB(),
     );
   };
 
   public potentialTransfersService = (
     projectAllocationsRepository?: ProjectAllocationsRepository,
   ) =>
-    injectDatabaseContext(
+    injectDatabase(
       new PotentialTransfersService(
         this.simulationConfiguration.simulationFacade(),
         this.cashflowConfiguration.cashflowFacade(),
         projectAllocationsRepository ?? this.projectAllocationsRepository(),
       ),
-      this.db,
+      this.db(),
     );
 
   public capabilityFinder = (): CapabilityFinder =>
-    injectDatabaseContext(
+    injectDatabase(
       new CapabilityFinder(
         this.availabilityConfiguration.availabilityFacade(),
         this.capabilityPlanningConfiguration.allocatableResourceRepository(),
       ),
-      this.db,
+      this.db(),
     );
 
   public projectAllocationsRepository = (): ProjectAllocationsRepository =>

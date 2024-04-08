@@ -51,6 +51,7 @@ export class RiskPeriodicCheckSagaDispatcher {
   }
 
   //remember about transactions spanning saga and potential external system
+  @dbconnection
   public async handleProjectAllocationsDemandsScheduled(
     event: ProjectAllocationsDemandsScheduled,
   ): Promise<void> {

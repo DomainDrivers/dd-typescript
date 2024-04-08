@@ -2,27 +2,28 @@ import { endPool, getDB } from '#storage';
 import {
   UtilsConfiguration,
   deepEquals,
-  getInMemoryEventsBus,
+  getTransactionAwareEventBus,
   isEventOfType,
   type Event,
-  type EventBus,
   type EventDataOf,
   type EventHandler,
   type EventTypeOf,
   type OptionalEventMetaData,
+  type TransactionAwareEventBus,
 } from '#utils';
 import {
   PostgreSqlContainer,
   type StartedPostgreSqlContainer,
 } from '@testcontainers/postgresql';
-import type { DrizzleConfig } from 'drizzle-orm';
+import { sql, type DrizzleConfig } from 'drizzle-orm';
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { assertThatArray } from '../asserts';
 
 let postgreSQLContainer: StartedPostgreSqlContainer | null = null;
 let startedCount = 0;
 
-type EventBusWrapper = EventBus & {
+type EventBusWrapper = TransactionAwareEventBus & {
   verifyPublishedEvent: <EventType extends Event>(
     type: EventTypeOf<EventType>,
     data: Omit<EventDataOf<EventType>, 'eventId' | 'occurredAt'> &
@@ -47,7 +48,9 @@ export interface TestConfiguration {
   clearTestData: () => Promise<void> | void;
 }
 
-const wrapEventBusForTests = (eventBus: EventBus): EventBusWrapper => {
+const wrapEventBusForTests = (
+  eventBus: TransactionAwareEventBus,
+): EventBusWrapper => {
   let publishedEvents: Event[] = [];
 
   return {
@@ -57,6 +60,9 @@ const wrapEventBusForTests = (eventBus: EventBus): EventBusWrapper => {
       await eventBus.publish(event);
       publishedEvents.push(event);
     },
+    enlist: (tx) => eventBus.enlist(tx),
+
+    commit: () => eventBus.commit(),
 
     subscribe: <EventType extends Event>(
       eventTypes: EventTypeOf<EventType>[],
@@ -107,12 +113,14 @@ const wrapEventBusForTests = (eventBus: EventBus): EventBusWrapper => {
 
 export const TestConfiguration = (
   utilsConfiguration?: UtilsConfiguration,
+  databaseName?: string,
   enableLogging: boolean = false,
 ): TestConfiguration => {
   let connectionString: string;
-  const eventBusWrapper = wrapEventBusForTests(getInMemoryEventsBus());
+  const eventBusWrapper = wrapEventBusForTests(getTransactionAwareEventBus());
   utilsConfiguration =
     utilsConfiguration ?? new UtilsConfiguration(eventBusWrapper);
+  let drizzleConfig: DrizzleConfig;
 
   return {
     eventBus: eventBusWrapper,
@@ -120,14 +128,18 @@ export const TestConfiguration = (
     start: async <
       TSchema extends Record<string, unknown> = Record<string, never>,
     >(
-      config?: DrizzleConfig<TSchema>,
+      config: DrizzleConfig<TSchema>,
     ): Promise<string> => {
       if (startedCount++ === 0 || postgreSQLContainer === null)
         postgreSQLContainer = await new PostgreSqlContainer(
           'postgres:15-alpine',
-        ).start();
+        )
+          .withDatabase(databaseName ?? 'test')
+          .start();
 
       connectionString = postgreSQLContainer.getConnectionUri();
+      drizzleConfig = config as DrizzleConfig;
+
       if (enableLogging) console.log('connectionstring: ' + connectionString);
 
       const database = getDB<TSchema>(connectionString, config);
@@ -147,6 +159,30 @@ export const TestConfiguration = (
       }
     },
 
-    clearTestData: () => eventBusWrapper.clearPublishedHistory(),
+    clearTestData: async () => {
+      eventBusWrapper.clearPublishedHistory();
+      await clearDb(getDB(connectionString, drizzleConfig));
+    },
   };
+};
+
+const clearDb = async <
+  TSchema extends Record<string, unknown> = Record<string, never>,
+>(
+  db: NodePgDatabase<TSchema>,
+): Promise<void> => {
+  const query = sql<string>`SELECT table_name
+      FROM information_schema.tables
+      WHERE table_schema = 'public'
+        AND table_type = 'BASE TABLE';
+    `;
+
+  const tables = await db.execute(query);
+
+  for (const table of tables.rows) {
+    const query = sql.raw(
+      `TRUNCATE TABLE ${table.table_name?.toString()} CASCADE;`,
+    );
+    await db.execute(query);
+  }
 };

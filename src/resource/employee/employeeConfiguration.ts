@@ -2,8 +2,9 @@ import {
   CapabilityPlanningConfiguration,
   type CapabilityScheduler,
 } from '#allocation';
-import { getDB, injectDatabaseContext } from '#storage';
+import { getDB, injectDatabase } from '#storage';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import type { UtilsConfiguration } from '../../utils';
 import * as schema from '../schema';
 import { EmployeeFacade } from './employeeFacade';
 import {
@@ -15,6 +16,7 @@ import { ScheduleEmployeeCapabilities } from './scheduleEmployeeCapabilities';
 export class EmployeeConfiguration {
   constructor(
     public readonly connectionString: string,
+    public readonly utils: UtilsConfiguration,
     public readonly capabilityPlanningConfiguration: CapabilityPlanningConfiguration = new CapabilityPlanningConfiguration(
       connectionString,
     ),
@@ -25,7 +27,7 @@ export class EmployeeConfiguration {
     capabilityScheduler?: CapabilityScheduler,
   ): EmployeeFacade => {
     employeeRepository = employeeRepository ?? this.employeeRepository();
-    return injectDatabaseContext(
+    return injectDatabase(
       new EmployeeFacade(
         employeeRepository,
         new ScheduleEmployeeCapabilities(
@@ -34,7 +36,8 @@ export class EmployeeConfiguration {
             this.capabilityPlanningConfiguration.capabilityScheduler(),
         ),
       ),
-      this.db,
+      this.db(),
+      this.utils.eventBus.commit,
     );
   };
 

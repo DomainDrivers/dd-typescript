@@ -1,3 +1,4 @@
+import type { EnlistableInTransaction, PostTransactionCommit } from '#storage';
 import { ObjectMap } from '#utils';
 import { type Event, type EventTypeOf } from './event';
 
@@ -17,6 +18,49 @@ export interface EventsSubscriber {
 }
 
 export interface EventBus extends EventsPublisher, EventsSubscriber {}
+
+export type TransactionAwareEventBus = EventBus &
+  PostTransactionCommit &
+  EnlistableInTransaction;
+
+export const getTransactionAwareEventBus = (
+  bus?: EventBus,
+): TransactionAwareEventBus => {
+  const eventBus = bus ?? getInMemoryEventsBus();
+
+  let enlisted: boolean = false;
+
+  let scheduled: Event[] = [];
+
+  const commit = async () => {
+    for (const event of scheduled) {
+      await eventBus.publish(event);
+    }
+    scheduled = [];
+  };
+
+  return {
+    publish: <EventType extends Event = Event>(
+      event: EventType,
+    ): Promise<void> => {
+      if (enlisted) {
+        scheduled = [...scheduled, event];
+        return Promise.resolve();
+      }
+
+      return eventBus.publish(event);
+    },
+
+    subscribe: <EventType extends Event>(
+      eventTypes: EventTypeOf<EventType>[],
+      eventHandler: EventHandler<EventType>,
+    ): void => eventBus?.subscribe(eventTypes, eventHandler),
+    commit,
+    enlist: (): void => {
+      enlisted = true;
+    },
+  };
+};
 
 export const getInMemoryEventsBus = (): EventBus => {
   const allHandlers = ObjectMap.empty<string, EventHandler[]>();
