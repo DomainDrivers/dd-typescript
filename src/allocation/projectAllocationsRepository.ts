@@ -18,6 +18,7 @@ import * as schema from './schema';
 
 export interface ProjectAllocationsRepository
   extends Repository<ProjectAllocations, ProjectAllocationsId> {
+  findAllById(ids: ProjectAllocationsId[]): Promise<ProjectAllocations[]>;
   findAll(): Promise<ProjectAllocations[]>;
 }
 

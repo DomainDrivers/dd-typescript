@@ -11,3 +11,4 @@ export {
 export { availabilities, availability } from '../availability/schema';
 export { planning, projects } from '../planning/schema';
 export { devices, employees, resources } from '../resource/schema';
+export { projectRiskSagas, risk } from '../risk/schema';

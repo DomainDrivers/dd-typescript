@@ -1,7 +1,7 @@
 import { getDB, injectDatabaseContext } from '#storage';
 import { UtilsConfiguration } from '#utils';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { CashflowFacade } from './cashflowFacade';
+import { CashFlowFacade } from './cashflowFacade';
 import {
   DrizzleCashflowRepository,
   type CashflowRepository,
@@ -13,23 +13,17 @@ export class CashflowConfiguration {
     public readonly connectionString: string,
     private readonly utils: UtilsConfiguration = new UtilsConfiguration(),
     private readonly enableLogging: boolean = false,
-  ) {
-    console.log('connectionstring: ' + this.connectionString);
-  }
+  ) {}
 
   public cashflowFacade = (
     cashflowRepository?: CashflowRepository,
     getDatabase?: () => NodePgDatabase<typeof schema>,
-  ): CashflowFacade => {
+  ): CashFlowFacade => {
     const repository = cashflowRepository ?? this.cashflowRepository();
     const getDB = getDatabase ?? (() => this.db());
 
     return injectDatabaseContext(
-      new CashflowFacade(
-        repository,
-        this.utils.eventsPublisher,
-        this.utils.clock,
-      ),
+      new CashFlowFacade(repository, this.utils.eventBus, this.utils.clock),
       getDB,
     );
   };

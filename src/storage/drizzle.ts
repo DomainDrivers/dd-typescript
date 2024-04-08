@@ -82,8 +82,6 @@ export abstract class DrizzleRepository<
         .where(eq(this.idColumn, id))
     ).length > 0;
 
-  public abstract findAllById(ids: Id[]): Promise<Entity[]>;
-
   public abstract save(entity: Entity): Promise<void>;
 
   protected upsert = async <

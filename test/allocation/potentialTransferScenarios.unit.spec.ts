@@ -50,6 +50,8 @@ describe('PotentialTransferScenarios', () => {
 
   const potentialTransfers = new PotentialTransfersService(
     new SimulationFacade(new OptimizationFacade()),
+    null!,
+    null!,
   );
 
   it('simulates moving capabilities to different project', () => {

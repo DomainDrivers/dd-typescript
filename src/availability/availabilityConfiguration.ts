@@ -4,6 +4,7 @@ import { ResourceAvailabilityReadModel } from '.';
 import { UtilsConfiguration } from '../utils';
 import { AvailabilityFacade } from './availabilityFacade';
 import { ResourceAvailabilityRepository } from './resourceAvailabilityRepository';
+import * as schema from './schema';
 
 export class AvailabilityConfiguration {
   constructor(
@@ -14,7 +15,7 @@ export class AvailabilityConfiguration {
   public availabilityFacade = (
     resourceAvailabilityRepository?: ResourceAvailabilityRepository,
     resourceAvailabilityReadModel?: ResourceAvailabilityReadModel,
-    getDatabase?: () => NodePgDatabase,
+    getDatabase?: () => NodePgDatabase<typeof schema>,
   ): AvailabilityFacade => {
     const getDB = getDatabase ?? (() => this.db());
     const repository =
@@ -27,7 +28,7 @@ export class AvailabilityConfiguration {
       new AvailabilityFacade(
         repository,
         readModel,
-        this.utilsConfiguration.eventsPublisher,
+        this.utilsConfiguration.eventBus,
         this.utilsConfiguration.clock,
       ),
       getDB,
@@ -40,6 +41,6 @@ export class AvailabilityConfiguration {
   public resourceAvailabilityReadModel = (): ResourceAvailabilityReadModel =>
     new ResourceAvailabilityReadModel();
 
-  public db = (cs?: string): NodePgDatabase =>
-    getDB(cs ?? this.connectionString);
+  public db = (cs?: string): NodePgDatabase<typeof schema> =>
+    getDB(cs ?? this.connectionString, { schema });
 }

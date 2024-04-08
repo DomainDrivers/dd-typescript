@@ -24,6 +24,8 @@ type RawQueryType = Omit<
 
 export interface AllocatableCapabilityRepository
   extends Repository<AllocatableCapability, AllocatableCapabilityId> {
+  findAllById(ids: AllocatableCapabilityId[]): Promise<AllocatableCapability[]>;
+
   findByCapabilityWithin(
     name: string,
     type: string,

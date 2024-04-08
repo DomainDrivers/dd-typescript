@@ -8,6 +8,6 @@ export type NeededResourcesChosen = Event<
   {
     projectId: ProjectId;
     neededResources: ObjectSet<ResourceId>;
-    stageTimeSlot: TimeSlot;
+    timeSlot: TimeSlot;
   }
 >;

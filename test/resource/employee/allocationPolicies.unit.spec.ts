@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import { CapabilitySelector } from '#allocation';
 import {
   EmployeeAllocationPolicy,
   EmployeeId,
@@ -7,7 +8,6 @@ import {
 } from '#resource';
 import { Capability } from '#shared';
 import { describe, it } from 'node:test';
-import { CapabilitySelector } from '../../../src/allocation';
 import { assertThatArray } from '../../asserts';
 
 const permissionsInMultipleProjects =
@@ -17,8 +17,6 @@ const permission = Capability.permission;
 const skill = Capability.skill;
 
 describe('AllocationsToProject', () => {
-  it('can allocate', () => {});
-
   it('Default policy should return just one skill at once', () => {
     //given
     const employee = new EmployeeSummary(

@@ -11,14 +11,14 @@ export type EventHandler<E extends Event = Event> = (
 
 export interface EventsSubscriber {
   subscribe<EventType extends Event>(
+    eventTypes: EventTypeOf<EventType>[],
     eventHandler: EventHandler<EventType>,
-    ...eventTypes: EventTypeOf<EventType>[]
   ): void;
 }
 
 export interface EventBus extends EventsPublisher, EventsSubscriber {}
 
-export const getInMemoryEventsBus = (): EventsPublisher & EventsSubscriber => {
+export const getInMemoryEventsBus = (): EventBus => {
   const allHandlers = ObjectMap.empty<string, EventHandler[]>();
 
   return {
@@ -31,8 +31,8 @@ export const getInMemoryEventsBus = (): EventsPublisher & EventsSubscriber => {
       }
     },
     subscribe: <EventType extends Event>(
+      eventTypes: EventTypeOf<EventType>[],
       eventHandler: EventHandler<EventType>,
-      ...eventTypes: EventTypeOf<EventType>[]
     ): void => {
       for (const eventType of eventTypes) {
         allHandlers

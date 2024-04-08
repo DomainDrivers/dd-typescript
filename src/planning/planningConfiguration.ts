@@ -21,8 +21,6 @@ export class PlanningConfiguration {
     ),
   ) {}
 
-  public static readonly schema = schema;
-
   public planningFacade = (
     projectRepository?: ProjectRepository,
     planChosenResources?: PlanChosenResources,
@@ -40,7 +38,7 @@ export class PlanningConfiguration {
             this.planChosenResourcesService(repository),
             getDB,
           ),
-        this.utilsConfiguration.eventsPublisher,
+        this.utilsConfiguration.eventBus,
         this.utilsConfiguration.clock,
       ),
       getDB,
@@ -51,7 +49,7 @@ export class PlanningConfiguration {
     new PlanChosenResources(
       projectRepository ?? this.projectRepository(),
       this.availabilityConfiguration.availabilityFacade(),
-      this.utilsConfiguration.eventsPublisher,
+      this.utilsConfiguration.eventBus,
       this.utilsConfiguration.clock,
     );
 

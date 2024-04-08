@@ -9,6 +9,7 @@ import {
   type EventDataOf,
   type EventHandler,
   type EventTypeOf,
+  type OptionalEventMetaData,
 } from '#utils';
 import {
   PostgreSqlContainer,
@@ -16,7 +17,6 @@ import {
 } from '@testcontainers/postgresql';
 import type { DrizzleConfig } from 'drizzle-orm';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
-import type { OptionalEventMetaData } from '../../src/utils/event';
 import { assertThatArray } from '../asserts';
 
 let postgreSQLContainer: StartedPostgreSqlContainer | null = null;
@@ -59,9 +59,9 @@ const wrapEventBusForTests = (eventBus: EventBus): EventBusWrapper => {
     },
 
     subscribe: <EventType extends Event>(
+      eventTypes: EventTypeOf<EventType>[],
       eventHandler: EventHandler<EventType>,
-      ...eventTypes: EventTypeOf<EventType>[]
-    ): void => eventBus.subscribe(eventHandler, ...eventTypes),
+    ): void => eventBus.subscribe(eventTypes, eventHandler),
 
     verifyPublishedEvent: <EventType extends Event>(
       type: EventTypeOf<EventType>,

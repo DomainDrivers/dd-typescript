@@ -32,6 +32,39 @@ export function assertIsNull<T extends object>(
   assert.equal(result, null);
 }
 
+type Call = {
+  arguments: unknown[];
+  result: unknown;
+  target: unknown;
+  this: unknown;
+};
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type MockedFunction = Function & { mock?: { calls: Call[] } };
+
+export function verifyThat(fn: MockedFunction) {
+  return {
+    calledTimes: (times: number) => {
+      assertEquals(fn.mock?.calls?.length, times);
+    },
+    notCalled: () => {
+      assertEquals(fn?.mock?.calls?.length, 0);
+    },
+    called: () => {
+      assertTrue(
+        fn.mock?.calls.length !== undefined && fn.mock.calls.length > 0,
+      );
+    },
+    calledOnceWith: (...args: unknown[]) => {
+      assertTrue(
+        fn.mock?.calls.length !== undefined &&
+          fn.mock.calls.length === 1 &&
+          deepEquals(fn.mock.calls[0].arguments, args),
+      );
+    },
+  };
+}
+
 export const assertThatArray = <T>(array: T[]) => {
   return {
     isEmpty: () => assert.equal(array.length, 0),

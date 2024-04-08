@@ -33,7 +33,7 @@ const calculateNumberOfSegments = (
   segmentInMinutesDuration: number,
 ): number => {
   return Math.ceil(
-    Duration.toMinutes(Duration.between(timeSlot.to, timeSlot.from)) /
+    Duration.toMinutes(Duration.between(timeSlot.from, timeSlot.to)) /
       segmentInMinutesDuration,
   );
 };

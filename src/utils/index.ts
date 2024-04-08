@@ -8,6 +8,7 @@ export {
   type EventDataOf,
   type EventMetaData,
   type EventTypeOf,
+  type OptionalEventMetaData,
 } from './event';
 export {
   getInMemoryEventsBus,

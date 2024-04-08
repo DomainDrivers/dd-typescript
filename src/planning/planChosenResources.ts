@@ -30,18 +30,18 @@ export class PlanChosenResources {
     project.addChosenResources(
       new ChosenResources(chosenResources, timeBoundaries),
     );
+    await this.repository.save(project);
     await this.eventsPublisher.publish(
       event<NeededResourcesChosen>(
         'NeededResourcesChosen',
         {
           projectId,
           neededResources: chosenResources,
-          stageTimeSlot: timeBoundaries,
+          timeSlot: timeBoundaries,
         },
         this.clock,
       ),
     );
-    await this.repository.save(project);
   }
 
   @transactional

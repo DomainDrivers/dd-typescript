@@ -5,4 +5,5 @@ export { Demands } from './demands';
 export { ProjectId } from './projectId';
 export { SimulatedCapabilities } from './simulatedCapabilities';
 export { SimulatedProject } from './simulatedProject';
+export { SimulationConfiguration } from './simulationConfiguration';
 export { SimulationFacade } from './simulationFacade';

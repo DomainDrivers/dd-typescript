@@ -1,6 +1,6 @@
 import { dbconnection, transactional } from '#storage';
 import type { ProjectAllocationsId } from '..';
-import { UUID, type Clock, type EventsPublisher } from '../../utils';
+import { ObjectMap, UUID, type Clock, type EventsPublisher } from '../../utils';
 import { Cashflow } from './cashflow';
 import type { CashflowRepository } from './cashflowRepository';
 import type { Cost } from './cost';
@@ -8,9 +8,9 @@ import type { Earnings } from './earnings';
 import type { EarningsRecalculated } from './earningsRecalculated';
 import type { Income } from './income';
 
-export class CashflowFacade {
+export class CashFlowFacade {
   constructor(
-    private readonly repository: CashflowRepository,
+    private readonly cashflowRepository: CashflowRepository,
     private readonly eventsPublisher: EventsPublisher,
     private readonly clock: Clock,
   ) {}
@@ -22,7 +22,8 @@ export class CashflowFacade {
     cost: Cost,
   ): Promise<void> {
     const cashflow =
-      (await this.repository.findById(projectId)) ?? new Cashflow(projectId);
+      (await this.cashflowRepository.findById(projectId)) ??
+      new Cashflow(projectId);
     cashflow.update(income, cost);
 
     const event: EarningsRecalculated = {
@@ -35,12 +36,24 @@ export class CashflowFacade {
       },
     };
     await this.eventsPublisher.publish(event);
-    await this.repository.save(cashflow);
+    await this.cashflowRepository.save(cashflow);
   }
 
   @dbconnection
   public async find(projectId: ProjectAllocationsId): Promise<Earnings> {
-    const byId = await this.repository.getById(projectId);
+    const byId = await this.cashflowRepository.getById(projectId);
     return byId.earnings();
+  }
+
+  @dbconnection
+  public async findAllEarnings(): Promise<
+    ObjectMap<ProjectAllocationsId, Earnings>
+  > {
+    return ObjectMap.from(
+      (await this.cashflowRepository.findAll()).map((cashflow) => [
+        cashflow.projectId,
+        cashflow.earnings(),
+      ]),
+    );
   }
 }

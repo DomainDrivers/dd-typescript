@@ -4,6 +4,13 @@ export interface Clock {
   now: () => UTCDate;
 }
 
-export const Clock: Clock = {
+type WithFixed = { fixed: (date: UTCDate) => Clock };
+
+export const Clock: Clock & WithFixed = {
+  fixed: (date: UTCDate): Clock => {
+    return {
+      now: () => date,
+    };
+  },
   now: () => new UTCDate(),
 };

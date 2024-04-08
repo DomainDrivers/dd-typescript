@@ -5,7 +5,7 @@ import {
   Earnings,
   Income,
   ProjectAllocationsId,
-  type CashflowFacade,
+  type CashFlowFacade,
   type EarningsRecalculated,
 } from '#allocation';
 import * as schema from '#schema';
@@ -15,7 +15,7 @@ import { TestConfiguration } from '../../setup';
 
 describe('CapabilityAllocating', () => {
   const testEnvironment = TestConfiguration();
-  let cashFlowFacade: CashflowFacade;
+  let cashFlowFacade: CashFlowFacade;
 
   before(async () => {
     const connectionString = await testEnvironment.start({ schema });

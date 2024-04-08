@@ -1,5 +1,6 @@
 export type { CapacityDimension, WeightDimension } from './dimension';
 export { Item } from './item';
+export { OptimizationConfiguration } from './optimizationConfiguration';
 export {
   OptimizationFacade,
   compareItemValueReversed,

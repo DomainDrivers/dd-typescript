@@ -46,7 +46,6 @@ export class AllocationFacade {
       scheduledDemands,
       timeSlot,
     );
-    await this.projectAllocationsRepository.save(projectAllocations);
 
     await this.eventsPublisher.publish(
       event<ProjectAllocationScheduled>(
@@ -58,6 +57,7 @@ export class AllocationFacade {
         this.clock,
       ),
     );
+    await this.projectAllocationsRepository.save(projectAllocations);
     return projectId;
   }
 
@@ -210,8 +210,9 @@ export class AllocationFacade {
   ): Promise<void> {
     const projectAllocations =
       await this.projectAllocationsRepository.getById(projectId);
-    projectAllocations.defineSlot(fromTo, this.clock.now());
+    const event = projectAllocations.defineSlot(fromTo, this.clock.now());
     await this.projectAllocationsRepository.save(projectAllocations);
+    if (event) await this.eventsPublisher.publish(event);
   }
 
   @transactional
@@ -223,7 +224,7 @@ export class AllocationFacade {
       (await this.projectAllocationsRepository.findById(projectId)) ??
       ProjectAllocations.empty(projectId);
     const event = projectAllocations.addDemands(demands, this.clock.now());
-    if (event) await this.eventsPublisher.publish(event);
     await this.projectAllocationsRepository.save(projectAllocations);
+    if (event) await this.eventsPublisher.publish(event);
   }
 }

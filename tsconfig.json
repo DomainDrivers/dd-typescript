@@ -55,6 +55,7 @@
       "#optimization": ["./src/optimization"],
       "#planning": ["./src/planning"],
       "#resource": ["./src/resource"],
+      "#risk": ["./src/risk"],
       "#shared": ["./src/shared"],
       "#schema": ["./src/schema"],
       "#simulation": ["./src/simulation"],
