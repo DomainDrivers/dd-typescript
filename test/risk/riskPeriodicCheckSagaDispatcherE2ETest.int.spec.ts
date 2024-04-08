@@ -25,6 +25,7 @@ import {
 } from '#risk';
 import * as schema from '#schema';
 import { Capability, TimeSlot } from '#shared';
+import { ProjectId } from '#simulation';
 import { Clock, ObjectMap, ObjectSet, UUID, deepEquals, event } from '#utils';
 import { UTCDate } from '@date-fns/utc';
 import { addDays, subDays } from 'date-fns';

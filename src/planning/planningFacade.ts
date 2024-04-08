@@ -97,6 +97,7 @@ export class PlanningFacade {
   ): Promise<void> {
     const project = await this.repository.getById(projectId);
     project.addDemandsPerStage(demandsPerStage);
+    await this.repository.save(project);
     await this.eventsPublisher.publish(
       event<CapabilitiesDemanded>(
         'CapabilitiesDemanded',
@@ -107,7 +108,6 @@ export class PlanningFacade {
         this.clock,
       ),
     );
-    return this.repository.save(project);
   }
 
   @transactional

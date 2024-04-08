@@ -51,80 +51,72 @@ void describe('Specialized Waterfall', () => {
 
   after(testEnvironment.stop);
 
-  void it(
-    'specialized waterfall project process',
-    { skip: 'not implemented yet' },
-    async () => {
-      //given
-      const projectId = await projectFacade.addNewProject('waterfall');
-      //and
-      const criticalStageDuration = Duration.ofDays(5);
-      const stage1Duration = Duration.ofDays(1);
-      const stageBeforeCritical = new Stage('stage1').ofDuration(
-        stage1Duration,
-      );
-      const criticalStage = new Stage('stage2').ofDuration(
-        criticalStageDuration,
-      );
-      const stageAfterCritical = new Stage('stage3').ofDuration(
-        Duration.ofDays(3),
-      );
-      await projectFacade.defineProjectStages(
-        projectId,
-        stageBeforeCritical,
-        criticalStage,
-        stageAfterCritical,
-      );
+  void it('specialized waterfall project process', async () => {
+    //given
+    const projectId = await projectFacade.addNewProject('waterfall');
+    //and
+    const criticalStageDuration = Duration.ofDays(5);
+    const stage1Duration = Duration.ofDays(1);
+    const stageBeforeCritical = new Stage('stage1').ofDuration(stage1Duration);
+    const criticalStage = new Stage('stage2').ofDuration(criticalStageDuration);
+    const stageAfterCritical = new Stage('stage3').ofDuration(
+      Duration.ofDays(3),
+    );
+    await projectFacade.defineProjectStages(
+      projectId,
+      stageBeforeCritical,
+      criticalStage,
+      stageAfterCritical,
+    );
 
-      //and
-      const criticalResourceName = ResourceId.newOne();
-      const criticalCapabilityAvailability =
-        resourceAvailableForCapabilityInPeriod(
-          criticalResourceName,
-          Capability.skill('JAVA'),
-          JAN_1_6,
-        );
-
-      //when
-      await projectFacade.planCriticalStageWithResource(
-        projectId,
-        criticalStage,
+    //and
+    const criticalResourceName = ResourceId.newOne();
+    const criticalCapabilityAvailability =
+      resourceAvailableForCapabilityInPeriod(
         criticalResourceName,
-        JAN_4_8,
-      );
-
-      //then
-      await verifyResourcesNotAvailable(
-        projectId,
-        criticalCapabilityAvailability,
-        JAN_4_8,
-      );
-
-      //when
-      await projectFacade.planCriticalStageWithResource(
-        projectId,
-        criticalStage,
-        criticalResourceName,
+        Capability.skill('JAVA'),
         JAN_1_6,
       );
 
-      //then
-      await assertResourcesAvailable(projectId, criticalCapabilityAvailability);
-      //and
-      const project = await projectFacade.load(projectId);
-      const schedule = project.schedule;
+    //when
+    await projectFacade.planCriticalStageWithResource(
+      projectId,
+      criticalStage,
+      criticalResourceName,
+      JAN_4_8,
+    );
 
-      assertThat(schedule)
-        .hasStage('stage1')
-        .withSlot(JAN_1_2)
-        .and()
-        .hasStage('stage2')
-        .withSlot(JAN_1_6)
-        .and()
-        .hasStage('stage3')
-        .withSlot(JAN_1_4);
-    },
-  );
+    //then
+    await verifyResourcesNotAvailable(
+      projectId,
+      criticalCapabilityAvailability,
+      JAN_4_8,
+    );
+
+    //when
+    await projectFacade.planCriticalStageWithResource(
+      projectId,
+      criticalStage,
+      criticalResourceName,
+      JAN_1_6,
+    );
+
+    //then
+    await assertResourcesAvailable(projectId, criticalCapabilityAvailability);
+    //and
+    const project = await projectFacade.load(projectId);
+    const schedule = project.schedule;
+
+    assertThat(schedule)
+      .hasStage('stage1')
+      .withSlot(JAN_1_2)
+      .and()
+      .hasStage('stage2')
+      .withSlot(JAN_1_6)
+      .and()
+      .hasStage('stage3')
+      .withSlot(JAN_1_4);
+  });
 
   const assertResourcesAvailable = (
     projectId: ProjectId,

@@ -55,7 +55,7 @@ describe('Standard Waterfall', () => {
 
   after(testEnvironment.stop);
 
-  it('waterfall project process', { skip: 'not implemented yet' }, async () => {
+  it('waterfall project process', async () => {
     //given
     const projectId = await projectFacade.addNewProject('waterfall');
 

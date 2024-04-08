@@ -46,42 +46,38 @@ describe('Time Critical Waterfall', () => {
 
   after(testEnvironment.stop);
 
-  it(
-    'time critical waterfall project process',
-    { skip: 'not implemented yet' },
-    async () => {
-      //given
-      const projectId = await projectFacade.addNewProject('waterfall');
-      //and
-      const stageBeforeCritical = new Stage('stage1').ofDuration(
-        Duration.ofDays(2),
-      );
-      const criticalStage = new Stage('stage2').ofDuration(JAN_1_5.duration());
-      const stageAfterCritical = new Stage('stage3').ofDuration(
-        Duration.ofDays(3),
-      );
-      await projectFacade.defineProjectStages(
-        projectId,
-        stageBeforeCritical,
-        criticalStage,
-        stageAfterCritical,
-      );
+  it('time critical waterfall project process', async () => {
+    //given
+    const projectId = await projectFacade.addNewProject('waterfall');
+    //and
+    const stageBeforeCritical = new Stage('stage1').ofDuration(
+      Duration.ofDays(2),
+    );
+    const criticalStage = new Stage('stage2').ofDuration(JAN_1_5.duration());
+    const stageAfterCritical = new Stage('stage3').ofDuration(
+      Duration.ofDays(3),
+    );
+    await projectFacade.defineProjectStages(
+      projectId,
+      stageBeforeCritical,
+      criticalStage,
+      stageAfterCritical,
+    );
 
-      //when
-      await projectFacade.planCriticalStage(projectId, criticalStage, JAN_1_5);
+    //when
+    await projectFacade.planCriticalStage(projectId, criticalStage, JAN_1_5);
 
-      //then
-      const project = await projectFacade.load(projectId);
-      const schedule = project.schedule;
-      assertThat(schedule)
-        .hasStage('stage1')
-        .withSlot(JAN_1_3)
-        .and()
-        .hasStage('stage2')
-        .withSlot(JAN_1_5)
-        .and()
-        .hasStage('stage3')
-        .withSlot(JAN_1_4);
-    },
-  );
+    //then
+    const project = await projectFacade.load(projectId);
+    const schedule = project.schedule;
+    assertThat(schedule)
+      .hasStage('stage1')
+      .withSlot(JAN_1_3)
+      .and()
+      .hasStage('stage2')
+      .withSlot(JAN_1_5)
+      .and()
+      .hasStage('stage3')
+      .withSlot(JAN_1_4);
+  });
 });
