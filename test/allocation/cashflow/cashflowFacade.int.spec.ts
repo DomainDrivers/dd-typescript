@@ -6,23 +6,29 @@ import {
   Income,
   ProjectAllocationsId,
   type CashflowFacade,
+  type EarningsRecalculated,
 } from '#allocation';
 import * as schema from '#schema';
 import assert from 'node:assert';
-import { after, before, describe, it } from 'node:test';
+import { after, afterEach, before, describe, it } from 'node:test';
 import { TestConfiguration } from '../../setup';
 
 describe('CapabilityAllocating', () => {
   const testEnvironment = TestConfiguration();
-  let cashflowFacade: CashflowFacade;
+  let cashFlowFacade: CashflowFacade;
 
   before(async () => {
     const connectionString = await testEnvironment.start({ schema });
 
-    const configuration = new CashflowConfiguration(connectionString);
+    const configuration = new CashflowConfiguration(
+      connectionString,
+      testEnvironment.utilsConfiguration,
+    );
 
-    cashflowFacade = configuration.cashflowFacade();
+    cashFlowFacade = configuration.cashflowFacade();
   });
+
+  afterEach(testEnvironment.clearTestData);
 
   after(testEnvironment.stop);
 
@@ -31,13 +37,29 @@ describe('CapabilityAllocating', () => {
     const projectId = ProjectAllocationsId.newOne();
 
     //when
-    await cashflowFacade.addIncomeAndCost(
+    await cashFlowFacade.addIncomeAndCost(
       projectId,
       Income.of(100),
       Cost.of(50),
     );
 
     //then
-    assert.ok(Earnings.of(50).isEqualTo(await cashflowFacade.find(projectId)));
+    assert.ok(Earnings.of(50).isEqualTo(await cashFlowFacade.find(projectId)));
+  });
+
+  it('Updating cash flow emits an event', async () => {
+    //given
+    const projectId = ProjectAllocationsId.newOne();
+    const income = Income.of(100);
+    const cost = Cost.of(50);
+
+    //when
+    await cashFlowFacade.addIncomeAndCost(projectId, income, cost);
+
+    //then
+    testEnvironment.eventBus.verifyPublishedEvent<EarningsRecalculated>(
+      'EarningsRecalculated',
+      { projectId, earnings: Earnings.of(50) },
+    );
   });
 });

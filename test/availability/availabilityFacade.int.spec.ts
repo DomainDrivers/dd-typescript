@@ -5,13 +5,20 @@ import {
   Calendar,
   Owner,
   ResourceId,
+  type ResourceTakenOver,
 } from '#availability';
 import * as schema from '#schema';
 import { TimeSlot } from '#shared';
+import { ObjectSet } from '#utils';
 import { addMinutes } from 'date-fns';
 import assert from 'node:assert';
-import { after, before, describe, it } from 'node:test';
-import { assertFalse, assertThat, assertThatArray } from '../asserts';
+import { after, afterEach, before, describe, it } from 'node:test';
+import {
+  assertFalse,
+  assertThat,
+  assertThatArray,
+  assertTrue,
+} from '../asserts';
 import { TestConfiguration } from '../setup';
 
 describe('AvailabilityFacade', () => {
@@ -21,10 +28,15 @@ describe('AvailabilityFacade', () => {
   before(async () => {
     const connectionString = await testEnvironment.start({ schema });
 
-    const configuration = new AvailabilityConfiguration(connectionString);
+    const configuration = new AvailabilityConfiguration(
+      connectionString,
+      testEnvironment.utilsConfiguration,
+    );
 
     availabilityFacade = configuration.availabilityFacade();
   });
+
+  afterEach(testEnvironment.clearTestData);
 
   after(testEnvironment.stop);
 
@@ -293,6 +305,34 @@ describe('AvailabilityFacade', () => {
     );
     assertThatArray(dailyCalendar.takenBy(newRequester)).containsExactly(
       fifteenMinutes,
+    );
+  });
+
+  it('Resource taken over event is emitted after taking over the resource', async () => {
+    //given
+    const resourceId = ResourceId.newOne();
+    const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
+    const initialOwner = Owner.newOne();
+    const newOwner = Owner.newOne();
+    await availabilityFacade.createResourceSlots(resourceId, oneDay);
+    await availabilityFacade.block(resourceId, oneDay, initialOwner);
+
+    //when
+    const result = await availabilityFacade.disable(
+      resourceId,
+      oneDay,
+      newOwner,
+    );
+
+    //then
+    assertTrue(result);
+    testEnvironment.eventBus.verifyPublishedEvent<ResourceTakenOver>(
+      'ResourceTakenOver',
+      {
+        resourceId,
+        previousOwners: ObjectSet.of(initialOwner),
+        slot: oneDay,
+      },
     );
   });
 });

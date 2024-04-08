@@ -1,6 +1,6 @@
 import { AvailabilityConfiguration } from '#availability';
 import { getDB, injectDatabaseContext } from '#storage';
-import { Clock } from '#utils';
+import { Clock, getInMemoryEventsBus, type EventsPublisher } from '#utils';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { AllocationFacade, CapabilityPlanningConfiguration } from '.';
 import {
@@ -19,6 +19,7 @@ export class AllocationConfiguration {
 
   public allocationFacade = (
     clock: Clock = Clock,
+    eventPublisher?: EventsPublisher,
     projectAllocationsRepository?: ProjectAllocationsRepository,
     getDatabase?: () => NodePgDatabase<typeof schema>,
   ) => {
@@ -31,12 +32,11 @@ export class AllocationConfiguration {
         repository,
         new AvailabilityConfiguration(
           this.connectionString,
-          this.enableLogging,
         ).availabilityFacade(),
         new CapabilityPlanningConfiguration(
           this.connectionString,
-          this.enableLogging,
         ).capabilityFinder(),
+        eventPublisher ?? this.eventPublisher(),
         clock,
       ),
       getDB,
@@ -48,4 +48,6 @@ export class AllocationConfiguration {
 
   public db = (cs?: string): NodePgDatabase<typeof schema> =>
     getDB(cs ?? this.connectionString, { schema, logger: this.enableLogging });
+
+  public eventPublisher = (): EventsPublisher => getInMemoryEventsBus();
 }

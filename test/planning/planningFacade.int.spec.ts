@@ -8,6 +8,7 @@ import {
   PlanningConfiguration,
   Schedule,
   Stage,
+  type CapabilitiesDemanded,
   type PlanningFacade,
 } from '#planning';
 import * as schema from '#schema';
@@ -28,7 +29,10 @@ describe('PlanningFacade', () => {
   before(async () => {
     const connectionString = await testEnvironment.start({ schema });
 
-    const configuration = new PlanningConfiguration(connectionString);
+    const configuration = new PlanningConfiguration(
+      connectionString,
+      testEnvironment.utilsConfiguration,
+    );
 
     projectFacade = configuration.planningFacade();
   });
@@ -289,6 +293,26 @@ describe('PlanningFacade', () => {
     assert.ok(
       loaded.schedule.dates.filter((d) => dates.some((s) => deepEquals(s, d)))
         .length === loaded.schedule.dates.length,
+    );
+  });
+
+  it('Capabilities demanded event is emitted after adding demands', async () => {
+    //given
+    const projectId = await projectFacade.addNewProject(
+      'project',
+      new Stage('Stage1'),
+    );
+    //and
+    const demandForJava = Demands.of(demandFor(skill('JAVA')));
+    await projectFacade.addDemands(projectId, demandForJava);
+
+    //then
+    testEnvironment.eventBus.verifyPublishedEvent<CapabilitiesDemanded>(
+      'CapabilitiesDemanded',
+      {
+        projectId,
+        demands: demandForJava,
+      },
     );
   });
 });

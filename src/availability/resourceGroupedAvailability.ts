@@ -1,6 +1,6 @@
 import type { ResourceId } from '.';
 import type { TimeSlot } from '../shared';
-import { deepEquals } from '../utils';
+import { ObjectSet, deepEquals } from '../utils';
 import { Owner } from './owner';
 import { ResourceAvailability } from './resourceAvailability';
 import { ResourceAvailabilityId } from './resourceAvailabilityId';
@@ -85,4 +85,7 @@ export class ResourceGroupedAvailability {
     this.resourceAvailabilities.every((ra) => ra.blockedBy().byNone());
 
   public hasNoSlots = (): boolean => this.resourceAvailabilities.length === 0;
+
+  public owners = () =>
+    ObjectSet.from(this.resourceAvailabilities.map((ra) => ra.blockedBy()));
 }

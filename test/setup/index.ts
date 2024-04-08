@@ -1,25 +1,122 @@
 import { endPool, getDB } from '#storage';
 import {
+  UtilsConfiguration,
+  deepEquals,
+  getInMemoryEventsBus,
+  isEventOfType,
+  type Event,
+  type EventBus,
+  type EventDataOf,
+  type EventHandler,
+  type EventTypeOf,
+} from '#utils';
+import {
   PostgreSqlContainer,
   type StartedPostgreSqlContainer,
 } from '@testcontainers/postgresql';
 import type { DrizzleConfig } from 'drizzle-orm';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
-
-export interface TestConfiguration {
-  start: <TSchema extends Record<string, unknown> = Record<string, never>>(
-    config: DrizzleConfig<TSchema>,
-  ) => Promise<string>;
-  stop: () => Promise<void>;
-}
+import type { OptionalEventMetaData } from '../../src/utils/event';
+import { assertThatArray } from '../asserts';
 
 let postgreSQLContainer: StartedPostgreSqlContainer | null = null;
 let startedCount = 0;
 
-export const TestConfiguration = (): TestConfiguration => {
-  let connectionString: string;
+type EventBusWrapper = EventBus & {
+  verifyPublishedEvent: <EventType extends Event>(
+    type: EventTypeOf<EventType>,
+    data: Omit<EventDataOf<EventType>, 'eventId' | 'occurredAt'> &
+      OptionalEventMetaData,
+  ) => void;
+
+  verifyPublishedEventThatMatches: <EventType extends Event>(
+    type: EventTypeOf<EventType>,
+    matches: (event: EventType) => boolean,
+  ) => void;
+
+  clearPublishedHistory: () => void;
+};
+
+export interface TestConfiguration {
+  eventBus: EventBusWrapper;
+  utilsConfiguration: UtilsConfiguration;
+  start: <TSchema extends Record<string, unknown> = Record<string, never>>(
+    config: DrizzleConfig<TSchema>,
+  ) => Promise<string>;
+  stop: () => Promise<void>;
+  clearTestData: () => Promise<void> | void;
+}
+
+const wrapEventBusForTests = (eventBus: EventBus): EventBusWrapper => {
+  let publishedEvents: Event[] = [];
 
   return {
+    publish: async <EventType extends Event = Event>(
+      event: EventType,
+    ): Promise<void> => {
+      await eventBus.publish(event);
+      publishedEvents.push(event);
+    },
+
+    subscribe: <EventType extends Event>(
+      eventHandler: EventHandler<EventType>,
+      ...eventTypes: EventTypeOf<EventType>[]
+    ): void => eventBus.subscribe(eventHandler, ...eventTypes),
+
+    verifyPublishedEvent: <EventType extends Event>(
+      type: EventTypeOf<EventType>,
+      data: Omit<EventDataOf<EventType>, 'eventId' | 'occurredAt'> &
+        OptionalEventMetaData,
+    ): void =>
+      assertThatArray(publishedEvents).anyMatches((published) => {
+        const {
+          eventId: expectedEventId,
+          occurredAt: expectedOccurredAt,
+          data: expectedData,
+        } = data;
+        const {
+          eventId: actualEventId,
+          occurredAt: actualOccurredAt,
+          data: actualData,
+        } = data;
+
+        return (
+          published.type === type &&
+          deepEquals(expectedData, actualData) &&
+          (expectedEventId
+            ? expectedEventId === actualEventId
+            : !actualEventId) &&
+          (expectedOccurredAt
+            ? expectedOccurredAt === actualOccurredAt
+            : !actualOccurredAt)
+        );
+      }),
+
+    verifyPublishedEventThatMatches: <EventType extends Event>(
+      type: EventTypeOf<EventType>,
+      matches: (event: EventType) => boolean,
+    ) =>
+      assertThatArray(publishedEvents).anyMatches(
+        (published) =>
+          isEventOfType<EventType>(type, published) && matches(published),
+      ),
+
+    clearPublishedHistory: () => (publishedEvents = []),
+  };
+};
+
+export const TestConfiguration = (
+  utilsConfiguration?: UtilsConfiguration,
+  enableLogging: boolean = false,
+): TestConfiguration => {
+  let connectionString: string;
+  const eventBusWrapper = wrapEventBusForTests(getInMemoryEventsBus());
+  utilsConfiguration =
+    utilsConfiguration ?? new UtilsConfiguration(eventBusWrapper);
+
+  return {
+    eventBus: eventBusWrapper,
+    utilsConfiguration: utilsConfiguration,
     start: async <
       TSchema extends Record<string, unknown> = Record<string, never>,
     >(
@@ -31,6 +128,7 @@ export const TestConfiguration = (): TestConfiguration => {
         ).start();
 
       connectionString = postgreSQLContainer.getConnectionUri();
+      if (enableLogging) console.log('connectionstring: ' + connectionString);
 
       const database = getDB<TSchema>(connectionString, config);
 
@@ -48,5 +146,7 @@ export const TestConfiguration = (): TestConfiguration => {
         }
       }
     },
+
+    clearTestData: () => eventBusWrapper.clearPublishedHistory(),
   };
 };

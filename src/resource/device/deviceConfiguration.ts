@@ -15,10 +15,10 @@ import { ScheduleDeviceCapabilities } from './scheduleDeviceCapabilities';
 export class DeviceConfiguration {
   constructor(
     public readonly connectionString: string,
-    private readonly enableLogging: boolean = false,
-  ) {
-    console.log('connectionstring: ' + this.connectionString);
-  }
+    public readonly capabilityPlanningConfiguration: CapabilityPlanningConfiguration = new CapabilityPlanningConfiguration(
+      connectionString,
+    ),
+  ) {}
 
   deviceFacade = (
     deviceRepository?: DeviceRepository,
@@ -31,10 +31,7 @@ export class DeviceConfiguration {
         new ScheduleDeviceCapabilities(
           deviceRepository,
           capabilityScheduler ??
-            new CapabilityPlanningConfiguration(
-              this.connectionString,
-              this.enableLogging,
-            ).capabilityScheduler(),
+            this.capabilityPlanningConfiguration.capabilityScheduler(),
         ),
       ),
       this.db,
@@ -45,5 +42,5 @@ export class DeviceConfiguration {
     new DrizzleDeviceRepository();
 
   public db = (cs?: string): NodePgDatabase<typeof schema> =>
-    getDB(cs ?? this.connectionString, { schema, logger: this.enableLogging });
+    getDB(cs ?? this.connectionString, { schema });
 }

@@ -1,17 +1,17 @@
 import { Capability, TimeSlot } from '#shared';
-import { deepEquals } from '#utils';
+import { UUID, deepEquals, event } from '#utils';
 import type { UTCDate } from '@date-fns/utc';
 import {
   AllocatableCapabilityId,
   AllocatedCapability,
   Allocations,
   Demands,
-  ProjectAllocationScheduled,
   ProjectAllocationsId,
+  type ProjectAllocationScheduled,
 } from '.';
-import { CapabilitiesAllocated } from './capabilitiesAllocated';
-import { CapabilityReleased } from './capabilitiesReleased';
-import { ProjectAllocationsDemandsScheduled } from './projectAllocationDemandsScheduled';
+import { type CapabilitiesAllocated } from './capabilitiesAllocated';
+import { type CapabilityReleased } from './capabilitiesReleased';
+import { type ProjectAllocationsDemandsScheduled } from './projectAllocationDemandsScheduled';
 
 export class ProjectAllocations {
   #projectId: ProjectAllocationsId;
@@ -65,12 +65,16 @@ export class ProjectAllocations {
     }
     this.#allocations = newAllocations;
 
-    return new CapabilitiesAllocated(
-      allocatedCapability.allocatedCapabilityId,
-      this.#projectId,
-      this.missingDemands(),
-      when,
-    );
+    return {
+      type: 'CapabilitiesAllocated',
+      data: {
+        allocatedCapabilityId: allocatedCapability.allocatedCapabilityId,
+        projectId: this.#projectId,
+        missingDemands: this.missingDemands(),
+        occurredAt: when,
+        eventId: UUID.randomUUID(),
+      },
+    };
   };
 
   private nothingAllocated = (newAllocations: Allocations): boolean =>
@@ -92,7 +96,15 @@ export class ProjectAllocations {
       return null;
     }
     this.#allocations = newAllocations;
-    return new CapabilityReleased(this.#projectId, this.missingDemands(), when);
+    return {
+      type: 'CapabilityReleased',
+      data: {
+        projectId: this.#projectId,
+        missingDemands: this.missingDemands(),
+        occurredAt: when,
+        eventId: UUID.randomUUID(),
+      },
+    };
   };
 
   missingDemands = (): Demands =>
@@ -105,11 +117,16 @@ export class ProjectAllocations {
     when: UTCDate,
   ): ProjectAllocationScheduled | null => {
     this.#timeSlot = timeSlot;
-    return new ProjectAllocationScheduled(
-      this.#projectId,
-      this.#timeSlot,
-      when,
-    );
+
+    return {
+      type: 'ProjectAllocationScheduled',
+      data: {
+        fromTo: timeSlot,
+        projectId: this.#projectId,
+        occurredAt: when,
+        eventId: UUID.randomUUID(),
+      },
+    };
   };
 
   public addDemands = (
@@ -117,10 +134,13 @@ export class ProjectAllocations {
     when: UTCDate,
   ): ProjectAllocationsDemandsScheduled | null => {
     this.#demands = this.#demands.withNew(newDemands);
-    return new ProjectAllocationsDemandsScheduled(
-      this.#projectId,
-      this.missingDemands(),
-      when,
+    return event<ProjectAllocationsDemandsScheduled>(
+      'ProjectAllocationsDemandsScheduled',
+      {
+        projectId: this.#projectId,
+        missingDemands: this.missingDemands(),
+        occurredAt: when,
+      },
     );
   };
 

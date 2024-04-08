@@ -6,9 +6,7 @@ export class ResourceConfiguration {
   constructor(
     public readonly connectionString: string,
     private readonly enableLogging: boolean = false,
-  ) {
-    console.log('connectionstring: ' + this.connectionString);
-  }
+  ) {}
 
   resourceFacade = (
     employeeFacade: EmployeeFacade,

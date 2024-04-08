@@ -1,16 +1,24 @@
 import { AvailabilityFacade, Owner, ResourceId } from '#availability';
 import { Capability, type TimeSlot } from '#shared';
 import { dbconnection, transactional } from '#storage';
-import { Clock, ObjectSet, deepEquals, type UUID } from '#utils';
+import {
+  Clock,
+  ObjectSet,
+  UUID,
+  deepEquals,
+  event,
+  type EventsPublisher,
+} from '#utils';
 import {
   AllocatableCapabilitiesSummary,
   AllocatableCapabilityId,
   Allocations,
-  CapabilitiesAllocated,
   CapabilityFinder,
   Demands,
   ProjectAllocations,
   ProjectAllocationsId,
+  type CapabilitiesAllocated,
+  type ProjectAllocationScheduled,
 } from '.';
 import type { ProjectAllocationsRepository } from './projectAllocationsRepository';
 import { ProjectsAllocationsSummary } from './projectsAllocationsSummary';
@@ -20,6 +28,7 @@ export class AllocationFacade {
     private readonly projectAllocationsRepository: ProjectAllocationsRepository,
     private readonly availabilityFacade: AvailabilityFacade,
     private readonly capabilityFinder: CapabilityFinder,
+    private readonly eventsPublisher: EventsPublisher,
     private readonly clock: Clock,
   ) {}
 
@@ -36,6 +45,17 @@ export class AllocationFacade {
       timeSlot,
     );
     await this.projectAllocationsRepository.save(projectAllocations);
+
+    await this.eventsPublisher.publish(
+      event<ProjectAllocationScheduled>(
+        'ProjectAllocationScheduled',
+        {
+          fromTo: timeSlot,
+          projectId,
+        },
+        this.clock,
+      ),
+    );
     return projectId;
   }
 
@@ -79,7 +99,7 @@ export class AllocationFacade {
       capability,
       timeSlot,
     );
-    return event?.allocatedCapabilityId ?? null;
+    return event?.data.allocatedCapabilityId ?? null;
   }
 
   private allocate = async (
@@ -194,7 +214,8 @@ export class AllocationFacade {
     const projectAllocations =
       (await this.projectAllocationsRepository.findById(projectId)) ??
       ProjectAllocations.empty(projectId);
-    projectAllocations.addDemands(demands, this.clock.now());
+    const event = projectAllocations.addDemands(demands, this.clock.now());
+    if (event) await this.eventsPublisher.publish(event);
     await this.projectAllocationsRepository.save(projectAllocations);
   }
 }

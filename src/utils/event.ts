@@ -1,7 +1,11 @@
-import { UUID, type Flavour } from '#utils';
+import { Clock, UUID, type Flavour } from '#utils';
 import { UTCDate } from '@date-fns/utc';
 
 export type EventMetaData = Readonly<{ eventId: UUID; occurredAt: UTCDate }>;
+export type OptionalEventMetaData = Readonly<{
+  eventId?: UUID;
+  occurredAt?: UTCDate;
+}>;
 
 export type EventTypeOf<T extends Event> = T['type'];
 export type EventDataOf<T extends Event> = T['data'];
@@ -19,7 +23,21 @@ export type Event<
 
 export const event = <EventType extends Event>(
   type: EventTypeOf<EventType>,
-  data: EventDataOf<EventType>,
+  data: Omit<EventDataOf<EventType>, 'eventId' | 'occurredAt'> &
+    OptionalEventMetaData,
+  clock: Clock = Clock,
 ): EventType => {
-  return { type, data } as EventType;
+  return {
+    type,
+    data: {
+      eventId: UUID.randomUUID(),
+      occurredAt: clock.now(),
+      ...data,
+    },
+  } as EventType;
 };
+
+export const isEventOfType = <EventType extends Event>(
+  expectedType: EventTypeOf<EventType>,
+  event: Event,
+): event is EventType => event.type === expectedType;

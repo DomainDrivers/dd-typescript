@@ -10,12 +10,7 @@ import { CapabilityScheduler } from './capabilityScheduler';
 import * as schema from './schema';
 
 export class CapabilityPlanningConfiguration {
-  constructor(
-    public readonly connectionString: string,
-    private readonly enableLogging: boolean = false,
-  ) {
-    console.log('connectionstring: ' + this.connectionString);
-  }
+  constructor(public readonly connectionString: string) {}
 
   public capabilityFinder = (
     availabilityFacade?: AvailabilityFacade,
@@ -54,14 +49,11 @@ export class CapabilityPlanningConfiguration {
   };
 
   public availabilityFacade = () =>
-    new AvailabilityConfiguration(
-      this.connectionString,
-      this.enableLogging,
-    ).availabilityFacade();
+    new AvailabilityConfiguration(this.connectionString).availabilityFacade();
 
   public allocatableResourceRepository = (): AllocatableCapabilityRepository =>
     new DrizzleAllocatableCapabilityRepository();
 
   public db = (cs?: string): NodePgDatabase<typeof schema> =>
-    getDB(cs ?? this.connectionString, { schema, logger: this.enableLogging });
+    getDB(cs ?? this.connectionString, { schema });
 }
