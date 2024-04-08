@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
+import { CapabilitySelector } from '#allocation';
 import {
   EmployeeAllocationPolicy,
   EmployeeId,
@@ -7,7 +7,6 @@ import {
 } from '#resource';
 import { Capability } from '#shared';
 import { describe, it } from 'node:test';
-import { CapabilitySelector } from '../../../src/allocation';
 import { assertThatArray } from '../../asserts';
 
 const permissionsInMultipleProjects =
@@ -16,10 +15,8 @@ const simultaneous = EmployeeAllocationPolicy.simultaneous;
 const permission = Capability.permission;
 const skill = Capability.skill;
 
-describe('AllocationsToProject', () => {
-  it('can allocate', () => {});
-
-  it('Default policy should return just one skill at once', () => {
+void describe('AllocationsToProject', () => {
+  void it('Default policy should return just one skill at once', () => {
     //given
     const employee = new EmployeeSummary(
       EmployeeId.newOne(),
@@ -44,7 +41,7 @@ describe('AllocationsToProject', () => {
     );
   });
 
-  it('Permissions can be shared between projects', () => {
+  void it('Permissions can be shared between projects', () => {
     //given
     const policy = permissionsInMultipleProjects(3);
     const employee = new EmployeeSummary(
@@ -71,7 +68,7 @@ describe('AllocationsToProject', () => {
     );
   });
 
-  it('Can create composite policy', () => {
+  void it('Can create composite policy', () => {
     //given
     const policy = simultaneous(
       permissionsInMultipleProjects(3),

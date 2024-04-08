@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import { OptimizationFacade } from '#optimization';
 import { Capability, TimeSlot } from '#shared';
 import {
@@ -17,7 +16,7 @@ import { SimulatedProjectsBuilder } from './simulatedProjectsBuilder';
 const demandFor = Demand.demandFor;
 const skill = Capability.skill;
 
-describe('SimulationScenarios', () => {
+void describe('SimulationScenarios', () => {
   const JAN_1 = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
   const PROJECT_1 = ProjectId.newOne();
   const PROJECT_2 = ProjectId.newOne();
@@ -31,7 +30,7 @@ describe('SimulationScenarios', () => {
 
   const SimulatedCapabilities = () => new AvailableCapabilitiesBuilder();
 
-  it('picks optimal project based on earnings', () => {
+  void it('picks optimal project based on earnings', () => {
     //given
     const simulatedProjects = SimulatedProjects()
       .withProject(PROJECT_1)
@@ -66,7 +65,7 @@ describe('SimulationScenarios', () => {
     assert.equal(result.chosenItems.length, 2);
   });
 
-  it('picks all when enough capabilities', () => {
+  void it('picks all when enough capabilities', () => {
     //given
     const simulatedProjects = SimulatedProjects()
       .withProject(PROJECT_1)
@@ -95,7 +94,7 @@ describe('SimulationScenarios', () => {
     assert.equal(result.chosenItems.length, 1);
   });
 
-  it('can simulate having extra resources', () => {
+  void it('can simulate having extra resources', () => {
     //given
     const simulatedProjects = SimulatedProjects()
       .withProject(PROJECT_1)
@@ -135,7 +134,7 @@ describe('SimulationScenarios', () => {
     assert.ok(resultWithExtraResource.profit.eq(108));
   });
 
-  it('picks optimal project based on reputation', () => {
+  void it('picks optimal project based on reputation', () => {
     //given
     const simulatedProjects = SimulatedProjects()
       .withProject(PROJECT_1)
@@ -163,7 +162,7 @@ describe('SimulationScenarios', () => {
     assert.equal(result.chosenItems[0].name, PROJECT_1);
   });
 
-  it('check if it pays off to pay for capability', () => {
+  void it('check if it pays off to pay for capability', () => {
     //given
     const simulatedProjects = SimulatedProjects()
       .withProject(PROJECT_1)

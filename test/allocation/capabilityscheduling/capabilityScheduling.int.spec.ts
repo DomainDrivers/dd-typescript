@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   AllocatableCapabilityId,
   AllocatableCapabilitySummary,
@@ -22,7 +21,7 @@ import {
 } from '../../asserts';
 import { TestConfiguration } from '../../setup';
 
-describe('CapabilityScheduling', () => {
+void describe('CapabilityScheduling', () => {
   const testEnvironment = TestConfiguration();
   let capabilityScheduler: CapabilityScheduler;
   let capabilityFinder: CapabilityFinder;
@@ -53,7 +52,7 @@ describe('CapabilityScheduling', () => {
     return deepEquals(calendar.availableSlots(), [oneDay]);
   };
 
-  it('can schedule allocatable capabilities', async () => {
+  void it('can schedule allocatable capabilities', async () => {
     //given
     const javaSkill = CapabilitySelector.canJustPerform(
       Capability.skill('JAVA'),
@@ -80,7 +79,7 @@ describe('CapabilityScheduling', () => {
     );
   });
 
-  it('capability is found when capability present in time slot', async () => {
+  void it('capability is found when capability present in time slot', async () => {
     //given
     const fitnessClass = Capability.permission('FITNESS-CLASS');
     const uniqueSkill = CapabilitySelector.canJustPerform(fitnessClass);
@@ -110,7 +109,7 @@ describe('CapabilityScheduling', () => {
     assertEquals(found.all[0].timeSlot, oneDay);
   });
 
-  it('capability not found when capability not present', async () => {
+  void it('capability not found when capability not present', async () => {
     //given
     const admin = CapabilitySelector.canJustPerform(
       Capability.permission('ADMIN'),
@@ -131,7 +130,7 @@ describe('CapabilityScheduling', () => {
     assertThatArray(found.all).isEmpty();
   });
 
-  it('can schedule multiple capabilities of same type', async () => {
+  void it('can schedule multiple capabilities of same type', async () => {
     //given
     const loading = Capability.skill('LOADING_TRUCK');
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
@@ -152,7 +151,7 @@ describe('CapabilityScheduling', () => {
     assertThatArray(found.all).hasSize(3);
   });
 
-  it('can find capability ignoring availability', async () => {
+  void it('can find capability ignoring availability', async () => {
     //given
     const adminPermission = Capability.permission('REALLY_UNIQUE_ADMIN');
     const admin = CapabilitySelector.canJustPerform(adminPermission);
@@ -198,7 +197,7 @@ describe('CapabilityScheduling', () => {
     assertThatArray(inOverlappingSlot.all).isEmpty();
   });
 
-  it('Finding takes into account simulations capabilities', async () => {
+  void it('Finding takes into account simulations capabilities', async () => {
     //given
     const truckAssets = ObjectSet.of(
       Capability.asset('LOADING'),

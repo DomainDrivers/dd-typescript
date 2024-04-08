@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   CapabilityPlanningConfiguration,
   type CapabilityFinder,
@@ -14,7 +13,7 @@ import { after, before, describe, it } from 'node:test';
 import { assertEquals } from '../../asserts';
 import { TestConfiguration } from '../../setup';
 
-describe('ScheduleEmployeeCapabilities', () => {
+void describe('ScheduleEmployeeCapabilities', () => {
   const testEnvironment = TestConfiguration();
   let employeeFacade: EmployeeFacade;
   let capabilityFinder: CapabilityFinder;
@@ -22,7 +21,10 @@ describe('ScheduleEmployeeCapabilities', () => {
   before(async () => {
     const connectionString = await testEnvironment.start({ schema });
 
-    const configuration = new EmployeeConfiguration(connectionString);
+    const configuration = new EmployeeConfiguration(
+      connectionString,
+      testEnvironment.utilsConfiguration,
+    );
 
     employeeFacade = configuration.employeeFacade();
     capabilityFinder = new CapabilityPlanningConfiguration(
@@ -32,7 +34,7 @@ describe('ScheduleEmployeeCapabilities', () => {
 
   after(testEnvironment.stop);
 
-  it('can create and load employees', async () => {
+  void it('can create and load employees', async () => {
     //given
     const employee = await employeeFacade.addEmployee(
       'resourceName',

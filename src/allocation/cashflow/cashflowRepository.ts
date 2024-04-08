@@ -8,7 +8,9 @@ import { Income } from './income';
 import * as schema from './schema';
 
 export interface CashflowRepository
-  extends Repository<Cashflow, ProjectAllocationsId> {}
+  extends Repository<Cashflow, ProjectAllocationsId> {
+  findAll(): Promise<Cashflow[]>;
+}
 
 export class DrizzleCashflowRepository
   extends DrizzleRepository<Cashflow, ProjectAllocationsId, typeof schema>
@@ -35,6 +37,12 @@ export class DrizzleCashflowRepository
       .select()
       .from(schema.cashflows)
       .where(inArray(schema.cashflows.id, ids));
+
+    return result.map(mapToCashflow);
+  };
+
+  public findAll = async (): Promise<Cashflow[]> => {
+    const result = await this.db.select().from(schema.cashflows);
 
     return result.map(mapToCashflow);
   };

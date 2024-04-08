@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import { ResourceId } from '#availability';
 import {
   ChosenResources,
@@ -22,7 +21,7 @@ import { TestConfiguration } from '../setup';
 const demandFor = Demand.demandFor;
 const skill = Capability.skill;
 
-describe('PlanningFacade', () => {
+void describe('PlanningFacade', () => {
   const testEnvironment = TestConfiguration();
   let projectFacade: PlanningFacade;
 
@@ -39,7 +38,7 @@ describe('PlanningFacade', () => {
 
   after(async () => await testEnvironment.stop());
 
-  it('can create project and load project card', async () => {
+  void it('can create project and load project card', async () => {
     //given
     const projectId = await projectFacade.addNewProject(
       'project',
@@ -55,7 +54,7 @@ describe('PlanningFacade', () => {
     assert.equal(loaded.parallelizedStages.print(), 'Stage1');
   });
 
-  it('can load multiple projects', async () => {
+  void it('can load multiple projects', async () => {
     //given
     const projectId = await projectFacade.addNewProject(
       'project',
@@ -78,7 +77,7 @@ describe('PlanningFacade', () => {
     );
   });
 
-  it('can create and save more complex parallelization', async () => {
+  void it('can create and save more complex parallelization', async () => {
     //given
     const stage1 = new Stage('Stage1');
     let stage2 = new Stage('Stage2');
@@ -101,7 +100,7 @@ describe('PlanningFacade', () => {
     assert.equal(loaded.parallelizedStages.print(), 'Stage1 | Stage2 | Stage3');
   });
 
-  it('can plan demands', async () => {
+  void it('can plan demands', async () => {
     // given;
     const projectId = await projectFacade.addNewProject(
       'project',
@@ -117,7 +116,7 @@ describe('PlanningFacade', () => {
     assert.ok(deepEquals(loaded.demands, demandForJava));
   });
 
-  it('can plan new demands', async () => {
+  void it('can plan new demands', async () => {
     //given
     const projectId = await projectFacade.addNewProject(
       'project',
@@ -135,7 +134,7 @@ describe('PlanningFacade', () => {
     assert.ok(deepEquals(loaded.demands, Demands.of(java, csharp)));
   });
 
-  it('can plan demands per stage', async () => {
+  void it('can plan demands per stage', async () => {
     //given
     const projectId = await projectFacade.addNewProject(
       'project',
@@ -155,7 +154,7 @@ describe('PlanningFacade', () => {
     assert.ok(deepEquals(loaded.demandsPerStage, demandsPerStage));
   });
 
-  it('can plan needed resources in time', async () => {
+  void it('can plan needed resources in time', async () => {
     //given
     const projectId = await projectFacade.addNewProject('project');
 
@@ -181,7 +180,7 @@ describe('PlanningFacade', () => {
     );
   });
 
-  it('can redefine stages', async () => {
+  void it('can redefine stages', async () => {
     //given
     const projectId = await projectFacade.addNewProject(
       'project',
@@ -196,7 +195,7 @@ describe('PlanningFacade', () => {
     assert.equal(loaded.parallelizedStages.print(), 'Stage2');
   });
 
-  it('can calculate schedule after passing possible start', async () => {
+  void it('can calculate schedule after passing possible start', async () => {
     //given
     const stage1 = new Stage('Stage1').ofDuration(Duration.ofDays(2));
     const stage2 = new Stage('Stage2').ofDuration(Duration.ofDays(5));
@@ -248,7 +247,7 @@ describe('PlanningFacade', () => {
     );
   });
 
-  it('can manually add schedule', async () => {
+  void it('can manually add schedule', async () => {
     //given
     const stage1 = new Stage('Stage1').ofDuration(Duration.ofDays(2));
     const stage2 = new Stage('Stage2').ofDuration(Duration.ofDays(5));
@@ -296,7 +295,7 @@ describe('PlanningFacade', () => {
     );
   });
 
-  it('Capabilities demanded event is emitted after adding demands', async () => {
+  void it('Capabilities demanded event is emitted after adding demands', async () => {
     //given
     const projectId = await projectFacade.addNewProject(
       'project',

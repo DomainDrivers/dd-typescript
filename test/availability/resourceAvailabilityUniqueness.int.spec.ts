@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   ResourceAvailability,
   ResourceAvailabilityId,
@@ -13,7 +12,7 @@ import { after, before, describe, it } from 'node:test';
 import pg from 'pg';
 import { TestConfiguration } from '../setup';
 
-describe('ResourceAvailabilityUniqueness', () => {
+void describe('ResourceAvailabilityUniqueness', () => {
   const ONE_MONTH = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
   const testEnvironment = TestConfiguration();
   let client: pg.PoolClient;
@@ -36,7 +35,7 @@ describe('ResourceAvailabilityUniqueness', () => {
     }
   });
 
-  it('Cant save two availabilities with same resource id and segment', async () => {
+  void it('Cant save two availabilities with same resource id and segment', async () => {
     //given
     const resourceId = ResourceId.newOne();
     const anotherResourceId = ResourceId.newOne();

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   AllocatableCapabilityId,
   AllocatedCapability,
@@ -18,7 +17,7 @@ import { assertEquals, assertThatArray } from '../asserts';
 const permission = Capability.permission;
 const canJustPerform = CapabilitySelector.canJustPerform;
 
-describe('AllocationsToProject', () => {
+void describe('AllocationsToProject', () => {
   const WHEN = new UTCDate();
   const PROJECT_ID = ProjectAllocationsId.newOne();
   const ADMIN_ID = AllocatableCapabilityId.newOne();
@@ -26,7 +25,7 @@ describe('AllocationsToProject', () => {
   const FEB_2 = TimeSlot.createDailyTimeSlotAtUTC(2020, 2, 2);
   const JANUARY = TimeSlot.createDailyTimeSlotAtUTC(2020, 1, 1);
 
-  it('can allocate', () => {
+  void it('can allocate', () => {
     //given
     const allocations = ProjectAllocations.empty(PROJECT_ID);
 
@@ -53,7 +52,7 @@ describe('AllocationsToProject', () => {
     });
   });
 
-  it('cant allocate when requested time slot not within project slot', () => {
+  void it('cant allocate when requested time slot not within project slot', () => {
     //given
     const allocations = new ProjectAllocations(
       PROJECT_ID,
@@ -74,7 +73,7 @@ describe('AllocationsToProject', () => {
     assert.equal(event, null);
   });
 
-  it('allocating has no effect when capability already allocated', () => {
+  void it('allocating has no effect when capability already allocated', () => {
     //given
     const allocations = ProjectAllocations.empty(PROJECT_ID);
 
@@ -98,7 +97,7 @@ describe('AllocationsToProject', () => {
     assert.equal(event, null);
   });
 
-  it('there are no missing demands when all allocated', () => {
+  void it('there are no missing demands when all allocated', () => {
     //given
     const demands = Demands.of(
       new Demand(permission('ADMIN'), FEB_1),
@@ -135,7 +134,7 @@ describe('AllocationsToProject', () => {
     });
   });
 
-  it('missing demands are present when allocating for different than demanded slot', () => {
+  void it('missing demands are present when allocating for different than demanded slot', () => {
     //given
     const demands = Demands.of(
       new Demand(permission('ADMIN'), FEB_1),
@@ -177,7 +176,7 @@ describe('AllocationsToProject', () => {
     });
   });
 
-  it('can release', () => {
+  void it('can release', () => {
     //given
     const allocations = ProjectAllocations.empty(PROJECT_ID);
     //and
@@ -207,7 +206,7 @@ describe('AllocationsToProject', () => {
     });
   });
 
-  it('releasing has no effect when capability was not allocated', () => {
+  void it('releasing has no effect when capability was not allocated', () => {
     //given
     const allocations = ProjectAllocations.empty(PROJECT_ID);
 
@@ -222,7 +221,7 @@ describe('AllocationsToProject', () => {
     assert.equal(event, null);
   });
 
-  it('missing demands are present after releasing some of allocated capabilities', () => {
+  void it('missing demands are present after releasing some of allocated capabilities', () => {
     //given
     const demandForJava = new Demand(Capability.skill('JAVA'), FEB_1);
     const demandForAdmin = new Demand(permission('ADMIN'), FEB_1);
@@ -265,7 +264,7 @@ describe('AllocationsToProject', () => {
     });
   });
 
-  it('releasing has no effect when releasing slot not within allocated slot', () => {
+  void it('releasing has no effect when releasing slot not within allocated slot', () => {
     //given
     const allocations = ProjectAllocations.empty(PROJECT_ID);
     //and
@@ -288,7 +287,7 @@ describe('AllocationsToProject', () => {
     assert.equal(event, null);
   });
 
-  it('releasing small part of slot leaves the rest', () => {
+  void it('releasing small part of slot leaves the rest', () => {
     //given
     const allocations = ProjectAllocations.empty(PROJECT_ID);
     //and

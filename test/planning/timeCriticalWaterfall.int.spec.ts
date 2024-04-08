@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   Demand,
   PlanningConfiguration,
@@ -19,7 +18,7 @@ const demandFor = Demand.demandFor;
 const skill = Capability.skill;
 const assertThat = ScheduleAssert.assertThat;
 
-describe('Time Critical Waterfall', () => {
+void describe('Time Critical Waterfall', () => {
   const testEnvironment = TestConfiguration();
   let projectFacade: PlanningFacade;
 
@@ -46,7 +45,7 @@ describe('Time Critical Waterfall', () => {
 
   after(testEnvironment.stop);
 
-  it(
+  void it(
     'time critical waterfall project process',
     { skip: 'not implemented yet' },
     async () => {

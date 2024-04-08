@@ -1,6 +1,6 @@
 export { Cashflow } from './cashflow';
 export { CashflowConfiguration } from './cashflowConfiguration';
-export { CashflowFacade } from './cashflowFacade';
+export { CashFlowFacade } from './cashflowFacade';
 export {
   DrizzleCashflowRepository,
   type CashflowRepository,

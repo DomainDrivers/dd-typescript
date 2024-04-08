@@ -4,7 +4,44 @@ import type { PostgresTransaction } from './drizzle';
 
 type DatabaseAware<
   TSchema extends Record<string, unknown> = Record<string, never>,
-> = { ___getDatabase: () => NodePgDatabase<TSchema> };
+> = {
+  ___database: NodePgDatabase<TSchema>;
+  ___postCommit?: () => Promise<void>;
+};
+
+const toDatabaseAware = (service: unknown): DatabaseAware | null => {
+  const result = service as DatabaseAware;
+  if (!result?.___database) return null;
+
+  return result;
+};
+
+export interface PostTransactionCommit {
+  commit: () => Promise<void>;
+}
+
+export const injectDatabase = <
+  T,
+  TSchema extends Record<string, unknown> = Record<string, never>,
+>(
+  service: T,
+  database: NodePgDatabase<TSchema>,
+  postCommit?: () => Promise<void>,
+): T => {
+  const dbAware = service as DatabaseAware<TSchema>;
+  dbAware.___database = database;
+  dbAware.___postCommit = postCommit;
+  return service;
+};
+
+type TransactionAware = { ___transaction: PostgresTransaction };
+
+const toTransactionAware = (service: unknown): TransactionAware | null => {
+  const result = service as TransactionAware;
+  if (!result.___transaction) return null;
+
+  return result;
+};
 
 export type EnlistableInTransaction<
   TSchema extends Record<string, unknown> = Record<string, never>,
@@ -16,27 +53,6 @@ export type EnlistableInTransaction<
 
 export type EnlistableInRawTransaction = {
   enlistRaw: (client: pg.Client) => void;
-};
-
-export const injectDatabaseContext = <
-  T,
-  TSchema extends Record<string, unknown> = Record<string, never>,
->(
-  service: T,
-  getDatabase: () => NodePgDatabase<TSchema>,
-): T => {
-  (service as DatabaseAware<TSchema>).___getDatabase = getDatabase;
-  return service;
-};
-
-const toDatabaseAware = (service: unknown): DatabaseAware => {
-  const result = service as DatabaseAware;
-  if (!result.___getDatabase)
-    throw Error(
-      `Service is not transation aware, wrap your object with 'injectDatabaseContext' call!`,
-    );
-
-  return result;
 };
 
 const getEnlistableInTransaction = (
@@ -96,25 +112,15 @@ export const dbconnection = (
   const originalDef = descriptor.value;
 
   descriptor.value = function (...args: unknown[]) {
-    const db = toDatabaseAware(this).___getDatabase();
+    const db = toDatabaseAware(this)?.___database;
 
-    for (const repositoryFieldName in this) {
-      const repository =
-        getEnlistableInTransaction(this, repositoryFieldName) ??
-        getEnlistableInRawTransaction(this, repositoryFieldName);
-
-      if (repository !== null && 'enlist' in repository) {
-        repository.enlist(db);
-        continue;
-      }
-
-      const client = (db as { session?: { client: pg.Client } }).session
-        ?.client;
-
-      if (client && repository !== null && 'enlistRaw' in repository) {
-        repository.enlistRaw(client);
-      }
+    if (!db) {
+      throw Error(
+        `Service is not transation aware, wrap your object with 'injectDatabase' call!`,
+      );
     }
+
+    enlist(this, { db });
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     return originalDef.apply(this, args);
@@ -130,31 +136,70 @@ export const transactional = (
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const originalDef = descriptor.value;
 
-  descriptor.value = function (...args: unknown[]) {
-    const db = toDatabaseAware(this).___getDatabase();
+  descriptor.value = async function (...args: unknown[]) {
+    const withTransaction = toTransactionAware(this);
+    if (withTransaction?.___transaction) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      return originalDef.apply(this, args);
+    }
 
-    return db.transaction((tx) => {
-      for (const repositoryFieldName in this) {
-        const repository =
-          getEnlistableInTransaction(this, repositoryFieldName) ??
-          getEnlistableInRawTransaction(this, repositoryFieldName);
+    const dbAware = toDatabaseAware(this);
+    const db = dbAware?.___database;
 
-        if (repository !== null && 'enlist' in repository) {
-          repository.enlist(tx);
-          continue;
-        }
+    if (!db) {
+      throw Error(
+        `Service is not transation aware, wrap your object with 'injectDatabaseContext' call!`,
+      );
+    }
 
-        const client = (tx as { session?: { client: pg.Client } }).session
-          ?.client;
-
-        if (client && repository !== null && 'enlistRaw' in repository) {
-          repository.enlistRaw(client);
-        }
-      }
+    const result = await db.transaction((tx) => {
+      enlist(this, { tx, db });
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       return originalDef.apply(this, args);
     });
+
+    if (dbAware.___postCommit) await dbAware.___postCommit();
+
+    return result;
   };
   return descriptor;
+};
+
+const enlist = (
+  obj: PropertyDescriptor,
+  { tx, db }: { tx?: PostgresTransaction; db: NodePgDatabase },
+) => {
+  const context: PostgresTransaction | NodePgDatabase = tx ?? db;
+
+  const client = (context as { session?: { client: pg.Client } }).session
+    ?.client;
+
+  for (const fieldName in obj) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+    if (typeof (obj as any)[fieldName] === 'function') continue;
+
+    const repository =
+      getEnlistableInTransaction(obj, fieldName) ??
+      getEnlistableInRawTransaction(obj, fieldName);
+
+    if (repository !== null && 'enlist' in repository) {
+      repository.enlist(context);
+      continue;
+    }
+
+    if (client && repository !== null && 'enlistRaw' in repository) {
+      repository.enlistRaw(client);
+      continue;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+    const dbAware = toDatabaseAware((obj as any)[fieldName]);
+
+    if (dbAware && !dbAware.___database) {
+      dbAware.___database = db;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      enlist((obj as any)[fieldName], { tx, db });
+    }
+  }
 };

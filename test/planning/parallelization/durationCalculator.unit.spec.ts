@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import { DurationCalculator, Stage } from '#planning';
 import { Duration } from '#utils';
 import assert from 'node:assert/strict';
@@ -8,8 +7,8 @@ const ZERO = Duration.zero;
 const ofDays = Duration.ofDays;
 const ofHours = Duration.ofHours;
 
-describe('DurationCalculator', () => {
-  it('longest stage is taken into account', () => {
+void describe('DurationCalculator', () => {
+  void it('longest stage is taken into account', () => {
     //given
     const stage1 = new Stage('Stage1').ofDuration(ZERO);
     const stage2 = new Stage('Stage2').ofDuration(ofDays(3));
@@ -28,7 +27,7 @@ describe('DurationCalculator', () => {
     assert.equal(duration, ofDays(5));
   });
 
-  it('sum is taken into account when nothing is parallel', () => {
+  void it('sum is taken into account when nothing is parallel', () => {
     //given
     const stage1 = new Stage('Stage1').ofDuration(ofHours(10));
     const stage2 = new Stage('Stage2').ofDuration(ofHours(24));

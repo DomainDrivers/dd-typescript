@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import { GraphTopologicalSort, Node, Nodes } from '#sorter';
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-describe('GraphTopologicalSort', () => {
-  it('test topological sort with simple dependencies', () => {
+void describe('GraphTopologicalSort', () => {
+  void it('test topological sort with simple dependencies', () => {
     //given
     const node1 = new Node('Node1');
     let node2 = new Node('Node2');
@@ -33,7 +32,7 @@ describe('GraphTopologicalSort', () => {
     assert.ok([...sortedNodes.all[2].all()].some((n) => n.equals(node4)));
   });
 
-  it('test topological sort with linear dependencies', () => {
+  void it('test topological sort with linear dependencies', () => {
     //given
     let node1 = new Node('Node1');
     let node2 = new Node('Node2');
@@ -69,7 +68,7 @@ describe('GraphTopologicalSort', () => {
     assert.ok([...sortedNodes.all[4].all()].some((n) => n.equals(node1)));
   });
 
-  it('test nodes without dependencies', () => {
+  void it('test nodes without dependencies', () => {
     //given
     const node1 = new Node('Node1');
     const node2 = new Node('Node2');
@@ -82,7 +81,7 @@ describe('GraphTopologicalSort', () => {
     assert.equal(sortedNodes.all.length, 1);
   });
 
-  it('test cyclic dependencies', () => {
+  void it('test cyclic dependencies', () => {
     //given
     let node1 = new Node('Node1');
     let node2 = new Node('Node2');

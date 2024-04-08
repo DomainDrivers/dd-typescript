@@ -8,6 +8,6 @@ export type CriticalStagePlanned = Event<
   {
     projectId: ProjectId;
     stageTimeSlot: TimeSlot;
-    criticalResource: ResourceId | null;
+    criticalResource: ResourceId;
   }
 >;

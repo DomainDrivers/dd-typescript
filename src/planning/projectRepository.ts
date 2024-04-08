@@ -13,7 +13,10 @@ import { ProjectId } from './projectId';
 import { Schedule } from './schedule';
 import * as schema from './schema';
 
-export interface ProjectRepository extends Repository<Project, ProjectId> {}
+export interface ProjectRepository extends Repository<Project, ProjectId> {
+  findAllById(ids: ProjectId[]): Promise<Project[]>;
+  findAll(): Promise<Project[]>;
+}
 
 export class DrizzleProjectRepository extends DrizzleRepository<
   Project,
@@ -31,6 +34,7 @@ export class DrizzleProjectRepository extends DrizzleRepository<
 
     return result ? mapToProject(result) : null;
   };
+
   public findAllById = async (ids: ProjectId[]): Promise<Project[]> => {
     const result = await this.db
       .select()
@@ -39,6 +43,13 @@ export class DrizzleProjectRepository extends DrizzleRepository<
 
     return result.map(mapToProject);
   };
+
+  public findAll = async (): Promise<Project[]> => {
+    const result = await this.db.select().from(schema.projects);
+
+    return result.map(mapToProject);
+  };
+
   public save = async (project: Project): Promise<void> => {
     const entity = mapFromProject(project);
     const { id: _id, ...toUpdate } = entity;

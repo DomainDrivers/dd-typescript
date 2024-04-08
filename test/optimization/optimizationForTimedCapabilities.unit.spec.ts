@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   Item,
   OptimizationFacade,
@@ -14,10 +13,10 @@ import {
   CapabilityTimedWeightDimension,
 } from './capabilityCapacityDimension';
 
-describe('OptimizationForTimedCapabilities', () => {
+void describe('OptimizationForTimedCapabilities', () => {
   const facade = new OptimizationFacade();
 
-  it('nothing is chosen when no capacities in time slot', () => {
+  void it('nothing is chosen when no capacities in time slot', () => {
     //given
     const june = TimeSlot.createMonthlyTimeSlotAtUTC(2020, 6);
     const october = TimeSlot.createMonthlyTimeSlotAtUTC(2020, 10);
@@ -57,7 +56,7 @@ describe('OptimizationForTimedCapabilities', () => {
     assert.equal(result.chosenItems.length, 0);
   });
 
-  it('most profitable item is chosen', () => {
+  void it('most profitable item is chosen', () => {
     //given
     const june = TimeSlot.createMonthlyTimeSlotAtUTC(2020, 6);
 

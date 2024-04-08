@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   AllocatableCapabilityId,
   AllocatedCapability,
@@ -23,7 +22,7 @@ import { describe, it } from 'node:test';
 const skill = Capability.skill;
 const canJustPerform = CapabilitySelector.canJustPerform;
 
-describe('PotentialTransferScenarios', () => {
+void describe('PotentialTransferScenarios', () => {
   const JAN_1 = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
   const FIFTEEN_MINUTES_IN_JAN = new TimeSlot(
     JAN_1.from,
@@ -50,9 +49,11 @@ describe('PotentialTransferScenarios', () => {
 
   const potentialTransfers = new PotentialTransfersService(
     new SimulationFacade(new OptimizationFacade()),
+    null!,
+    null!,
   );
 
-  it('simulates moving capabilities to different project', () => {
+  void it('simulates moving capabilities to different project', () => {
     //given
     const bankingSoft = new Project(
       BANKING_SOFT_ID,
@@ -81,7 +82,7 @@ describe('PotentialTransferScenarios', () => {
     assert.ok(result.eq(81));
   });
 
-  it('simulates moving capabilities to different project just for awhile', () => {
+  void it('simulates moving capabilities to different project just for awhile', () => {
     //given
     const bankingSoft = new Project(
       BANKING_SOFT_ID,
@@ -110,7 +111,7 @@ describe('PotentialTransferScenarios', () => {
     assert.ok(result.eq(90));
   });
 
-  it('the move gives zero profit when there are still missing demands', () => {
+  void it('the move gives zero profit when there are still missing demands', () => {
     //given
     const bankingSoft = new Project(
       BANKING_SOFT_ID,

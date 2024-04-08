@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   ResourceAvailability,
   ResourceAvailabilityId,
@@ -14,7 +13,7 @@ import { after, before, describe, it } from 'node:test';
 import pg from 'pg';
 import { TestConfiguration } from '../setup';
 
-describe('ResourceAvailabilityLoading', () => {
+void describe('ResourceAvailabilityLoading', () => {
   const ONE_MONTH = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
   const testEnvironment = TestConfiguration();
   let client: pg.PoolClient;
@@ -37,7 +36,7 @@ describe('ResourceAvailabilityLoading', () => {
     }
   });
 
-  it('Can save and load by id', async () => {
+  void it('Can save and load by id', async () => {
     //given
     const resourceAvailabilityId = ResourceAvailabilityId.newOne();
     const resourceId = ResourceId.newOne();

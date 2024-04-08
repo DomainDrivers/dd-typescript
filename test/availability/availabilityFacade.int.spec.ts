@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   AvailabilityConfiguration,
   AvailabilityFacade,
@@ -21,7 +20,7 @@ import {
 } from '../asserts';
 import { TestConfiguration } from '../setup';
 
-describe('AvailabilityFacade', () => {
+void describe('AvailabilityFacade', () => {
   const testEnvironment = TestConfiguration();
   let availabilityFacade: AvailabilityFacade;
 
@@ -40,7 +39,7 @@ describe('AvailabilityFacade', () => {
 
   after(testEnvironment.stop);
 
-  it('can create availability slots', async () => {
+  void it('can create availability slots', async () => {
     //given
     const resourceId = ResourceId.newOne();
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
@@ -63,7 +62,7 @@ describe('AvailabilityFacade', () => {
     );
   });
 
-  it('can create new availability slots with parent id', async () => {
+  void it('can create new availability slots with parent id', async () => {
     //given
     const resourceId = ResourceId.newOne();
     const resourceId2 = ResourceId.newOne();
@@ -92,7 +91,7 @@ describe('AvailabilityFacade', () => {
     );
   });
 
-  it('can block availabilities', async () => {
+  void it('can block availabilities', async () => {
     //given
     const resourceId = ResourceId.newOne();
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
@@ -112,7 +111,7 @@ describe('AvailabilityFacade', () => {
     assert.ok(resourceAvailabilities.blockedEntirelyBy(owner));
   });
 
-  it('cant block when no slots created', async () => {
+  void it('cant block when no slots created', async () => {
     //given
     const resourceId = ResourceId.newOne();
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
@@ -125,7 +124,7 @@ describe('AvailabilityFacade', () => {
     assertFalse(result);
   });
 
-  it('can disable availabilities', async () => {
+  void it('can disable availabilities', async () => {
     //given
     const resourceId = ResourceId.newOne();
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
@@ -152,7 +151,7 @@ describe('AvailabilityFacade', () => {
     assertThatArray(monthlyCalendar.takenBy(owner)).containsExactly(oneDay);
   });
 
-  it(`can't disable when no slots created`, async () => {
+  void it(`can't disable when no slots created`, async () => {
     //given
     const resourceId = ResourceId.newOne();
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
@@ -165,7 +164,7 @@ describe('AvailabilityFacade', () => {
     assertFalse(result);
   });
 
-  it('cant block even when just small segment of requested slot is blocked', async () => {
+  void it('cant block even when just small segment of requested slot is blocked', async () => {
     //given
     const resourceId = ResourceId.newOne();
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
@@ -194,7 +193,7 @@ describe('AvailabilityFacade', () => {
     assert.ok(resourceAvailabilities.blockedEntirelyBy(owner));
   });
 
-  it('can release availability', async () => {
+  void it('can release availability', async () => {
     //given
     const resourceId = ResourceId.newOne();
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
@@ -219,7 +218,7 @@ describe('AvailabilityFacade', () => {
     assert.ok(resourceAvailabilities.isEntirelyAvailable());
   });
 
-  it(`can't release when no slots created`, async () => {
+  void it(`can't release when no slots created`, async () => {
     //given
     const resourceId = ResourceId.newOne();
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
@@ -232,7 +231,7 @@ describe('AvailabilityFacade', () => {
     assertFalse(result);
   });
 
-  it(`can't release even when just part of slot is owned by the requester`, async () => {
+  void it(`can't release even when just part of slot is owned by the requester`, async () => {
     //given
     const resourceId = ResourceId.newOne();
     const jan_1 = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
@@ -262,7 +261,7 @@ describe('AvailabilityFacade', () => {
     assert.ok(resourceAvailability.blockedEntirelyBy(jan1owner));
   });
 
-  it('one segment can be taken by someone else after realising', async () => {
+  void it('one segment can be taken by someone else after realising', async () => {
     //given
     const resourceId = ResourceId.newOne();
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
@@ -308,7 +307,7 @@ describe('AvailabilityFacade', () => {
     );
   });
 
-  it('Resource taken over event is emitted after taking over the resource', async () => {
+  void it('Resource taken over event is emitted after taking over the resource', async () => {
     //given
     const resourceId = ResourceId.newOne();
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);

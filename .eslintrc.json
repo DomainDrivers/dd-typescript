@@ -224,8 +224,8 @@
               "./src/shared",
               "./src/simulation",
               "./src/sorter",
-              "./src/sql",
-              "./src/storage"
+              "./src/sql"
+              // "./src/storage" // allowed
             ]
           }
         ]

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   Owner,
   ResourceAvailability,
@@ -9,7 +8,7 @@ import { TimeSlot } from '#shared';
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
-describe('ResourceAvailability', () => {
+void describe('ResourceAvailability', () => {
   const resourceAvailability = ResourceAvailabilityId.newOne();
   const OWNER_ONE = Owner.newOne();
   const OWNER_TWO = Owner.newOne();
@@ -21,7 +20,7 @@ describe('ResourceAvailability', () => {
       TimeSlot.createDailyTimeSlotAtUTC(2000, 1, 1),
     );
 
-  it('can be blocked when is available', () => {
+  void it('can be blocked when is available', () => {
     //given
     const resourceAvailability = getResourceAvailability();
 
@@ -32,7 +31,7 @@ describe('ResourceAvailability', () => {
     assert.ok(result);
   });
 
-  it(`can't beBlocked when already blocked by someone else`, () => {
+  void it(`can't beBlocked when already blocked by someone else`, () => {
     //given
     const resourceAvailability = getResourceAvailability();
     //and
@@ -45,7 +44,7 @@ describe('ResourceAvailability', () => {
     assert.equal(result, false);
   });
 
-  it('can be released only by initial owner', () => {
+  void it('can be released only by initial owner', () => {
     //given
     const resourceAvailability = getResourceAvailability();
     //and
@@ -58,7 +57,7 @@ describe('ResourceAvailability', () => {
     assert.ok(result);
   });
 
-  it(`can't be released by someone else`, () => {
+  void it(`can't be released by someone else`, () => {
     //given
     const resourceAvailability = getResourceAvailability();
     //and
@@ -71,7 +70,7 @@ describe('ResourceAvailability', () => {
     assert.equal(result, false);
   });
 
-  it('can be blocked by someone else after releasing is available', () => {
+  void it('can be blocked by someone else after releasing is available', () => {
     //given
     const resourceAvailability = getResourceAvailability();
     //and
@@ -86,7 +85,7 @@ describe('ResourceAvailability', () => {
     assert.ok(result);
   });
 
-  it('can disable when available', () => {
+  void it('can disable when available', () => {
     //given
     const resourceAvailability = getResourceAvailability();
 
@@ -99,7 +98,7 @@ describe('ResourceAvailability', () => {
     assert.ok(resourceAvailability.isDisabledBy(OWNER_ONE));
   });
 
-  it('can disable when blocked', () => {
+  void it('can disable when blocked', () => {
     //given
     const resourceAvailability = getResourceAvailability();
 
@@ -116,7 +115,7 @@ describe('ResourceAvailability', () => {
     assert.ok(resourceAvailability.isDisabledBy(OWNER_TWO));
   });
 
-  it('cant be blocked while disabled', () => {
+  void it('cant be blocked while disabled', () => {
     //given
     const resourceAvailability = getResourceAvailability();
 
@@ -135,7 +134,7 @@ describe('ResourceAvailability', () => {
     assert.ok(resourceAvailability.isDisabledBy(OWNER_ONE));
   });
 
-  it('can be enabled by initial requester', () => {
+  void it('can be enabled by initial requester', () => {
     //given
     const resourceAvailability = getResourceAvailability();
 
@@ -151,7 +150,7 @@ describe('ResourceAvailability', () => {
     assert.equal(resourceAvailability.isDisabledBy(OWNER_ONE), false);
   });
 
-  it('cant be enabled by another requester', () => {
+  void it('cant be enabled by another requester', () => {
     //given
     const resourceAvailability = getResourceAvailability();
 
@@ -167,7 +166,7 @@ describe('ResourceAvailability', () => {
     assert.ok(resourceAvailability.isDisabledBy(OWNER_ONE));
   });
 
-  it('can be blocked again after enabling', () => {
+  void it('can be blocked again after enabling', () => {
     //given
     const resourceAvailability = getResourceAvailability();
 

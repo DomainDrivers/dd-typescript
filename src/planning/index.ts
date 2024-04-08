@@ -2,6 +2,7 @@ export { type CapabilitiesDemanded } from './capabilitiesDemanded';
 export { ChosenResources } from './chosenResources';
 export { type CriticalStagePlanned } from './criticalStagePlanned';
 export { Demand, Demands, DemandsPerStage } from './demands';
+export { type NeededResourcesChosen } from './neededResourcesChosen';
 export * from './parallelization';
 export { PlanChosenResources } from './planChosenResources';
 export { PlanningConfiguration } from './planningConfiguration';

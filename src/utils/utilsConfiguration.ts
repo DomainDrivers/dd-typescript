@@ -1,9 +1,12 @@
 import { Clock } from './clock';
-import { getInMemoryEventsBus, type EventsPublisher } from './eventsPublisher';
+import {
+  getTransactionAwareEventBus,
+  type TransactionAwareEventBus,
+} from './eventsPublisher';
 
 export class UtilsConfiguration {
   constructor(
-    public readonly eventsPublisher: EventsPublisher = getInMemoryEventsBus(),
+    public readonly eventBus: TransactionAwareEventBus = getTransactionAwareEventBus(),
     public readonly clock: Clock = Clock,
   ) {}
 }

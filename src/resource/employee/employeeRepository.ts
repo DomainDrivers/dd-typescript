@@ -1,7 +1,7 @@
 import { Capability } from '#shared';
 import { DrizzleRepository, type Repository } from '#storage';
 import { ObjectSet, UUID } from '#utils';
-import { eq, inArray } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { Employee, EmployeeId } from '.';
 import * as schema from '../schema';
 import { EmployeeSummary } from './employeeSummary';
@@ -26,14 +26,6 @@ export class DrizzleEmployeeRepository
     });
 
     return result ? mapToEmployee(result) : null;
-  };
-  public findAllById = async (ids: EmployeeId[]): Promise<Employee[]> => {
-    const result = await this.db
-      .select()
-      .from(schema.employees)
-      .where(inArray(schema.employees.id, ids));
-
-    return result.map(mapToEmployee);
   };
 
   public findSummary = async (

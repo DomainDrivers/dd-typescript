@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   CashflowConfiguration,
   Cost,
   Earnings,
   Income,
   ProjectAllocationsId,
-  type CashflowFacade,
+  type CashFlowFacade,
   type EarningsRecalculated,
 } from '#allocation';
 import * as schema from '#schema';
@@ -13,9 +12,9 @@ import assert from 'node:assert';
 import { after, afterEach, before, describe, it } from 'node:test';
 import { TestConfiguration } from '../../setup';
 
-describe('CapabilityAllocating', () => {
+void describe('CapabilityAllocating', () => {
   const testEnvironment = TestConfiguration();
-  let cashFlowFacade: CashflowFacade;
+  let cashFlowFacade: CashFlowFacade;
 
   before(async () => {
     const connectionString = await testEnvironment.start({ schema });
@@ -32,7 +31,7 @@ describe('CapabilityAllocating', () => {
 
   after(testEnvironment.stop);
 
-  it('can allocate capability to project', async () => {
+  void it('can allocate capability to project', async () => {
     //given
     const projectId = ProjectAllocationsId.newOne();
 
@@ -47,7 +46,7 @@ describe('CapabilityAllocating', () => {
     assert.ok(Earnings.of(50).isEqualTo(await cashFlowFacade.find(projectId)));
   });
 
-  it('Updating cash flow emits an event', async () => {
+  void it('Updating cash flow emits an event', async () => {
     //given
     const projectId = ProjectAllocationsId.newOne();
     const income = Income.of(100);

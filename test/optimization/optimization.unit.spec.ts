@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   Item,
   OptimizationFacade,
@@ -13,10 +12,10 @@ import {
   CapabilityWeightDimension,
 } from './capabilityCapacityDimension';
 
-describe('Optimization', () => {
+void describe('Optimization', () => {
   const facade = new OptimizationFacade();
 
-  it('nothing is chosen when no capacities', () => {
+  void it('nothing is chosen when no capacities', () => {
     //given
     const items = [
       new Item(
@@ -39,7 +38,7 @@ describe('Optimization', () => {
     assert.equal(result.chosenItems.length, 0);
   });
 
-  it('everything is chosen when all weights are zero', () => {
+  void it('everything is chosen when all weights are zero', () => {
     //given
     const items = [
       new Item('Item1', new BigNumber(200), TotalWeight.zero()),
@@ -54,7 +53,7 @@ describe('Optimization', () => {
     assert.equal(result.chosenItems.length, 2);
   });
 
-  it('if enough capacity all items are chosen', () => {
+  void it('if enough capacity all items are chosen', () => {
     //given
     const items = [
       new Item(
@@ -91,7 +90,7 @@ describe('Optimization', () => {
     assert.equal(result.chosenItems.length, 2);
   });
 
-  it('most valuable items are chosen', () => {
+  void it('most valuable items are chosen', () => {
     //given
     const item1 = new Item(
       'Item1',

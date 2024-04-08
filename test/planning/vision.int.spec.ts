@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import { ResourceId } from '#availability';
 import {
   Demand,
@@ -23,7 +22,7 @@ const demandFor = Demand.demandFor;
 const skill = Capability.skill;
 const assertThat = ScheduleAssert.assertThat;
 
-describe('Vision', () => {
+void describe('Vision', () => {
   const testEnvironment = TestConfiguration();
   let projectFacade: PlanningFacade;
 
@@ -54,7 +53,7 @@ describe('Vision', () => {
 
   after(testEnvironment.stop);
 
-  it(
+  void it(
     'time critical waterfall project process',
     { skip: 'not implemented yet' },
     async () => {
@@ -62,7 +61,7 @@ describe('Vision', () => {
       const projectId = await projectFacade.addNewProject('vision');
       //when
       const java = Demands.of(demandFor(skill('JAVA')));
-      projectFacade.addDemands(projectId, java);
+      await projectFacade.addDemands(projectId, java);
 
       //then
       await verifyPossibleRiskDuringPlanning(projectId, java);

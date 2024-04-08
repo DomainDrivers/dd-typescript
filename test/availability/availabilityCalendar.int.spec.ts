@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   AvailabilityConfiguration,
   AvailabilityFacade,
@@ -13,7 +12,7 @@ import { after, before, describe, it } from 'node:test';
 import { assertThatArray } from '../asserts';
 import { TestConfiguration } from '../setup';
 
-describe('AvailabilityFacade', () => {
+void describe('AvailabilityFacade', () => {
   const testEnvironment = TestConfiguration();
   let availabilityFacade: AvailabilityFacade;
 
@@ -27,7 +26,7 @@ describe('AvailabilityFacade', () => {
 
   after(testEnvironment.stop);
 
-  it('loads calendar for entire month', async () => {
+  void it('loads calendar for entire month', async () => {
     //given
     const resourceId = ResourceId.newOne();
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
@@ -52,7 +51,7 @@ describe('AvailabilityFacade', () => {
     );
   });
 
-  it('loads calendar for multiple resources', async () => {
+  void it('loads calendar for multiple resources', async () => {
     //given
     const resourceId = ResourceId.newOne();
     const resourceId2 = ResourceId.newOne();

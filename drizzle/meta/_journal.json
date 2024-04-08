@@ -15,6 +15,13 @@
       "when": 1712492758640,
       "tag": "0001_panoramic_electro",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1712584943690,
+      "tag": "0002_bizarre_franklin_storm",
+      "breakpoints": true
     }
   ]
 }

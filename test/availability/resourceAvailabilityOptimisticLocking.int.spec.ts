@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   Owner,
   ResourceAvailability,
@@ -15,7 +14,7 @@ import { after, before, describe, it } from 'node:test';
 import pg from 'pg';
 import { TestConfiguration } from '../setup';
 
-describe('ResourceAvailabilityOptimisticLocking', () => {
+void describe('ResourceAvailabilityOptimisticLocking', () => {
   const ONE_MONTH = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
   const testEnvironment = TestConfiguration();
   let client: pg.PoolClient;
@@ -38,7 +37,7 @@ describe('ResourceAvailabilityOptimisticLocking', () => {
     }
   });
 
-  it('Update bumps version', async () => {
+  void it('Update bumps version', async () => {
     //given
     const resourceAvailabilityId = ResourceAvailabilityId.newOne();
     const resourceId = ResourceId.newOne();
@@ -66,7 +65,7 @@ describe('ResourceAvailabilityOptimisticLocking', () => {
     );
   });
 
-  it(`can't update concurrently`, async () => {
+  void it(`can't update concurrently`, async () => {
     //given
     const resourceAvailabilityId = ResourceAvailabilityId.newOne();
     const resourceId = ResourceId.newOne();

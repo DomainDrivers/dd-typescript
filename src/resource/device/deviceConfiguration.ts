@@ -2,8 +2,9 @@ import {
   CapabilityPlanningConfiguration,
   CapabilityScheduler,
 } from '#allocation';
-import { getDB, injectDatabaseContext } from '#storage';
+import { getDB, injectDatabase } from '#storage';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import type { UtilsConfiguration } from '../../utils';
 import * as schema from '../schema';
 import { DeviceFacade } from './deviceFacade';
 import {
@@ -15,6 +16,7 @@ import { ScheduleDeviceCapabilities } from './scheduleDeviceCapabilities';
 export class DeviceConfiguration {
   constructor(
     public readonly connectionString: string,
+    public readonly utils: UtilsConfiguration,
     public readonly capabilityPlanningConfiguration: CapabilityPlanningConfiguration = new CapabilityPlanningConfiguration(
       connectionString,
     ),
@@ -25,7 +27,7 @@ export class DeviceConfiguration {
     capabilityScheduler?: CapabilityScheduler,
   ): DeviceFacade => {
     deviceRepository = deviceRepository ?? this.deviceRepository();
-    return injectDatabaseContext(
+    return injectDatabase(
       new DeviceFacade(
         deviceRepository,
         new ScheduleDeviceCapabilities(
@@ -34,7 +36,8 @@ export class DeviceConfiguration {
             this.capabilityPlanningConfiguration.capabilityScheduler(),
         ),
       ),
-      this.db,
+      this.db(),
+      this.utils.eventBus.commit,
     );
   };
 

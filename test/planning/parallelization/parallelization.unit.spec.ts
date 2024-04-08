@@ -1,17 +1,16 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import { ResourceId } from '#availability';
 import { Stage, StageParallelization } from '#planning';
 import { ObjectSet } from '#utils';
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-describe('Parallelization', () => {
+void describe('Parallelization', () => {
   const LEON = ResourceId.newOne();
   const ERYK = ResourceId.newOne();
   const SLAWEK = ResourceId.newOne();
   const KUBA = ResourceId.newOne();
 
-  it('everything can be done in parallel when there are no dependencies', () => {
+  void it('everything can be done in parallel when there are no dependencies', () => {
     //given
     const stage1 = new Stage('Stage1');
     const stage2 = new Stage('Stage2');
@@ -25,7 +24,7 @@ describe('Parallelization', () => {
     assert.equal(sortedStages.all.length, 1);
   });
 
-  it('test simple dependencies', () => {
+  void it('test simple dependencies', () => {
     //given
     const stage1 = new Stage('Stage1');
     let stage2 = new Stage('Stage2');
@@ -44,7 +43,7 @@ describe('Parallelization', () => {
     assert.equal(sortedStages.print(), 'Stage1 | Stage2, Stage3 | Stage4');
   });
 
-  it(`can't be done when there is a cycle`, () => {
+  void it(`can't be done when there is a cycle`, () => {
     //given
     let stage1 = new Stage('Stage1');
     let stage2 = new Stage('Stage2');
@@ -60,7 +59,7 @@ describe('Parallelization', () => {
     assert.equal(sortedStages.all.length, 0);
   });
 
-  it('takes into account shared resources', () => {
+  void it('takes into account shared resources', () => {
     //given
     const stage1 = new Stage('Stage1').withChosenResourceCapabilities(LEON);
     const stage2 = new Stage('Stage2').withChosenResourceCapabilities(

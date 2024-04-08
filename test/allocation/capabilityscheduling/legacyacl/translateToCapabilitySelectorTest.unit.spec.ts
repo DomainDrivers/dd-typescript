@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   CapabilitySelector,
   EmployeeDataFromLegacyEsbMessage,
@@ -13,8 +12,8 @@ const canPerformOneOf = CapabilitySelector.canPerformOneOf;
 const permission = Capability.permission;
 const skill = Capability.skill;
 
-describe('TranslateToCapabilitySelector', () => {
-  it('Translate legacy esb message to capability selector model', () => {
+void describe('TranslateToCapabilitySelector', () => {
+  void it('Translate legacy esb message to capability selector model', () => {
     //given
     const legacyPermissions = ['ADMIN<>2', 'ROOT<>1'];
     const legacySkillsPerformedTogether = [
@@ -45,7 +44,7 @@ describe('TranslateToCapabilitySelector', () => {
     );
   });
 
-  it('Zero means no permission nowhere', () => {
+  void it('Zero means no permission nowhere', () => {
     const legacyPermissions = ['ADMIN<>0'];
 
     //when

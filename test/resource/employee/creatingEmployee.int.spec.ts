@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   EmployeeConfiguration,
   Seniority,
@@ -12,21 +11,24 @@ import { TestConfiguration } from '../../setup';
 
 const SENIOR = Seniority.SENIOR;
 
-describe('CreatingEmployee', () => {
+void describe('CreatingEmployee', () => {
   const testEnvironment = TestConfiguration();
   let employeeFacade: EmployeeFacade;
 
   before(async () => {
     const connectionString = await testEnvironment.start({ schema });
 
-    const configuration = new EmployeeConfiguration(connectionString);
+    const configuration = new EmployeeConfiguration(
+      connectionString,
+      testEnvironment.utilsConfiguration,
+    );
 
     employeeFacade = configuration.employeeFacade();
   });
 
   after(testEnvironment.stop);
 
-  it('can create and load employees', async () => {
+  void it('can create and load employees', async () => {
     //given
     const employee = await employeeFacade.addEmployee(
       'resourceName',
@@ -49,23 +51,23 @@ describe('CreatingEmployee', () => {
     assertEquals(SENIOR, loaded.seniority);
   });
 
-  it('can find all capabilities', async () => {
+  void it('can find all capabilities', async () => {
     //given
-    employeeFacade.addEmployee(
+    await employeeFacade.addEmployee(
       'staszek',
       'lastName',
       SENIOR,
       Capability.skills('JAVA12', 'PYTHON21'),
       Capability.permissions('ADMIN1', 'COURT1'),
     );
-    employeeFacade.addEmployee(
+    await employeeFacade.addEmployee(
       'leon',
       'lastName',
       SENIOR,
       Capability.skills('JAVA12', 'PYTHON21'),
       Capability.permissions('ADMIN2', 'COURT2'),
     );
-    employeeFacade.addEmployee(
+    await employeeFacade.addEmployee(
       'sławek',
       'lastName',
       SENIOR,

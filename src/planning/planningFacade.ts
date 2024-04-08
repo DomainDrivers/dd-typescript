@@ -1,6 +1,6 @@
 import type { ResourceId } from '#availability';
 import { TimeSlot } from '#shared';
-import { transactional } from '#storage';
+import { dbconnection, transactional } from '#storage';
 import {
   Clock,
   Duration,
@@ -77,6 +77,7 @@ export class PlanningFacade {
   ): Promise<void> {
     const project = await this.repository.getById(projectId);
     project.addDemands(demands);
+    await this.repository.save(project);
     await this.eventsPublisher.publish(
       event<CapabilitiesDemanded>(
         'CapabilitiesDemanded',
@@ -87,7 +88,6 @@ export class PlanningFacade {
         this.clock,
       ),
     );
-    return this.repository.save(project);
   }
 
   @transactional
@@ -148,6 +148,7 @@ export class PlanningFacade {
       criticalStage,
       stageTimeSlot,
     );
+    await this.repository.save(project);
     await this.eventsPublisher.publish(
       event<CriticalStagePlanned>(
         'CriticalStagePlanned',
@@ -159,7 +160,6 @@ export class PlanningFacade {
         this.clock,
       ),
     );
-    await this.repository.save(project);
   }
 
   @transactional
@@ -173,18 +173,18 @@ export class PlanningFacade {
       criticalStage,
       stageTimeSlot,
     );
+    await this.repository.save(project);
     await this.eventsPublisher.publish(
       event<CriticalStagePlanned>(
         'CriticalStagePlanned',
         {
           projectId,
-          criticalResource: null,
+          criticalResource: null!,
           stageTimeSlot,
         },
         this.clock,
       ),
     );
-    await this.repository.save(project);
   }
 
   @transactional
@@ -199,17 +199,24 @@ export class PlanningFacade {
   public durationOf = (...stages: Stage[]): Duration =>
     DurationCalculator.calculate(stages);
 
-  public load = async (projectId: ProjectId): Promise<ProjectCard> => {
+  @dbconnection
+  public async load(projectId: ProjectId): Promise<ProjectCard> {
     const project = await this.repository.getById(projectId);
     return PlanningFacade.toSummary(project);
-  };
+  }
 
-  public loadAll = async (
-    projectsIds: ObjectSet<ProjectId>,
-  ): Promise<ProjectCard[]> =>
-    (await this.repository.findAllById(projectsIds)).map((project) =>
-      PlanningFacade.toSummary(project),
-    );
+  @dbconnection
+  public async loadAll(
+    projectsIds?: ObjectSet<ProjectId>,
+  ): Promise<ProjectCard[]> {
+    return projectsIds
+      ? (await this.repository.findAllById(projectsIds)).map((project) =>
+          PlanningFacade.toSummary(project),
+        )
+      : (await this.repository.findAll()).map((project) =>
+          PlanningFacade.toSummary(project),
+        );
+  }
 
   private static toSummary = (project: Project) =>
     new ProjectCard(

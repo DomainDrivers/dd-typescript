@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import { SegmentInMinutes, Segments, slotToSegments } from '#availability';
 import { TimeSlot } from '#shared';
 import { UTCDate } from '@date-fns/utc';
@@ -6,8 +5,8 @@ import { isEqual } from 'date-fns';
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
-describe('Segments', () => {
-  it('Unit has to be multiple of15 minutes', () => {
+void describe('Segments', () => {
+  void it('Unit has to be multiple of15 minutes', () => {
     //expect
     assert.throws(() => SegmentInMinutes.of(20));
     assert.throws(() => SegmentInMinutes.of(18));
@@ -17,7 +16,7 @@ describe('Segments', () => {
     assert.notEqual(SegmentInMinutes.of(45), null);
   });
 
-  it('Splitting into segments when there is no leftover', () => {
+  void it('Splitting into segments when there is no leftover', () => {
     //given
     const start = new UTCDate('2023-09-09T00:00:00Z');
     const end = new UTCDate('2023-09-09T01:00:00Z');
@@ -38,7 +37,7 @@ describe('Segments', () => {
     assert.ok(isEqual(new UTCDate('2023-09-09T01:00:00Z'), segments[3].to));
   });
 
-  it('Splitting into segments just normalizes if chosen segment larger than passed slot', () => {
+  void it('Splitting into segments just normalizes if chosen segment larger than passed slot', () => {
     //given
     const start = new UTCDate('2023-09-09T00:10:00Z');
     const end = new UTCDate('2023-09-09T01:00:00Z');
@@ -53,7 +52,7 @@ describe('Segments', () => {
     assert.ok(isEqual(new UTCDate('2023-09-09T01:30:00Z'), segments[0].to));
   });
 
-  it('Normalizing a time slot', () => {
+  void it('Normalizing a time slot', () => {
     //given
     const start = new UTCDate('2023-09-09T00:10:00Z');
     const end = new UTCDate('2023-09-09T01:00:00Z');
@@ -70,7 +69,7 @@ describe('Segments', () => {
     assert.ok(isEqual(new UTCDate('2023-09-09T01:30:00Z'), segment.to));
   });
 
-  it('slots are normalized before splitting', () => {
+  void it('slots are normalized before splitting', () => {
     //given
     const start = new UTCDate('2023-09-09T00:10:00Z');
     const end = new UTCDate('2023-09-09T00:59:00Z');
@@ -86,7 +85,7 @@ describe('Segments', () => {
     assert.ok(isEqual(new UTCDate('2023-09-09T01:00:00Z'), segments[0].to));
   });
 
-  it('splitting into segments without mormalization', () => {
+  void it('splitting into segments without mormalization', () => {
     //given
     const start = new UTCDate('2023-09-09T00:00:00Z');
     const end = new UTCDate('2023-09-09T00:59:00Z');

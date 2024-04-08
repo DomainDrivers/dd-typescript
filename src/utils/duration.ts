@@ -10,7 +10,7 @@ const hour = 60 * minute;
 const day = 24 * hour;
 
 const between = (from: UTCDate, to: UTCDate): Duration =>
-  differenceInMilliseconds(from, to) as Duration;
+  differenceInMilliseconds(to, from) as Duration;
 
 const fromInterval = (interval: Interval): Duration =>
   differenceInMilliseconds(interval.start, interval.end) as Duration;
@@ -21,6 +21,7 @@ export const Duration = {
   second,
   minute,
   hour,
+  day,
   zero: 0 as Duration,
   ofDays: (days: number): Duration => days * day,
   ofHours: (hours: number): Duration => hours * hour,

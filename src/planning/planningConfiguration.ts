@@ -1,4 +1,4 @@
-import { getDB, injectDatabaseContext } from '#storage';
+import { getDB, injectDatabase } from '#storage';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { AvailabilityConfiguration } from '../availability';
 import { UtilsConfiguration } from '../utils';
@@ -14,14 +14,12 @@ import * as schema from './schema';
 export class PlanningConfiguration {
   constructor(
     public readonly connectionString: string,
-    private readonly utilsConfiguration: UtilsConfiguration = new UtilsConfiguration(),
+    private readonly utils: UtilsConfiguration = new UtilsConfiguration(),
     private readonly availabilityConfiguration: AvailabilityConfiguration = new AvailabilityConfiguration(
       connectionString,
-      utilsConfiguration,
+      utils,
     ),
   ) {}
-
-  public static readonly schema = schema;
 
   public planningFacade = (
     projectRepository?: ProjectRepository,
@@ -31,19 +29,17 @@ export class PlanningConfiguration {
     const repository = projectRepository ?? this.projectRepository();
     const getDB = getDatabase ?? this.db;
 
-    return injectDatabaseContext(
+    return injectDatabase(
       new PlanningFacade(
         repository,
         new StageParallelization(),
         planChosenResources ??
-          injectDatabaseContext(
-            this.planChosenResourcesService(repository),
-            getDB,
-          ),
-        this.utilsConfiguration.eventsPublisher,
-        this.utilsConfiguration.clock,
+          injectDatabase(this.planChosenResourcesService(repository), getDB()),
+        this.utils.eventBus,
+        this.utils.clock,
       ),
-      getDB,
+      getDB(),
+      this.utils.eventBus.commit,
     );
   };
 
@@ -51,8 +47,8 @@ export class PlanningConfiguration {
     new PlanChosenResources(
       projectRepository ?? this.projectRepository(),
       this.availabilityConfiguration.availabilityFacade(),
-      this.utilsConfiguration.eventsPublisher,
-      this.utilsConfiguration.clock,
+      this.utils.eventBus,
+      this.utils.clock,
     );
 
   public projectRepository = (): ProjectRepository =>

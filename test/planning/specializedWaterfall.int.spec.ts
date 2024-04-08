@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import { ResourceId } from '#availability';
 import {
   PlanningConfiguration,
@@ -17,7 +16,7 @@ import { ScheduleAssert } from './schedule/assertions';
 
 const assertThat = ScheduleAssert.assertThat;
 
-describe('Specialized Waterfall', () => {
+void describe('Specialized Waterfall', () => {
   const testEnvironment = TestConfiguration();
   let projectFacade: PlanningFacade;
 
@@ -52,7 +51,7 @@ describe('Specialized Waterfall', () => {
 
   after(testEnvironment.stop);
 
-  it(
+  void void it(
     'specialized waterfall project process',
     { skip: 'not implemented yet' },
     async () => {

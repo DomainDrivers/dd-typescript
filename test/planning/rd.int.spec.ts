@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   AvailabilityConfiguration,
   AvailabilityFacade,
@@ -25,7 +24,7 @@ import { ScheduleAssert } from './schedule/assertions';
 const ofDays = Duration.ofDays;
 const assertThat = ScheduleAssert.assertThat;
 
-describe('RD', () => {
+void describe('RD', () => {
   const testEnvironment = TestConfiguration();
   let projectFacade: PlanningFacade;
   let availabilityFacade: AvailabilityFacade;
@@ -72,7 +71,7 @@ describe('RD', () => {
 
   after(testEnvironment.stop);
 
-  it('research and development project process', async () => {
+  void it('research and development project process', async () => {
     //given
     const projectId = await projectFacade.addNewProject('waterfall');
     //and
@@ -105,7 +104,7 @@ describe('RD', () => {
     );
 
     //then
-    verifyThatResourcesAreMissing(
+    await verifyThatResourcesAreMissing(
       projectId,
       ObjectSet.from([phpAvailableInFebruary, csharpAvailableInMarch]),
     );
@@ -118,7 +117,7 @@ describe('RD', () => {
     );
 
     //then
-    verifyThatResourcesAreMissing(
+    await verifyThatResourcesAreMissing(
       projectId,
       ObjectSet.from([javaAvailableInJanuary, csharpAvailableInMarch]),
     );
@@ -127,7 +126,7 @@ describe('RD', () => {
     await projectFacade.defineResourcesWithinDates(projectId, allResources, Q1);
 
     //then
-    verifyThatNoResourcesAreMissing(projectId);
+    await verifyThatNoResourcesAreMissing(projectId);
 
     //when
     await projectFacade.adjustStagesToResourceAvailability(

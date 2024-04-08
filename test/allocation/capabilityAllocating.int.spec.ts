@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   AllocatableCapabilityId,
   AllocatableResourceId,
@@ -32,7 +31,7 @@ const canPerformOneOf = CapabilitySelector.canPerformOneOf;
 const skill = Capability.skill;
 const skills = Capability.skills;
 
-describe('CapabilityAllocating', () => {
+void describe('CapabilityAllocating', () => {
   const testEnvironment = TestConfiguration();
   let allocationFacade: AllocationFacade;
   let availabilityFacade: AvailabilityFacade;
@@ -58,7 +57,7 @@ describe('CapabilityAllocating', () => {
 
   after(async () => await testEnvironment.stop());
 
-  it('Can allocate any capability of required type', async () => {
+  void it('Can allocate any capability of required type', async () => {
     //given
     const javaAndPython = canPerformOneOf(skills('JAVA11', 'PYTHON'));
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
@@ -106,7 +105,7 @@ describe('CapabilityAllocating', () => {
     );
   });
 
-  it(`Can't allocate any capability of required type when no capabilities`, async () => {
+  void it(`Can't allocate any capability of required type when no capabilities`, async () => {
     //given
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
     //and
@@ -130,7 +129,7 @@ describe('CapabilityAllocating', () => {
     assertThatArray(summary.projectAllocations.get(projectId)!.all).isEmpty();
   });
 
-  it(`Can't allocate any capability of required type when all capabilities taken`, async () => {
+  void it(`Can't allocate any capability of required type when all capabilities taken`, async () => {
     //given
     const capability = canPerformOneOf(skills('DEBUGGING'));
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);

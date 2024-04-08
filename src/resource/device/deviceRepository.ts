@@ -1,7 +1,7 @@
 import { Capability } from '#shared';
 import { DrizzleRepository, type Repository } from '#storage';
 import { ObjectSet, UUID } from '#utils';
-import { eq, inArray } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { Device, DeviceId } from '.';
 import * as schema from '../schema';
 import { DeviceSummary } from './deviceSummary';
@@ -25,14 +25,6 @@ export class DrizzleDeviceRepository
     });
 
     return result ? mapToDevice(result) : null;
-  };
-  public findAllById = async (ids: DeviceId[]): Promise<Device[]> => {
-    const result = await this.db
-      .select()
-      .from(schema.devices)
-      .where(inArray(schema.devices.id, ids));
-
-    return result.map(mapToDevice);
   };
 
   public findSummary = async (deviceId: DeviceId): Promise<DeviceSummary> => {

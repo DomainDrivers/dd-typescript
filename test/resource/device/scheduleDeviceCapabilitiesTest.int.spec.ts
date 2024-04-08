@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   CapabilityPlanningConfiguration,
   type CapabilityFinder,
@@ -10,7 +9,7 @@ import { after, before, describe, it } from 'node:test';
 import { assertEquals } from '../../asserts';
 import { TestConfiguration } from '../../setup';
 
-describe('ScheduleDeviceCapabilities', () => {
+void describe('ScheduleDeviceCapabilities', () => {
   const testEnvironment = TestConfiguration();
   let deviceFacade: DeviceFacade;
   let capabilityFinder: CapabilityFinder;
@@ -18,7 +17,10 @@ describe('ScheduleDeviceCapabilities', () => {
   before(async () => {
     const connectionString = await testEnvironment.start({ schema });
 
-    const configuration = new DeviceConfiguration(connectionString);
+    const configuration = new DeviceConfiguration(
+      connectionString,
+      testEnvironment.utilsConfiguration,
+    );
 
     capabilityFinder = new CapabilityPlanningConfiguration(
       connectionString,
@@ -29,7 +31,7 @@ describe('ScheduleDeviceCapabilities', () => {
 
   after(testEnvironment.stop);
 
-  it('Can setup capabilities according to policy', async () => {
+  void it('Can setup capabilities according to policy', async () => {
     //given
     const device = await deviceFacade.createDevice(
       'super-bulldozer-3000',

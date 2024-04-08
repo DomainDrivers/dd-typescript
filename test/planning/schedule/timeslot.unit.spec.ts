@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
-
 import { TimeSlot } from '#shared';
 import { Duration } from '#utils';
 import { UTCDate } from '@date-fns/utc';
@@ -7,8 +5,8 @@ import { isEqual } from 'date-fns';
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
-describe('TimeSlot', () => {
-  it('slots overlapping', () => {
+void describe('TimeSlot', () => {
+  void it('slots overlapping', () => {
     //given
     const slot1 = new TimeSlot(
       new UTCDate('2022-01-01T00:00:00Z'),
@@ -39,7 +37,7 @@ describe('TimeSlot', () => {
     assert.ok(slot1.overlapsWith(slot5));
   });
 
-  it('slots not overlapping', () => {
+  void it('slots not overlapping', () => {
     //given
     const slot1 = new TimeSlot(
       new UTCDate('2022-01-01T00:00:00Z'),
@@ -59,7 +57,7 @@ describe('TimeSlot', () => {
     assert.ok(!slot1.overlapsWith(slot3));
   });
 
-  it('two slots have common part when slots overlap', () => {
+  void it('two slots have common part when slots overlap', () => {
     //given
     const slot1 = new TimeSlot(
       new UTCDate('2022-01-01T00:00:00Z'),
@@ -79,7 +77,7 @@ describe('TimeSlot', () => {
     assert.ok(isEqual(common.to, new UTCDate('2022-01-15T00:00:00Z')));
   });
 
-  it('two slots have common part when slots overlap', () => {
+  void it('two slots have common part when slots overlap', () => {
     //given
     const slot1 = new TimeSlot(
       new UTCDate('2022-01-10T00:00:00Z'),
@@ -98,7 +96,7 @@ describe('TimeSlot', () => {
     assert.ok(slot1.equals(common));
   });
 
-  it('stretch time slot', () => {
+  void it('stretch time slot', () => {
     // Arrange
     const initialFrom = new UTCDate('2022-01-01T10:00:00Z');
     const initialTo = new UTCDate('2022-01-01T12:00:00Z');

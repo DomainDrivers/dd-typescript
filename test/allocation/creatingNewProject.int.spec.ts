@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   AllocationConfiguration,
   Demand,
@@ -12,7 +11,7 @@ import assert from 'node:assert';
 import { after, before, describe, it } from 'node:test';
 import { TestConfiguration } from '../setup';
 
-describe('DemandScheduling', () => {
+void describe('DemandScheduling', () => {
   const JAN = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
   const FEB = TimeSlot.createDailyTimeSlotAtUTC(2021, 2, 1);
 
@@ -29,7 +28,7 @@ describe('DemandScheduling', () => {
 
   after(async () => await testEnvironment.stop());
 
-  it('can create new project', async () => {
+  void it('can create new project', async () => {
     //given
     const demand = new Demand(Capability.skill('JAVA'), JAN);
 
@@ -45,7 +44,7 @@ describe('DemandScheduling', () => {
     assert.ok(deepEquals(summary.timeSlots.get(newProject), JAN));
   });
 
-  it('can redefine project deadline', async () => {
+  void it('can redefine project deadline', async () => {
     //given
     const demand = new Demand(Capability.skill('JAVA'), JAN);
     //and

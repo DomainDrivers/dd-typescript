@@ -1,13 +1,12 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import { Stage, StageParallelization } from '#planning';
 import { ObjectSet } from '#utils';
 import { describe, it } from 'node:test';
 import { assertThat } from '../../asserts';
 
-describe('DependencyRemovalSuggesting', () => {
+void describe('DependencyRemovalSuggesting', () => {
   const stageParallelization = new StageParallelization();
 
-  it('suggesting breaks the cycle in schedule', () => {
+  void it('suggesting breaks the cycle in schedule', () => {
     //given
     let stage1 = new Stage('Stage1');
     let stage2 = new Stage('Stage2');

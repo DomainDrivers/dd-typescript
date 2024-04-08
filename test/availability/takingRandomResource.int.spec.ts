@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   AvailabilityConfiguration,
   AvailabilityFacade,
@@ -17,7 +16,7 @@ import {
 } from '../asserts';
 import { TestConfiguration } from '../setup';
 
-describe('TakingRandomResource', () => {
+void describe('TakingRandomResource', () => {
   const testEnvironment = TestConfiguration();
   let availabilityFacade: AvailabilityFacade;
 
@@ -31,7 +30,7 @@ describe('TakingRandomResource', () => {
 
   after(testEnvironment.stop);
 
-  it('Can take random resource from pool', async () => {
+  void it('Can take random resource from pool', async () => {
     //given
     const resourceId = ResourceId.newOne();
     const resourceId2 = ResourceId.newOne();
@@ -58,7 +57,7 @@ describe('TakingRandomResource', () => {
     //then
     assertIsNotNull(taken1);
     assertTrue(resourcesPool.has(taken1));
-    assertThatResourceIsTakeByOwner(taken1, owner1, oneDay);
+    await assertThatResourceIsTakeByOwner(taken1, owner1, oneDay);
 
     //when
     const taken2 = await availabilityFacade.blockRandomAvailable(
@@ -70,7 +69,7 @@ describe('TakingRandomResource', () => {
     //then
     assertIsNotNull(taken2);
     assertTrue(resourcesPool.has(taken2));
-    assertThatResourceIsTakeByOwner(taken2, owner2, oneDay);
+    await assertThatResourceIsTakeByOwner(taken2, owner2, oneDay);
 
     //when
     const taken3 = await availabilityFacade.blockRandomAvailable(
@@ -82,7 +81,7 @@ describe('TakingRandomResource', () => {
     //then
     assertIsNotNull(taken3);
     assertTrue(resourcesPool.has(taken3));
-    assertThatResourceIsTakeByOwner(taken3, owner3, oneDay);
+    await assertThatResourceIsTakeByOwner(taken3, owner3, oneDay);
 
     //when
     const taken4 = await availabilityFacade.blockRandomAvailable(
@@ -95,7 +94,7 @@ describe('TakingRandomResource', () => {
     assertIsNull(taken4);
   });
 
-  it('Nothing is taken when no resource in pool', async () => {
+  void it('Nothing is taken when no resource in pool', async () => {
     //given
     const resources = ObjectSet.of(
       ResourceId.newOne(),

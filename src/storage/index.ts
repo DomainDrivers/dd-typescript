@@ -8,8 +8,9 @@ export {
 export { type Repository } from './repository';
 export {
   dbconnection,
-  injectDatabaseContext,
+  injectDatabase,
   transactional,
   type EnlistableInRawTransaction,
   type EnlistableInTransaction,
+  type PostTransactionCommit,
 } from './transactionalDecorator';

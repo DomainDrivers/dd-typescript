@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   AllocatableCapabilityId,
   AllocatableResourceId,
@@ -35,7 +34,7 @@ const toAvailabilityResourceId =
   AllocatableCapabilityId.toAvailabilityResourceId;
 const canJustPerform = CapabilitySelector.canJustPerform;
 
-describe('ResourceAllocating', () => {
+void describe('ResourceAllocating', () => {
   const testEnvironment = TestConfiguration();
   let allocationFacade: AllocationFacade;
   let availabilityFacade: AvailabilityFacade;
@@ -59,7 +58,7 @@ describe('ResourceAllocating', () => {
 
   after(async () => await testEnvironment.stop());
 
-  it('Can allocate capability to project', async () => {
+  void it('Can allocate capability to project', async () => {
     //given
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
     const skillJava = Capability.skill('JAVA');
@@ -109,7 +108,7 @@ describe('ResourceAllocating', () => {
     );
   });
 
-  it(`Can't allocate when resource not available`, async () => {
+  void it(`Can't allocate when resource not available`, async () => {
     //given
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
     const skillJava = Capability.skill('JAVA');
@@ -147,7 +146,7 @@ describe('ResourceAllocating', () => {
     assertThatArray(summary.projectAllocations.get(projectId)!.all).isEmpty();
   });
 
-  it(`Can't allocate when capability has not been scheduled`, async () => {
+  void it(`Can't allocate when capability has not been scheduled`, async () => {
     //given
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
     const skillJava = Capability.skill('JAVA');
@@ -175,7 +174,7 @@ describe('ResourceAllocating', () => {
     assertThatArray(summary.projectAllocations.get(projectId)!.all).isEmpty();
   });
 
-  it('Can release capability from project', async () => {
+  void it('Can release capability from project', async () => {
     //given
     const oneDay = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
     //and

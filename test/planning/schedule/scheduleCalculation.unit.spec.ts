@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
-
 import { Calendar, Calendars, ResourceId } from '#availability';
 import { ParallelStages, ParallelStagesList, Schedule, Stage } from '#planning';
 import { TimeSlot } from '#shared';
@@ -11,7 +9,7 @@ import { ScheduleAssert } from './assertions';
 const ofDays = Duration.ofDays;
 const assertThat = ScheduleAssert.assertThat;
 
-describe('ScheduleCalculation', () => {
+void describe('ScheduleCalculation', () => {
   const JAN_1 = new UTCDate('2020-01-01T00:00:00.00Z');
   const JAN_10_20 = new TimeSlot(
     new UTCDate('2020-01-10T00:00:00.00Z'),
@@ -66,7 +64,7 @@ describe('ScheduleCalculation', () => {
     new UTCDate('2020-01-06T00:00:00.00Z'),
   );
 
-  it('can calculate schedule based on the start day', () => {
+  void it('can calculate schedule based on the start day', () => {
     //given
     const stage1 = new Stage('Stage1').ofDuration(ofDays(3));
     const stage2 = new Stage('Stage2').ofDuration(ofDays(10));
@@ -93,7 +91,7 @@ describe('ScheduleCalculation', () => {
       .withSlot(JAN_14_16);
   });
 
-  it('schedule can adjust to dates of one reference stage', () => {
+  void it('schedule can adjust to dates of one reference stage', () => {
     //given
     const stage = new Stage('S1').ofDuration(ofDays(3));
     const anotherStage = new Stage('S2').ofDuration(ofDays(10));
@@ -131,7 +129,7 @@ describe('ScheduleCalculation', () => {
       .withSlot(JAN_1_5);
   });
 
-  it('no schedule is calculated if reference stage to adjust to does not exist', () => {
+  void it('no schedule is calculated if reference stage to adjust to does not exist', () => {
     //given
     const stage1 = new Stage('Stage1').ofDuration(ofDays(3));
     const stage2 = new Stage('Stage2').ofDuration(ofDays(10));
@@ -155,7 +153,7 @@ describe('ScheduleCalculation', () => {
     assertThat(schedule).isEmpty();
   });
 
-  it('can adjust schedule to availability of needed resources', () => {
+  void it('can adjust schedule to availability of needed resources', () => {
     //given
     const r1 = ResourceId.newOne();
     const r2 = ResourceId.newOne();

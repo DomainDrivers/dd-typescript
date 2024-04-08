@@ -1,5 +1,5 @@
 import { AvailabilityConfiguration, AvailabilityFacade } from '#availability';
-import { getDB, injectDatabaseContext } from '#storage';
+import { getDB, injectDatabase } from '#storage';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import {
   DrizzleAllocatableCapabilityRepository,
@@ -21,12 +21,12 @@ export class CapabilityPlanningConfiguration {
       allocatableResourceRepository ?? this.allocatableResourceRepository();
     const getDB = getDatabase ?? (() => this.db());
 
-    return injectDatabaseContext(
+    return injectDatabase(
       new CapabilityFinder(
         availabilityFacade ?? this.availabilityFacade(),
         repository,
       ),
-      getDB,
+      getDB(),
     );
   };
 
@@ -39,12 +39,12 @@ export class CapabilityPlanningConfiguration {
       allocatableResourceRepository ?? this.allocatableResourceRepository();
     const getDB = getDatabase ?? (() => this.db());
 
-    return injectDatabaseContext(
+    return injectDatabase(
       new CapabilityScheduler(
         availabilityFacade ?? this.availabilityFacade(),
         repository,
       ),
-      getDB,
+      getDB(),
     );
   };
 

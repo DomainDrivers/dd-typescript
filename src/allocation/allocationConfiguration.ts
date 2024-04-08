@@ -1,8 +1,15 @@
 import { AvailabilityConfiguration } from '#availability';
-import { getDB, injectDatabaseContext } from '#storage';
-import { Clock, getInMemoryEventsBus, type EventsPublisher } from '#utils';
+import { SimulationConfiguration } from '#simulation';
+import { getDB, injectDatabase } from '#storage';
+import { Clock, UtilsConfiguration, type EventsPublisher } from '#utils';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { AllocationFacade, CapabilityPlanningConfiguration } from '.';
+import {
+  AllocationFacade,
+  CapabilityFinder,
+  CapabilityPlanningConfiguration,
+  CashflowConfiguration,
+  PotentialTransfersService,
+} from '.';
 import {
   DrizzleProjectAllocationsRepository,
   type ProjectAllocationsRepository,
@@ -12,10 +19,20 @@ import * as schema from './schema';
 export class AllocationConfiguration {
   constructor(
     public readonly connectionString: string,
-    private readonly enableLogging: boolean = false,
-  ) {
-    console.log('connectionstring: ' + this.connectionString);
-  }
+    public readonly utilsConfiguration: UtilsConfiguration = new UtilsConfiguration(),
+    public readonly availabilityConfiguration: AvailabilityConfiguration = new AvailabilityConfiguration(
+      connectionString,
+      utilsConfiguration,
+    ),
+    public readonly capabilityPlanningConfiguration: CapabilityPlanningConfiguration = new CapabilityPlanningConfiguration(
+      connectionString,
+    ),
+    public readonly cashflowConfiguration: CashflowConfiguration = new CashflowConfiguration(
+      connectionString,
+      utilsConfiguration,
+    ),
+    public readonly simulationConfiguration: SimulationConfiguration = new SimulationConfiguration(),
+  ) {}
 
   public allocationFacade = (
     clock: Clock = Clock,
@@ -27,27 +44,42 @@ export class AllocationConfiguration {
       projectAllocationsRepository ?? this.projectAllocationsRepository();
     const getDB = getDatabase ?? (() => this.db());
 
-    return injectDatabaseContext(
+    return injectDatabase(
       new AllocationFacade(
         repository,
-        new AvailabilityConfiguration(
-          this.connectionString,
-        ).availabilityFacade(),
-        new CapabilityPlanningConfiguration(
-          this.connectionString,
-        ).capabilityFinder(),
-        eventPublisher ?? this.eventPublisher(),
+        this.availabilityConfiguration.availabilityFacade(),
+        this.capabilityPlanningConfiguration.capabilityFinder(),
+        eventPublisher ?? this.utilsConfiguration.eventBus,
         clock,
       ),
-      getDB,
+      getDB(),
     );
   };
+
+  public potentialTransfersService = (
+    projectAllocationsRepository?: ProjectAllocationsRepository,
+  ) =>
+    injectDatabase(
+      new PotentialTransfersService(
+        this.simulationConfiguration.simulationFacade(),
+        this.cashflowConfiguration.cashflowFacade(),
+        projectAllocationsRepository ?? this.projectAllocationsRepository(),
+      ),
+      this.db(),
+    );
+
+  public capabilityFinder = (): CapabilityFinder =>
+    injectDatabase(
+      new CapabilityFinder(
+        this.availabilityConfiguration.availabilityFacade(),
+        this.capabilityPlanningConfiguration.allocatableResourceRepository(),
+      ),
+      this.db(),
+    );
 
   public projectAllocationsRepository = (): ProjectAllocationsRepository =>
     new DrizzleProjectAllocationsRepository();
 
   public db = (cs?: string): NodePgDatabase<typeof schema> =>
-    getDB(cs ?? this.connectionString, { schema, logger: this.enableLogging });
-
-  public eventPublisher = (): EventsPublisher => getInMemoryEventsBus();
+    getDB(cs ?? this.connectionString, { schema });
 }
