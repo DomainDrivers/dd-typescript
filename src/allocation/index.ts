@@ -8,6 +8,7 @@ export * from './capabilityscheduling';
 export * from './cashflow';
 export { Demand } from './demand';
 export { Demands } from './demands';
+export { NotSatisfiedDemands } from './notSatisfiedDemands';
 export { PotentialTransfers } from './potentialTransfers';
 export { PotentialTransfersService } from './potentialTransfersService';
 export { Project } from './project';

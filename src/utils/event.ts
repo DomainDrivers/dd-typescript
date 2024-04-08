@@ -21,7 +21,25 @@ export type Event<
   'Event'
 >;
 
-export const event = <EventType extends Event>(
+export type PrivateEvent<
+  EventType extends string = string,
+  EventData extends Record<string, unknown> = Record<string, unknown>,
+> = Event<EventType, EventData> & { readonly _private?: true };
+
+export type PublishedEvent<
+  EventType extends string = string,
+  EventData extends Record<string, unknown> = Record<string, unknown>,
+> = Event<EventType, EventData> & { readonly _public?: true };
+
+export type PrivateAndPublishedEvent<
+  EventType extends string = string,
+  EventData extends Record<string, unknown> = Record<string, unknown>,
+> = Event<EventType, EventData> & {
+  readonly _private?: true;
+  readonly _public?: true;
+};
+
+export const event = <EventType extends PrivateEvent | PublishedEvent>(
   type: EventTypeOf<EventType>,
   data: Omit<EventDataOf<EventType>, 'eventId' | 'occurredAt'> &
     OptionalEventMetaData,

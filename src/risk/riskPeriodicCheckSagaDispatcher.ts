@@ -5,13 +5,11 @@ import {
   Demands,
   PotentialTransfersService,
   ProjectAllocationsId,
-  type CapabilitiesAllocated,
-  type CapabilityReleased,
   type EarningsRecalculated,
+  type NotSatisfiedDemands,
   type ProjectAllocationScheduled,
-  type ProjectAllocationsDemandsScheduled,
 } from '#allocation';
-import type { ResourceTakenOver } from '#availability';
+import { type ResourceTakenOver } from '#availability';
 import { dbconnection } from '#storage';
 import { Clock, ObjectMap } from '#utils';
 import {
@@ -33,40 +31,19 @@ export class RiskPeriodicCheckSagaDispatcher {
 
   @dbconnection
   //remember about transactions spanning saga and potential external system
-  public handle(event: RiskPeriodicCheckSagaEvent): Promise<void> {
+  public handle(
+    event: RiskPeriodicCheckSagaEvent | NotSatisfiedDemands,
+  ): Promise<void> {
     switch (event.type) {
-      case 'ProjectAllocationsDemandsScheduled':
-        return this.handleProjectAllocationsDemandsScheduled(event);
       case 'EarningsRecalculated':
         return this.handleEarningsRecalculated(event);
       case 'ProjectAllocationScheduled':
         return this.handleProjectAllocationScheduled(event);
-      case 'CapabilitiesAllocated':
-        return this.handleCapabilitiesAllocated(event);
-      case 'CapabilityReleased':
-        return this.handleCapabilityReleased(event);
       case 'ResourceTakenOver':
         return this.handleResourceTakenOver(event);
+      case 'NotSatisfiedDemands':
+        return this.handleNotSatisfiedDemands(event);
     }
-  }
-
-  //remember about transactions spanning saga and potential external system
-  @dbconnection
-  public async handleProjectAllocationsDemandsScheduled(
-    event: ProjectAllocationsDemandsScheduled,
-  ): Promise<void> {
-    let found = await this.riskSagaRepository.findByProjectId(
-      event.data.projectId,
-    );
-    if (found == null) {
-      found = new RiskPeriodicCheckSaga(
-        event.data.projectId,
-        event.data.missingDemands,
-      );
-    }
-    const nextStep = found.handle(event);
-    await this.riskSagaRepository.save(found);
-    return this.perform(nextStep, found);
   }
 
   //remember about transactions spanning saga and potential external system
@@ -104,38 +81,6 @@ export class RiskPeriodicCheckSagaDispatcher {
   }
 
   //remember about transactions spanning saga and potential external system
-  public async handleCapabilitiesAllocated(
-    event: CapabilitiesAllocated,
-  ): Promise<void> {
-    const saga = await this.riskSagaRepository.findByProjectId(
-      event.data.projectId,
-    );
-    if (saga === null)
-      throw Error(
-        `RiskPeriodicCheckSaga for projectId: '${event.data.projectId}' was not found!`,
-      );
-    const nextStep = saga.handle(event);
-    await this.riskSagaRepository.save(saga);
-    return this.perform(nextStep, saga);
-  }
-
-  //remember about transactions spanning saga and potential external system
-  public async handleCapabilityReleased(
-    event: CapabilityReleased,
-  ): Promise<void> {
-    const saga = await this.riskSagaRepository.findByProjectId(
-      event.data.projectId,
-    );
-    if (saga === null)
-      throw Error(
-        `RiskPeriodicCheckSaga for projectId: '${event.data.projectId}' was not found!`,
-      );
-    const nextStep = saga.handle(event);
-    await this.riskSagaRepository.save(saga);
-    return this.perform(nextStep, saga);
-  }
-
-  //remember about transactions spanning saga and potential external system
   public async handleResourceTakenOver(
     event: ResourceTakenOver,
   ): Promise<void> {
@@ -147,6 +92,29 @@ export class RiskPeriodicCheckSagaDispatcher {
     //transaction per one saga
     for (const saga of sagas) {
       await this.handleSingleResourceTakenOver(saga, event);
+    }
+  }
+
+  //remember about transactions spanning saga and potential external system
+  private async handleNotSatisfiedDemands(
+    event: NotSatisfiedDemands,
+  ): Promise<void> {
+    const sagas = await this.riskSagaRepository.findByProjectIdInOrElseCreate(
+      event.data.missingDemands.map((m) => m.key),
+    );
+    const nextSteps = ObjectMap.empty<
+      RiskPeriodicCheckSaga,
+      RiskPeriodicCheckSagaStep
+    >();
+    for (const saga of sagas) {
+      const missingDemands = event.data.missingDemands.get(saga.projectId)!;
+      const nextStep = saga.setMissingDemands(missingDemands);
+      nextSteps.set(saga, nextStep);
+    }
+    await this.riskSagaRepository.saveAll(sagas);
+
+    for (const { key: saga, value: nextStep } of nextSteps) {
+      await this.perform(nextStep, saga);
     }
   }
 

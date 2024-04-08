@@ -211,7 +211,9 @@ export class AllocationFacade {
     const projectAllocations =
       await this.projectAllocationsRepository.getById(projectId);
     const event = projectAllocations.defineSlot(fromTo, this.clock.now());
+
     await this.projectAllocationsRepository.save(projectAllocations);
+
     if (event) await this.eventsPublisher.publish(event);
   }
 

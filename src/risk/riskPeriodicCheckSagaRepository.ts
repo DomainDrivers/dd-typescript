@@ -17,7 +17,17 @@ export interface RiskPeriodicCheckSagaRepository
     interested: ProjectAllocationsId[],
   ): Promise<RiskPeriodicCheckSaga[]>;
 
+  findByProjectIdOrCreate(
+    projectId: ProjectAllocationsId,
+  ): Promise<RiskPeriodicCheckSaga>;
+
+  findByProjectIdInOrElseCreate(
+    interested: ProjectAllocationsId[],
+  ): Promise<RiskPeriodicCheckSaga[]>;
+
   findAll(): Promise<RiskPeriodicCheckSaga[]>;
+
+  saveAll(riskPeriodicCheckSagas: RiskPeriodicCheckSaga[]): Promise<void>;
 }
 
 export class DrizzleRiskPeriodicCheckSagaRepository
@@ -69,6 +79,33 @@ export class DrizzleRiskPeriodicCheckSagaRepository
     return result.map(mapToRiskPeriodicCheckSaga);
   };
 
+  public findByProjectIdOrCreate = async (
+    projectId: ProjectAllocationsId,
+  ): Promise<RiskPeriodicCheckSaga> => {
+    let found: RiskPeriodicCheckSaga | null =
+      await this.findByProjectId(projectId);
+    if (found == null) {
+      found = new RiskPeriodicCheckSaga(projectId);
+      await this.save(found);
+    }
+    return found;
+  };
+
+  public findByProjectIdInOrElseCreate = async (
+    interested: ProjectAllocationsId[],
+  ): Promise<RiskPeriodicCheckSaga[]> => {
+    const found = await this.findByProjectIdIn(interested);
+    const foundIds = found.map((s) => s.projectId);
+
+    const missing = interested
+      .filter((projectId) => !foundIds.includes(projectId))
+      .map((projectId) => new RiskPeriodicCheckSaga(projectId));
+
+    await this.saveAll(missing);
+
+    return [...found, ...missing];
+  };
+
   public save = async (
     riskPeriodicCheckSaga: RiskPeriodicCheckSaga,
   ): Promise<void> => {
@@ -78,6 +115,14 @@ export class DrizzleRiskPeriodicCheckSagaRepository
     return this.upsert(entity, toUpdate, {
       id: riskPeriodicCheckSaga.id,
     });
+  };
+
+  public saveAll = async (
+    riskPeriodicCheckSagas: RiskPeriodicCheckSaga[],
+  ): Promise<void> => {
+    for (const riskPeriodicCheckSaga of riskPeriodicCheckSagas) {
+      await this.save(riskPeriodicCheckSaga);
+    }
   };
 }
 

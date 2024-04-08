@@ -1,14 +1,11 @@
-import { UUID, type Event } from '#utils';
-import type { UTCDate } from '@date-fns/utc';
+import { type PrivateEvent } from '#utils';
 import type { Demands } from './demands';
 import type { ProjectAllocationsId } from './projectAllocationsId';
 
-export type CapabilityReleased = Event<
+export type CapabilityReleased = PrivateEvent<
   'CapabilityReleased',
   {
     projectId: ProjectAllocationsId;
     missingDemands: Demands;
-    occurredAt: UTCDate;
-    eventId: UUID;
   }
 >;

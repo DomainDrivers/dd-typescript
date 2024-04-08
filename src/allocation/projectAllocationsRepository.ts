@@ -2,7 +2,7 @@ import { Capability, TimeSlot } from '#shared';
 import { DrizzleRepository, type Repository } from '#storage';
 import { ObjectSet, UUID } from '#utils';
 import { UTCDate } from '@date-fns/utc';
-import { eq, inArray } from 'drizzle-orm';
+import { and, eq, gte, inArray, lte } from 'drizzle-orm';
 import {
   AllocatableCapabilityId,
   AllocatedCapability,
@@ -20,6 +20,7 @@ export interface ProjectAllocationsRepository
   extends Repository<ProjectAllocations, ProjectAllocationsId> {
   findAllById(ids: ProjectAllocationsId[]): Promise<ProjectAllocations[]>;
   findAll(): Promise<ProjectAllocations[]>;
+  findAllContainingDate(when: UTCDate): Promise<ProjectAllocations[]>;
 }
 
 export class DrizzleProjectAllocationsRepository
@@ -57,6 +58,21 @@ export class DrizzleProjectAllocationsRepository
 
   public findAll = async (): Promise<ProjectAllocations[]> => {
     const result = await this.db.select().from(schema.projectAllocations);
+
+    return result.map(mapToProjectAllocations);
+  };
+  public findAllContainingDate = async (
+    when: UTCDate,
+  ): Promise<ProjectAllocations[]> => {
+    const result = await this.db
+      .select()
+      .from(schema.projectAllocations)
+      .where(
+        and(
+          lte(schema.projectAllocations.fromDate, when),
+          gte(schema.projectAllocations.toDate, when),
+        ),
+      );
 
     return result.map(mapToProjectAllocations);
   };
