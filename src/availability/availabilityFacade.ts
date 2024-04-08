@@ -7,9 +7,10 @@ import {
   ResourceGroupedAvailability,
   Segments,
   defaultSegment,
+  type ResourceTakenOver,
 } from '.';
 import { dbconnection } from '../storage/transactionalDecorator';
-import { type ObjectSet } from '../utils';
+import { Clock, event, type EventsPublisher, type ObjectSet } from '../utils';
 import type { Owner } from './owner';
 import type { ResourceAvailabilityReadModel } from './resourceAvailabilityReadModel';
 import type { ResourceAvailabilityRepository } from './resourceAvailabilityRepository';
@@ -19,6 +20,8 @@ export class AvailabilityFacade {
   constructor(
     private readonly availabilityRepository: ResourceAvailabilityRepository,
     private readonly availabilityReadModel: ResourceAvailabilityReadModel,
+    private readonly eventsPublisher: EventsPublisher,
+    private readonly clock: Clock,
   ) {}
 
   @transactional
@@ -113,10 +116,25 @@ export class AvailabilityFacade {
     if (toDisable.hasNoSlots()) {
       return false;
     }
+
+    const previousOwners = toDisable.owners();
     let result = toDisable.disable(requester);
     if (result) {
       result =
         await this.availabilityRepository.saveGroupedCheckingVersion(toDisable);
+
+      if (result)
+        await this.eventsPublisher.publish(
+          event<ResourceTakenOver>(
+            'ResourceTakenOver',
+            {
+              resourceId,
+              previousOwners,
+              slot: timeSlot,
+            },
+            this.clock,
+          ),
+        );
     }
     return result;
   }

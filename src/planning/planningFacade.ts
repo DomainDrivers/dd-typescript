@@ -1,8 +1,15 @@
 import type { ResourceId } from '#availability';
 import { TimeSlot } from '#shared';
 import { transactional } from '#storage';
-import { Duration, ObjectSet } from '#utils';
+import {
+  Clock,
+  Duration,
+  ObjectSet,
+  event,
+  type EventsPublisher,
+} from '#utils';
 import type { UTCDate } from '@date-fns/utc';
+import type { CapabilitiesDemanded, CriticalStagePlanned } from '.';
 import type { Demands, DemandsPerStage } from './demands';
 import {
   DurationCalculator,
@@ -22,6 +29,8 @@ export class PlanningFacade {
     private readonly repository: ProjectRepository,
     private readonly parallelization: StageParallelization,
     private readonly planChosenResourcesService: PlanChosenResources,
+    private readonly eventsPublisher: EventsPublisher,
+    private readonly clock: Clock,
   ) {}
 
   @transactional
@@ -68,6 +77,16 @@ export class PlanningFacade {
   ): Promise<void> {
     const project = await this.repository.getById(projectId);
     project.addDemands(demands);
+    await this.eventsPublisher.publish(
+      event<CapabilitiesDemanded>(
+        'CapabilitiesDemanded',
+        {
+          projectId,
+          demands: project.getAllDemands(),
+        },
+        this.clock,
+      ),
+    );
     return this.repository.save(project);
   }
 
@@ -78,6 +97,16 @@ export class PlanningFacade {
   ): Promise<void> {
     const project = await this.repository.getById(projectId);
     project.addDemandsPerStage(demandsPerStage);
+    await this.eventsPublisher.publish(
+      event<CapabilitiesDemanded>(
+        'CapabilitiesDemanded',
+        {
+          projectId,
+          demands: project.getAllDemands(),
+        },
+        this.clock,
+      ),
+    );
     return this.repository.save(project);
   }
 
@@ -119,6 +148,18 @@ export class PlanningFacade {
       criticalStage,
       stageTimeSlot,
     );
+    await this.eventsPublisher.publish(
+      event<CriticalStagePlanned>(
+        'CriticalStagePlanned',
+        {
+          projectId,
+          criticalResource,
+          stageTimeSlot,
+        },
+        this.clock,
+      ),
+    );
+    await this.repository.save(project);
   }
 
   @transactional
@@ -132,6 +173,18 @@ export class PlanningFacade {
       criticalStage,
       stageTimeSlot,
     );
+    await this.eventsPublisher.publish(
+      event<CriticalStagePlanned>(
+        'CriticalStagePlanned',
+        {
+          projectId,
+          criticalResource: null,
+          stageTimeSlot,
+        },
+        this.clock,
+      ),
+    );
+    await this.repository.save(project);
   }
 
   @transactional

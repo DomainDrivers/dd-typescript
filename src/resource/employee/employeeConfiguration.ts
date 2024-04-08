@@ -15,10 +15,10 @@ import { ScheduleEmployeeCapabilities } from './scheduleEmployeeCapabilities';
 export class EmployeeConfiguration {
   constructor(
     public readonly connectionString: string,
-    private readonly enableLogging: boolean = false,
-  ) {
-    console.log('connectionstring: ' + this.connectionString);
-  }
+    public readonly capabilityPlanningConfiguration: CapabilityPlanningConfiguration = new CapabilityPlanningConfiguration(
+      connectionString,
+    ),
+  ) {}
 
   employeeFacade = (
     employeeRepository?: EmployeeRepository,
@@ -31,10 +31,7 @@ export class EmployeeConfiguration {
         new ScheduleEmployeeCapabilities(
           employeeRepository,
           capabilityScheduler ??
-            new CapabilityPlanningConfiguration(
-              this.connectionString,
-              this.enableLogging,
-            ).capabilityScheduler(),
+            this.capabilityPlanningConfiguration.capabilityScheduler(),
         ),
       ),
       this.db,
@@ -45,5 +42,5 @@ export class EmployeeConfiguration {
     new DrizzleEmployeeRepository();
 
   public db = (cs?: string): NodePgDatabase<typeof schema> =>
-    getDB(cs ?? this.connectionString, { schema, logger: this.enableLogging });
+    getDB(cs ?? this.connectionString, { schema });
 }

@@ -73,6 +73,9 @@ export const assertThatArray = <T>(array: T[]) => {
     allMatch: (matches: (item: T) => boolean) => {
       assertTrue(array.every(matches));
     },
+    anyMatches: (matches: (item: T) => boolean) => {
+      assertTrue(array.some(matches));
+    },
     allMatchAsync: async (
       matches: (item: T) => Promise<boolean>,
     ): Promise<void> => {

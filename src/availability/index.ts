@@ -9,4 +9,5 @@ export { ResourceAvailabilityReadModel } from './resourceAvailabilityReadModel';
 export { ResourceAvailabilityRepository } from './resourceAvailabilityRepository';
 export { ResourceGroupedAvailability } from './resourceGroupedAvailability';
 export { ResourceId } from './resourceId';
+export { type ResourceTakenOver } from './resourceTakenOver';
 export * from './segment';
