@@ -3,6 +3,7 @@ import {
   AllocatableCapabilityId,
   AllocatedCapability,
   Allocations,
+  CapabilitySelector,
   Demand,
   Demands,
   ProjectAllocations,
@@ -15,6 +16,7 @@ import assert from 'node:assert';
 import { describe, it } from 'node:test';
 import { assertEquals, assertThatArray } from '../asserts';
 const permission = Capability.permission;
+const canJustPerform = CapabilitySelector.canJustPerform;
 
 describe('AllocationsToProject', () => {
   const WHEN = new UTCDate();
@@ -31,7 +33,7 @@ describe('AllocationsToProject', () => {
     //when
     const event = allocations.allocate(
       ADMIN_ID,
-      permission('ADMIN'),
+      canJustPerform(permission('ADMIN')),
       FEB_1,
       WHEN,
     );
@@ -63,7 +65,7 @@ describe('AllocationsToProject', () => {
     //when
     const event = allocations.allocate(
       ADMIN_ID,
-      permission('ADMIN'),
+      canJustPerform(permission('ADMIN')),
       FEB_1,
       WHEN,
     );
@@ -77,12 +79,17 @@ describe('AllocationsToProject', () => {
     const allocations = ProjectAllocations.empty(PROJECT_ID);
 
     //and
-    allocations.allocate(ADMIN_ID, permission('ADMIN'), FEB_1, WHEN);
+    allocations.allocate(
+      ADMIN_ID,
+      canJustPerform(permission('ADMIN')),
+      FEB_1,
+      WHEN,
+    );
 
     //when
     const event = allocations.allocate(
       ADMIN_ID,
-      permission('ADMIN'),
+      canJustPerform(permission('ADMIN')),
       FEB_1,
       WHEN,
     );
@@ -100,11 +107,16 @@ describe('AllocationsToProject', () => {
     //and
     const allocations = ProjectAllocations.withDemands(PROJECT_ID, demands);
     //and
-    allocations.allocate(ADMIN_ID, permission('ADMIN'), FEB_1, WHEN);
+    allocations.allocate(
+      ADMIN_ID,
+      canJustPerform(permission('ADMIN')),
+      FEB_1,
+      WHEN,
+    );
     //when
     const event = allocations.allocate(
       ADMIN_ID,
-      Capability.skill('JAVA'),
+      canJustPerform(Capability.skill('JAVA')),
       FEB_1,
       WHEN,
     );
@@ -132,11 +144,16 @@ describe('AllocationsToProject', () => {
     //and
     const allocations = ProjectAllocations.withDemands(PROJECT_ID, demands);
     //and
-    allocations.allocate(ADMIN_ID, permission('ADMIN'), FEB_1, WHEN);
+    allocations.allocate(
+      ADMIN_ID,
+      canJustPerform(permission('ADMIN')),
+      FEB_1,
+      WHEN,
+    );
     //when
     const event = allocations.allocate(
       ADMIN_ID,
-      Capability.skill('JAVA'),
+      canJustPerform(Capability.skill('JAVA')),
       FEB_2,
       WHEN,
     );
@@ -166,7 +183,7 @@ describe('AllocationsToProject', () => {
     //and
     const allocatedAdmin = allocations.allocate(
       ADMIN_ID,
-      permission('ADMIN'),
+      canJustPerform(permission('ADMIN')),
       FEB_1,
       WHEN,
     );
@@ -216,14 +233,14 @@ describe('AllocationsToProject', () => {
     //and
     const allocatedAdmin = allocations.allocate(
       ADMIN_ID,
-      permission('ADMIN'),
+      canJustPerform(permission('ADMIN')),
       FEB_1,
       WHEN,
     );
     assert.ok(allocatedAdmin);
     allocations.allocate(
       AllocatableCapabilityId.newOne(),
-      Capability.skill('JAVA'),
+      canJustPerform(Capability.skill('JAVA')),
       FEB_1,
       WHEN,
     );
@@ -254,7 +271,7 @@ describe('AllocationsToProject', () => {
     //and
     const allocatedAdmin = allocations.allocate(
       ADMIN_ID,
-      permission('ADMIN'),
+      canJustPerform(permission('ADMIN')),
       FEB_1,
       WHEN,
     );
@@ -277,7 +294,7 @@ describe('AllocationsToProject', () => {
     //and
     const allocatedAdmin = allocations.allocate(
       ADMIN_ID,
-      permission('ADMIN'),
+      canJustPerform(permission('ADMIN')),
       FEB_1,
       WHEN,
     );
@@ -311,8 +328,16 @@ describe('AllocationsToProject', () => {
     });
     assert.equal(allocations.allocations.all.length, 2);
     assertThatArray(allocations.allocations.all).containsExactlyInAnyOrder(
-      new AllocatedCapability(ADMIN_ID, permission('ADMIN'), oneHourBefore),
-      new AllocatedCapability(ADMIN_ID, permission('ADMIN'), theRest),
+      new AllocatedCapability(
+        ADMIN_ID,
+        canJustPerform(permission('ADMIN')),
+        oneHourBefore,
+      ),
+      new AllocatedCapability(
+        ADMIN_ID,
+        canJustPerform(permission('ADMIN')),
+        theRest,
+      ),
     );
   });
 });

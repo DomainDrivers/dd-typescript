@@ -33,6 +33,7 @@ import { TestConfiguration } from '../setup';
 
 const toAvailabilityResourceId =
   AllocatableCapabilityId.toAvailabilityResourceId;
+const canJustPerform = CapabilitySelector.canJustPerform;
 
 describe('ResourceAllocating', () => {
   const testEnvironment = TestConfiguration();
@@ -81,7 +82,6 @@ describe('ResourceAllocating', () => {
     const result = await allocationFacade.allocateToProject(
       projectId,
       allocatableCapabilityId,
-      skillJava,
       oneDay,
     );
 
@@ -91,7 +91,11 @@ describe('ResourceAllocating', () => {
     assertThatArray(
       summary.projectAllocations.get(projectId)!.all,
     ).containsExactly(
-      new AllocatedCapability(allocatableCapabilityId, skillJava, oneDay),
+      new AllocatedCapability(
+        allocatableCapabilityId,
+        canJustPerform(skillJava),
+        oneDay,
+      ),
     );
     assertThatArray(summary.demands.get(projectId)!.all).containsExactly(
       demand,
@@ -134,7 +138,6 @@ describe('ResourceAllocating', () => {
     const result = await allocationFacade.allocateToProject(
       projectId,
       allocatableCapabilityId,
-      skillJava,
       oneDay,
     );
 
@@ -163,7 +166,6 @@ describe('ResourceAllocating', () => {
     const result = await allocationFacade.allocateToProject(
       projectId,
       notScheduledCapability,
-      skillJava,
       oneDay,
     );
 
@@ -190,11 +192,9 @@ describe('ResourceAllocating', () => {
       Demands.none(),
     );
     //and
-    const chosenCapability = Capability.skill('JAVA');
     await allocationFacade.allocateToProject(
       projectId,
       allocatableCapabilityId,
-      chosenCapability,
       oneDay,
     );
 
@@ -234,7 +234,7 @@ describe('ResourceAllocating', () => {
     capability: Capability,
     resourceId: AllocatableResourceId,
   ): Promise<AllocatableCapabilityId> => {
-    const capabilitySelector = CapabilitySelector.canJustPerform(capability);
+    const capabilitySelector = canJustPerform(capability);
     return scheduleCapabilities(resourceId, capabilitySelector, period);
   };
 

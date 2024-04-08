@@ -10,9 +10,14 @@ export type CapabilityEntity = {
   type: string;
 };
 
+export type CapabilitySelectorEntity = {
+  capabilities: CapabilityEntity[];
+  selectingPolicy: string;
+};
+
 export type AllocatedCapabilityEntity = {
   allocatedCapabilityID: string;
-  capability: CapabilityEntity;
+  capability: CapabilitySelectorEntity;
   timeSlot: TimeSlotEntity;
 };
 

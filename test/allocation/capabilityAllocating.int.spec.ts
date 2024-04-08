@@ -158,13 +158,11 @@ describe('CapabilityAllocating', () => {
     await allocationFacade.allocateToProject(
       project1,
       allocatableCapabilityId1,
-      skill('DEBUGGING'),
       oneDay,
     );
     await allocationFacade.allocateToProject(
       project2,
       allocatableCapabilityId2,
-      skill('DEBUGGING'),
       oneDay,
     );
 

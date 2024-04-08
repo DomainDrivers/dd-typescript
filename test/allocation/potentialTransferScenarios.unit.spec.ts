@@ -3,6 +3,7 @@ import {
   AllocatableCapabilityId,
   AllocatedCapability,
   Allocations,
+  CapabilitySelector,
   Demand,
   Demands,
   Earnings,
@@ -20,6 +21,7 @@ import { addMinutes } from 'date-fns';
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 const skill = Capability.skill;
+const canJustPerform = CapabilitySelector.canJustPerform;
 
 describe('PotentialTransferScenarios', () => {
   const JAN_1 = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
@@ -42,7 +44,7 @@ describe('PotentialTransferScenarios', () => {
   const INSURANCE_SOFT_ID = ProjectAllocationsId.newOne();
   const STASZEK_JAVA_MID = new AllocatedCapability(
     AllocatableCapabilityId.newOne(),
-    skill('JAVA-MID'),
+    canJustPerform(skill('JAVA-MID')),
     JAN_1,
   );
 

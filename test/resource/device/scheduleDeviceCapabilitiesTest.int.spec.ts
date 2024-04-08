@@ -40,7 +40,7 @@ describe('ScheduleDeviceCapabilities', () => {
     const allocations = await deviceFacade.scheduleCapabilities(device, oneDay);
 
     //then
-    const loaded = await capabilityFinder.findById(allocations);
+    const loaded = await capabilityFinder.findAllById(allocations);
     assertEquals(allocations.length, loaded.all.length);
   });
 });
