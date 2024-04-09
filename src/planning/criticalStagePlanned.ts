@@ -1,9 +1,9 @@
 import type { ResourceId } from '#availability';
 import type { TimeSlot } from '#shared';
-import { type Event } from '#utils';
+import { type PublishedEvent } from '#utils';
 import type { ProjectId } from '.';
 
-export type CriticalStagePlanned = Event<
+export type CriticalStagePlanned = PublishedEvent<
   'CriticalStagePlanned',
   {
     projectId: ProjectId;

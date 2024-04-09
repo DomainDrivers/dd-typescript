@@ -5,16 +5,13 @@ import {
   Demands,
   Earnings,
   ProjectAllocationsId,
-  type CapabilitiesAllocated,
-  type CapabilityReleased,
   type EarningsRecalculated,
   type ProjectAllocationScheduled,
-  type ProjectAllocationsDemandsScheduled,
 } from '#allocation';
 import { Owner, type ResourceTakenOver } from '#availability';
 import { RiskPeriodicCheckSaga } from '#risk';
 import { Capability, TimeSlot } from '#shared';
-import { Clock, ObjectSet, UUID, event } from '#utils';
+import { Clock, ObjectSet, event } from '#utils';
 import { UTCDate } from '@date-fns/utc';
 import { addDays, addHours, subDays, subHours } from 'date-fns';
 import { describe, it } from 'node:test';
@@ -62,22 +59,27 @@ describe('RiskPeriodicCheckSaga', () => {
     assertEquals(PROJECT_DATES.to, saga.deadline);
   });
 
-  it('Updates demands on schedule change', () => {
+  it('update missing demands', () => {
     //given
     const saga = new RiskPeriodicCheckSaga(PROJECT_ID, SINGLE_DEMAND);
 
     //when
-    const nextStep = saga.handle(
-      event<ProjectAllocationsDemandsScheduled>(
-        'ProjectAllocationsDemandsScheduled',
-        { projectId: PROJECT_ID, missingDemands: MANY_DEMANDS },
-        clock,
-      ),
-    );
+    const nextStep = saga.setMissingDemands(MANY_DEMANDS);
 
     //then
     assertEquals('DO_NOTHING', nextStep);
     assertEquals(MANY_DEMANDS, saga.missingDemands);
+  });
+
+  it('No new steps on when missing demands', () => {
+    //given
+    const saga = new RiskPeriodicCheckSaga(PROJECT_ID, MANY_DEMANDS);
+
+    //when
+    const nextStep = saga.setMissingDemands(MANY_DEMANDS);
+
+    //then
+    assertEquals('DO_NOTHING', nextStep);
   });
 
   it('Updated earnings on earnings recalculated', () => {
@@ -111,7 +113,7 @@ describe('RiskPeriodicCheckSaga', () => {
     assertEquals('DO_NOTHING', nextStep);
   });
 
-  it('Informs about demands satisfied when demands rescheduled', () => {
+  it('Informs about demands satisfied when no missing demands', () => {
     //given
     const saga = new RiskPeriodicCheckSaga(PROJECT_ID, MANY_DEMANDS);
     //and
@@ -123,83 +125,17 @@ describe('RiskPeriodicCheckSaga', () => {
       ),
     );
     //when
-    const stillMissing = saga.handle(
-      event<ProjectAllocationsDemandsScheduled>(
-        'ProjectAllocationsDemandsScheduled',
-        { projectId: PROJECT_ID, missingDemands: SINGLE_DEMAND },
-        clock,
-      ),
-    );
-    const zeroDemands = saga.handle(
-      event<ProjectAllocationsDemandsScheduled>(
-        'ProjectAllocationsDemandsScheduled',
-        { projectId: PROJECT_ID, missingDemands: Demands.none() },
-        clock,
-      ),
-    );
+    const stillMissing = saga.setMissingDemands(SINGLE_DEMAND);
+    const zeroDemands = saga.setMissingDemands(Demands.none());
 
     //then
     assertEquals('DO_NOTHING', stillMissing);
     assertEquals('NOTIFY_ABOUT_DEMANDS_SATISFIED', zeroDemands);
   });
 
-  it('Notify about no missing demands on capability allocated', () => {
-    //given
-    const saga = new RiskPeriodicCheckSaga(PROJECT_ID, SINGLE_DEMAND);
-
-    //when
-    const nextStep = saga.handle(
-      event<CapabilitiesAllocated>(
-        'CapabilitiesAllocated',
-        {
-          allocatedCapabilityId: UUID.randomUUID(),
-          projectId: PROJECT_ID,
-          missingDemands: Demands.none(),
-        },
-        clock,
-      ),
-    );
-
-    //then
-    assertEquals('NOTIFY_ABOUT_DEMANDS_SATISFIED', nextStep);
-  });
-
-  it('No new steps on capability allocated when missing demands', () => {
-    //given
-    const saga = new RiskPeriodicCheckSaga(PROJECT_ID, MANY_DEMANDS);
-
-    //when
-    const nextStep = saga.handle(
-      event<CapabilitiesAllocated>(
-        'CapabilitiesAllocated',
-        {
-          allocatedCapabilityId: UUID.randomUUID(),
-          projectId: PROJECT_ID,
-          missingDemands: SINGLE_DEMAND,
-        },
-        clock,
-      ),
-    );
-
-    //then
-    assertEquals('DO_NOTHING', nextStep);
-  });
-
   it('Do nothing on resource taken over when after deadline', () => {
     //given
     const saga = new RiskPeriodicCheckSaga(PROJECT_ID, MANY_DEMANDS);
-    //and
-    saga.handle(
-      event<CapabilitiesAllocated>(
-        'CapabilitiesAllocated',
-        {
-          allocatedCapabilityId: UUID.randomUUID(),
-          projectId: PROJECT_ID,
-          missingDemands: SINGLE_DEMAND,
-        },
-        clock,
-      ),
-    );
     //and
     saga.handle(
       event<ProjectAllocationScheduled>(
@@ -234,18 +170,6 @@ describe('RiskPeriodicCheckSaga', () => {
     const saga = new RiskPeriodicCheckSaga(PROJECT_ID, MANY_DEMANDS);
     //and
     saga.handle(
-      event<CapabilitiesAllocated>(
-        'CapabilitiesAllocated',
-        {
-          allocatedCapabilityId: UUID.randomUUID(),
-          projectId: PROJECT_ID,
-          missingDemands: MANY_DEMANDS,
-        },
-        clock,
-      ),
-    );
-    //and
-    saga.handle(
       event<ProjectAllocationScheduled>(
         'ProjectAllocationScheduled',
         { projectId: PROJECT_ID, fromTo: PROJECT_DATES },
@@ -276,30 +200,9 @@ describe('RiskPeriodicCheckSaga', () => {
   it('No next step on capability released', () => {
     //given
     const saga = new RiskPeriodicCheckSaga(PROJECT_ID, SINGLE_DEMAND);
-    //and
-    saga.handle(
-      event<CapabilitiesAllocated>(
-        'CapabilitiesAllocated',
-        {
-          allocatedCapabilityId: UUID.randomUUID(),
-          projectId: PROJECT_ID,
-          missingDemands: Demands.none(),
-        },
-        clock,
-      ),
-    );
 
     //when
-    const nextStep = saga.handle(
-      event<CapabilityReleased>(
-        'CapabilityReleased',
-        {
-          projectId: PROJECT_ID,
-          missingDemands: SINGLE_DEMAND,
-        },
-        clock,
-      ),
-    );
+    const nextStep = saga.setMissingDemands(SINGLE_DEMAND);
 
     //then
     assertEquals('DO_NOTHING', nextStep);
@@ -317,17 +220,7 @@ describe('RiskPeriodicCheckSaga', () => {
       ),
     );
     //and
-    saga.handle(
-      event<CapabilitiesAllocated>(
-        'CapabilitiesAllocated',
-        {
-          allocatedCapabilityId: UUID.randomUUID(),
-          projectId: PROJECT_ID,
-          missingDemands: Demands.none(),
-        },
-        clock,
-      ),
-    );
+    saga.setMissingDemands(Demands.none());
     //and
     saga.handle(
       event<ProjectAllocationScheduled>(

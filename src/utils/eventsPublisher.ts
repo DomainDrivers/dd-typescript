@@ -1,9 +1,11 @@
 import type { EnlistableInTransaction, PostTransactionCommit } from '#storage';
 import { ObjectMap } from '#utils';
-import { type Event, type EventTypeOf } from './event';
+import { type Event, type EventTypeOf, type PublishedEvent } from './event';
 
 export interface EventsPublisher {
-  publish<EventType extends Event = Event>(event: EventType): Promise<void>;
+  publish<EventType extends PublishedEvent = PublishedEvent>(
+    event: EventType,
+  ): Promise<void>;
 }
 
 export type EventHandler<E extends Event = Event> = (
@@ -66,7 +68,7 @@ export const getInMemoryEventsBus = (): EventBus => {
   const allHandlers = ObjectMap.empty<string, EventHandler[]>();
 
   return {
-    publish: async <EventType extends Event = Event>(
+    publish: async <EventType extends PublishedEvent = PublishedEvent>(
       event: EventType,
     ): Promise<void> => {
       const eventHandlers = allHandlers.getOrDefault(event.type, () => []);

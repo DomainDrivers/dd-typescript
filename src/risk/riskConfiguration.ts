@@ -1,6 +1,7 @@
 import {
   AllocationConfiguration,
   type CapabilityFinder,
+  type NotSatisfiedDemands,
   type PotentialTransfersService,
 } from '#allocation';
 import { AvailabilityConfiguration } from '#availability';
@@ -90,14 +91,14 @@ export class RiskConfiguration {
   }
 
   private subscribeToEvents = () => {
-    this.#utilsConfiguration.eventBus.subscribe<RiskPeriodicCheckSagaEvent>(
+    this.#utilsConfiguration.eventBus.subscribe<
+      RiskPeriodicCheckSagaEvent | NotSatisfiedDemands
+    >(
       [
-        'CapabilitiesAllocated',
-        'CapabilityReleased',
         'EarningsRecalculated',
         'ProjectAllocationScheduled',
-        'ProjectAllocationsDemandsScheduled',
         'ResourceTakenOver',
+        'NotSatisfiedDemands',
       ],
       (event) => this.riskSagaDispatcher().handle(event),
     );

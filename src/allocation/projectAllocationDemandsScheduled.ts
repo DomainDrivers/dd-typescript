@@ -1,9 +1,9 @@
-import { UUID, type Event } from '#utils';
+import { UUID, type PrivateAndPublishedEvent } from '#utils';
 import type { UTCDate } from '@date-fns/utc';
 import type { Demands } from './demands';
 import type { ProjectAllocationsId } from './projectAllocationsId';
 
-export type ProjectAllocationsDemandsScheduled = Event<
+export type ProjectAllocationsDemandsScheduled = PrivateAndPublishedEvent<
   'ProjectAllocationsDemandsScheduled',
   {
     projectId: ProjectAllocationsId;

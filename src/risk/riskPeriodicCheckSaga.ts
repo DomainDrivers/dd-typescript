@@ -2,11 +2,8 @@ import {
   Demands,
   Earnings,
   ProjectAllocationsId,
-  type CapabilitiesAllocated,
-  type CapabilityReleased,
   type EarningsRecalculated,
   type ProjectAllocationScheduled,
-  type ProjectAllocationsDemandsScheduled,
 } from '#allocation';
 
 import type { UTCDate } from '@date-fns/utc';
@@ -17,11 +14,8 @@ import { Duration } from '../utils';
 
 export type RiskPeriodicCheckSagaEvent =
   | EarningsRecalculated
-  | ProjectAllocationsDemandsScheduled
   | ProjectAllocationScheduled
-  | CapabilitiesAllocated
-  | ResourceTakenOver
-  | CapabilityReleased;
+  | ResourceTakenOver;
 
 const RISK_THRESHOLD_VALUE = Earnings.of(1000);
 const UPCOMING_DEADLINE_AVAILABILITY_SEARCH = 30;
@@ -37,7 +31,7 @@ export class RiskPeriodicCheckSaga {
 
   constructor(
     projectId: ProjectAllocationsId,
-    missingDemandsOrEarnings:
+    missingDemandsOrEarnings?:
       | Demands
       | Earnings
       | { missingDemands: Demands | null; earnings: Earnings | null },
@@ -48,7 +42,10 @@ export class RiskPeriodicCheckSaga {
     this.#id = riskSagaId;
     this.#projectId = projectId;
 
-    if (missingDemandsOrEarnings instanceof Demands) {
+    if (!missingDemandsOrEarnings) {
+      this.#missingDemands = Demands.none();
+      this.#earnings = null;
+    } else if (missingDemandsOrEarnings instanceof Demands) {
       this.#missingDemands = missingDemandsOrEarnings;
       this.#earnings = null;
     } else if ('missingDemands' in missingDemandsOrEarnings) {
@@ -62,7 +59,15 @@ export class RiskPeriodicCheckSaga {
     this.#deadline = deadline;
     this.#version = version;
   }
+
   areDemandsSatisfied = (): boolean => this.#missingDemands?.all.length === 0;
+
+  public setMissingDemands(
+    _missingDemands: Demands,
+  ): RiskPeriodicCheckSagaStep {
+    //TODO implement
+    return null!;
+  }
 
   public handle = ({
     type,
@@ -73,26 +78,8 @@ export class RiskPeriodicCheckSaga {
         this.#earnings = event.earnings;
         return 'DO_NOTHING';
       }
-      case 'ProjectAllocationsDemandsScheduled': {
-        this.#missingDemands = event.missingDemands;
-        if (this.areDemandsSatisfied()) {
-          return 'NOTIFY_ABOUT_DEMANDS_SATISFIED';
-        }
-        return 'DO_NOTHING';
-      }
       case 'ProjectAllocationScheduled': {
         this.#deadline = event.fromTo.to;
-        return 'DO_NOTHING';
-      }
-      case 'CapabilitiesAllocated': {
-        this.#missingDemands = event.missingDemands;
-        if (this.areDemandsSatisfied()) {
-          return 'NOTIFY_ABOUT_DEMANDS_SATISFIED';
-        }
-        return 'DO_NOTHING';
-      }
-      case 'CapabilityReleased': {
-        this.#missingDemands = event.missingDemands;
         return 'DO_NOTHING';
       }
       case 'ResourceTakenOver': {
@@ -134,6 +121,7 @@ export class RiskPeriodicCheckSaga {
   public get missingDemands() {
     return this.#missingDemands;
   }
+
   public get earnings() {
     return this.#earnings;
   }

@@ -1,7 +1,7 @@
-import { type Event } from '#utils';
-import type { ProjectId, Demands } from '.';
+import type { PublishedEvent } from '#utils';
+import type { Demands, ProjectId } from '.';
 
-export type CapabilitiesDemanded = Event<
+export type CapabilitiesDemanded = PublishedEvent<
   'CapabilitiesDemanded',
   {
     projectId: ProjectId;

@@ -9,6 +9,9 @@ export {
   type EventMetaData,
   type EventTypeOf,
   type OptionalEventMetaData,
+  type PrivateAndPublishedEvent,
+  type PrivateEvent,
+  type PublishedEvent,
 } from './event';
 export {
   getInMemoryEventsBus,
