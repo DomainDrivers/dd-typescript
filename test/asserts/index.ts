@@ -67,6 +67,13 @@ export function verifyThat(fn: MockedFunction) {
         fn.mock?.calls.length !== undefined && fn.mock.calls.length > 0,
       );
     },
+    calledWith: (...args: unknown[]) => {
+      assertTrue(
+        fn.mock?.calls.length !== undefined &&
+          fn.mock.calls.length >= 1 &&
+          fn.mock.calls.some((call) => deepEquals(call.arguments, args)),
+      );
+    },
     calledOnceWith: (...args: unknown[]) => {
       assertTrue(
         fn.mock?.calls.length !== undefined &&

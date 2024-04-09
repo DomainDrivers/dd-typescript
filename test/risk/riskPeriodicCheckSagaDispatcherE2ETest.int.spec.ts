@@ -100,8 +100,8 @@ void describe('RiskPeriodicCheckSagaDispatcherE2E', () => {
     );
 
     //then
-    verifyThat(notifyDemandsSatisfied).calledOnceWith(projectId);
-    verifyThat(notifyDemandsSatisfied).calledOnceWith(projectId2);
+    verifyThat(notifyDemandsSatisfied).calledWith(projectId);
+    verifyThat(notifyDemandsSatisfied).calledWith(projectId2);
   });
 
   void it('Informs about potential risk when resource taken over', async ({

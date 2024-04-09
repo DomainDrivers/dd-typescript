@@ -61,11 +61,12 @@ export class RiskPeriodicCheckSaga {
   }
   areDemandsSatisfied = (): boolean => this._missingDemands?.all.length === 0;
 
-  public setMissingDemands(
-    _missingDemands: Demands,
-  ): RiskPeriodicCheckSagaStep {
-    //TODO implement
-    return null!;
+  public setMissingDemands(missingDemands: Demands): RiskPeriodicCheckSagaStep {
+    this._missingDemands = missingDemands;
+    if (this.areDemandsSatisfied()) {
+      return 'NOTIFY_ABOUT_DEMANDS_SATISFIED';
+    }
+    return 'DO_NOTHING';
   }
 
   public handle = ({
