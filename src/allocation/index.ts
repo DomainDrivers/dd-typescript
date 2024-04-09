@@ -8,6 +8,8 @@ export * from './capabilityscheduling';
 export * from './cashflow';
 export { Demand } from './demand';
 export { Demands } from './demands';
+export { DrizzleProjectAllocationsRepository } from './drizzleProjectAllocationsRepository';
+export { InMemoryProjectAllocationsRepository } from './inMemoryProjectAllocationsRepository';
 export { NotSatisfiedDemands } from './notSatisfiedDemands';
 export { PotentialTransfers } from './potentialTransfers';
 export { PotentialTransfersService } from './potentialTransfersService';
@@ -18,4 +20,7 @@ export { ProjectAllocations } from './projectAllocations';
 export { ProjectAllocationsId } from './projectAllocationsId';
 export { type ProjectAllocationsRepository } from './projectAllocationsRepository';
 export { ProjectsAllocationsSummary } from './projectsAllocationsSummary';
-export { type PublishMissingDemandsService } from './publishMissingDemandsService';
+export {
+  CreateHourlyDemandsSummaryService,
+  type PublishMissingDemandsService,
+} from './publishMissingDemandsService';

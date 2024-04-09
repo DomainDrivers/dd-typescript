@@ -3,6 +3,7 @@ import {
   AllocationConfiguration,
   Demand,
   Demands,
+  InMemoryProjectAllocationsRepository,
   type AllocationFacade,
 } from '#allocation';
 import * as schema from '#schema';
@@ -12,7 +13,7 @@ import assert from 'node:assert';
 import { after, before, describe, it } from 'node:test';
 import { TestConfiguration } from '../setup';
 
-describe('DemandScheduling', () => {
+describe('creatingNewProject', () => {
   const JAN = TimeSlot.createDailyTimeSlotAtUTC(2021, 1, 1);
   const FEB = TimeSlot.createDailyTimeSlotAtUTC(2021, 2, 1);
 
@@ -24,7 +25,9 @@ describe('DemandScheduling', () => {
 
     const configuration = new AllocationConfiguration(connectionString);
 
-    allocationFacade = configuration.allocationFacade();
+    allocationFacade = configuration.allocationFacade(
+      new InMemoryProjectAllocationsRepository(),
+    );
   });
 
   after(async () => await testEnvironment.stop());

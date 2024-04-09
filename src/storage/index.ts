@@ -1,4 +1,5 @@
 export { DrizzleRepository, getDB, type PostgresTransaction } from './drizzle';
+export { InMemoryRepository } from './inMemoryRepository';
 export {
   PostgresRepository,
   endPool,

@@ -40,7 +40,9 @@ export class CreateHourlyDemandsSummaryService {
   ): NotSatisfiedDemands =>
     event('NotSatisfiedDemands', {
       missingDemands: ObjectMap.from(
-        projectAllocations.map((pa) => [pa.id, pa.missingDemands()]),
+        projectAllocations
+          .filter((pa) => pa.hasTimeSlot())
+          .map((pa) => [pa.id, pa.missingDemands()]),
       ),
       occurredAt: when,
     });

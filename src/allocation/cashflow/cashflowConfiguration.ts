@@ -2,11 +2,9 @@ import { getDB, injectDatabase } from '#storage';
 import { UtilsConfiguration } from '#utils';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { CashFlowFacade } from './cashflowFacade';
-import {
-  DrizzleCashflowRepository,
-  type CashflowRepository,
-} from './cashflowRepository';
+import { type CashflowRepository } from './cashflowRepository';
 import * as schema from './schema';
+import { DrizzleCashflowRepository } from './drizzleCashflowRepository';
 
 export class CashflowConfiguration {
   constructor(
