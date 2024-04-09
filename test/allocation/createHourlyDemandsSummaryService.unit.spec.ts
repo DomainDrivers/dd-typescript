@@ -7,9 +7,9 @@ import {
   ProjectAllocationsId,
 } from '#allocation';
 import { Capability, TimeSlot } from '#shared';
+import { ObjectMap } from '#utils';
 import { UTCDate } from '@date-fns/utc';
 import { describe, it } from 'node:test';
-import { ObjectMap } from '../../src/utils';
 import { assertEquals, assertThatArray } from '../asserts';
 
 const skill = Capability.skill;

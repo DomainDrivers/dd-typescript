@@ -5,11 +5,12 @@ import {
   type PotentialTransfersService,
 } from '#allocation';
 import { AvailabilityConfiguration } from '#availability';
-import type { NeededResourcesChosen } from '#planning';
 import {
   PlanningConfiguration,
+  RedisConfiguration,
   type CapabilitiesDemanded,
   type CriticalStagePlanned,
+  type NeededResourcesChosen,
 } from '#planning';
 import { ResourceConfiguration } from '#resource';
 import { SimulationConfiguration } from '#simulation';
@@ -29,9 +30,11 @@ import {
 } from './riskPeriodicCheckSagaRepository';
 import { RiskPushNotification } from './riskPushNotification';
 import * as schema from './schema';
+import type Redis from 'ioredis';
 
 type Dependencies = {
   utilsConfiguration?: UtilsConfiguration;
+  redisConfiguration?: RedisConfiguration;
   availabilityConfiguration?: AvailabilityConfiguration;
   planningConfiguration?: PlanningConfiguration;
   simmulationConfiguration?: SimulationConfiguration;
@@ -43,6 +46,7 @@ type Dependencies = {
 export class RiskConfiguration {
   #riskPushNotification: RiskPushNotification | undefined;
   #utilsConfiguration: UtilsConfiguration;
+  #redisConfiguration: RedisConfiguration;
   #availabilityConfiguration: AvailabilityConfiguration;
   #planningConfiguration: PlanningConfiguration;
   #simmulationConfiguration: SimulationConfiguration;
@@ -51,10 +55,12 @@ export class RiskConfiguration {
 
   constructor(
     public readonly connectionString: string,
+    public readonly redisClient: Redis,
     dependencies: Dependencies,
   ) {
     const {
       utilsConfiguration,
+      redisConfiguration,
       availabilityConfiguration,
       planningConfiguration,
       simmulationConfiguration,
@@ -64,12 +70,15 @@ export class RiskConfiguration {
     } = dependencies;
 
     this.#utilsConfiguration = utilsConfiguration ?? new UtilsConfiguration();
+    this.#redisConfiguration =
+      redisConfiguration ?? new RedisConfiguration(redisClient);
     this.#availabilityConfiguration =
       availabilityConfiguration ??
       new AvailabilityConfiguration(connectionString, utilsConfiguration);
     this.#planningConfiguration =
       planningConfiguration ??
       new PlanningConfiguration(
+        this.#redisConfiguration,
         connectionString,
         utilsConfiguration,
         availabilityConfiguration,

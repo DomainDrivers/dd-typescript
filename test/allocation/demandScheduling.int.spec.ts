@@ -29,7 +29,7 @@ void describe('DemandScheduling', () => {
   let allocationFacade: AllocationFacade;
 
   before(async () => {
-    const connectionString = await testEnvironment.start({ schema });
+    const { connectionString } = await testEnvironment.start({ schema });
 
     const configuration = new AllocationConfiguration(connectionString);
 

@@ -16,10 +16,7 @@ import assert from 'assert';
 import { describe, it } from 'node:test';
 import { assertThatArray } from '../asserts';
 import { TestConfiguration } from '../setup';
-import {
-  InMemoryProjectRepository,
-  PlanningTestConfiguration,
-} from './planningTestConfiguration';
+import { PlanningTestConfiguration } from './planningTestConfiguration';
 
 const demandFor = Demand.demandFor;
 const skill = Capability.skill;
@@ -28,7 +25,6 @@ describe('PlanningFacade', () => {
   const testEnvironment = TestConfiguration();
   const projectFacade = PlanningTestConfiguration.planningFacade(
     testEnvironment.eventBus,
-    new InMemoryProjectRepository(),
   );
 
   it('can create project and load project card', async () => {

@@ -2,25 +2,23 @@ import type { AvailabilityFacade, Calendars, ResourceId } from '#availability';
 import {
   PlanChosenResources,
   PlanningFacade,
-  Project,
-  ProjectId,
   StageParallelization,
-  type ProjectRepository,
 } from '#planning';
+import type { TimeSlot } from '#shared';
 import { Clock, ObjectSet, type TransactionAwareEventPublisher } from '#utils';
 import { UTCDate } from '@date-fns/utc';
-import type { TimeSlot } from '../../src/shared';
-import { InMemoryRepository, nulloTransactionContext } from '../../src/storage';
+import { nulloTransactionContext } from '../../src/storage';
+import { PlanningDbTestConfiguration } from './planningDbTestConfiguration';
 
 export class PlanningTestConfiguration {
   public static planningFacade(
     eventsPublisher: TransactionAwareEventPublisher,
-    projectRepository: ProjectRepository,
   ): PlanningFacade {
     const clock = Clock.fixed(new UTCDate());
+    const repository = PlanningDbTestConfiguration.inMemoryProjectDb();
     const planChosenResources = nulloTransactionContext(
       new PlanChosenResources(
-        projectRepository,
+        repository,
         PlanningTestConfiguration.getAvailabilityFacadeMock(),
         eventsPublisher,
         clock,
@@ -29,7 +27,7 @@ export class PlanningTestConfiguration {
     );
     return nulloTransactionContext(
       new PlanningFacade(
-        projectRepository,
+        repository,
         new StageParallelization(),
         planChosenResources,
         eventsPublisher,
@@ -47,13 +45,4 @@ export class PlanningTestConfiguration {
       ): Promise<Calendars> => Promise.resolve(null!),
     } as AvailabilityFacade;
   };
-}
-
-export class InMemoryProjectRepository
-  extends InMemoryRepository<Project, ProjectId>
-  implements ProjectRepository
-{
-  constructor() {
-    super((p) => p.getId());
-  }
 }

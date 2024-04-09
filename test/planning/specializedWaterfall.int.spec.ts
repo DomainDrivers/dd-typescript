@@ -3,6 +3,7 @@ import { ResourceId } from '#availability';
 import {
   PlanningConfiguration,
   ProjectId,
+  RedisConfiguration,
   Stage,
   schema,
   type PlanningFacade,
@@ -42,9 +43,15 @@ void describe('Specialized Waterfall', () => {
   );
 
   before(async () => {
-    const connectionString = await testEnvironment.start({ schema });
+    const { connectionString, redisClient } = await testEnvironment.start(
+      { schema },
+      true,
+    );
 
-    const configuration = new PlanningConfiguration(connectionString);
+    const configuration = new PlanningConfiguration(
+      new RedisConfiguration(redisClient!),
+      connectionString,
+    );
 
     projectFacade = configuration.planningFacade();
   });

@@ -1,115 +1,36 @@
 import { endPool, getDB } from '#storage';
-import {
-  UtilsConfiguration,
-  deepEquals,
-  getTransactionAwareEventBus,
-  isEventOfType,
-  type Event,
-  type EventDataOf,
-  type EventHandler,
-  type EventTypeOf,
-  type OptionalEventMetaData,
-  type TransactionAwareEventBus,
-} from '#utils';
+import { UtilsConfiguration, getTransactionAwareEventBus } from '#utils';
 import {
   PostgreSqlContainer,
   type StartedPostgreSqlContainer,
 } from '@testcontainers/postgresql';
 import { sql, type DrizzleConfig } from 'drizzle-orm';
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { migrate } from 'drizzle-orm/node-postgres/migrator';
-import { assertThatArray } from '../asserts';
+import type Redis from 'ioredis';
+import { wrapEventBusForTests, type EventBusWrapper } from './eventBusWrapper';
+import {
+  StartedRedisContainer,
+  getRedisTestContainer,
+  stopRedisTestContainer,
+} from './redisTestContainer';
 
 let postgreSQLContainer: StartedPostgreSqlContainer | null = null;
-let startedCount = 0;
-
-type EventBusWrapper = TransactionAwareEventBus & {
-  verifyPublishedEvent: <EventType extends Event>(
-    type: EventTypeOf<EventType>,
-    data: Omit<EventDataOf<EventType>, 'eventId' | 'occurredAt'> &
-      OptionalEventMetaData,
-  ) => void;
-
-  verifyPublishedEventThatMatches: <EventType extends Event>(
-    type: EventTypeOf<EventType>,
-    matches: (event: EventType) => boolean,
-  ) => void;
-
-  clearPublishedHistory: () => void;
-};
+let startedPostgresCount = 0;
 
 export interface TestConfiguration {
   eventBus: EventBusWrapper;
   utilsConfiguration: UtilsConfiguration;
   start: <TSchema extends Record<string, unknown> = Record<string, never>>(
     config: DrizzleConfig<TSchema>,
-  ) => Promise<string>;
+    startRedis?: boolean,
+  ) => Promise<{
+    connectionString: string;
+    redisClient: Redis | undefined;
+  }>;
   stop: () => Promise<void>;
   clearTestData: () => Promise<void> | void;
 }
-
-const wrapEventBusForTests = (
-  eventBus: TransactionAwareEventBus,
-): EventBusWrapper => {
-  let publishedEvents: Event[] = [];
-
-  return {
-    publish: async <EventType extends Event = Event>(
-      event: EventType,
-    ): Promise<void> => {
-      await eventBus.publish(event);
-      publishedEvents.push(event);
-    },
-    enlist: (tx) => eventBus.enlist(tx),
-
-    commit: () => eventBus.commit(),
-
-    subscribe: <EventType extends Event>(
-      eventTypes: EventTypeOf<EventType>[],
-      eventHandler: EventHandler<EventType>,
-    ): void => eventBus.subscribe(eventTypes, eventHandler),
-
-    verifyPublishedEvent: <EventType extends Event>(
-      type: EventTypeOf<EventType>,
-      data: Omit<EventDataOf<EventType>, 'eventId' | 'occurredAt'> &
-        OptionalEventMetaData,
-    ): void =>
-      assertThatArray(publishedEvents).anyMatches((published) => {
-        const {
-          eventId: expectedEventId,
-          occurredAt: expectedOccurredAt,
-          data: expectedData,
-        } = data;
-        const {
-          eventId: actualEventId,
-          occurredAt: actualOccurredAt,
-          data: actualData,
-        } = data;
-
-        return (
-          published.type === type &&
-          deepEquals(expectedData, actualData) &&
-          (expectedEventId
-            ? expectedEventId === actualEventId
-            : !actualEventId) &&
-          (expectedOccurredAt
-            ? expectedOccurredAt === actualOccurredAt
-            : !actualOccurredAt)
-        );
-      }),
-
-    verifyPublishedEventThatMatches: <EventType extends Event>(
-      type: EventTypeOf<EventType>,
-      matches: (event: EventType) => boolean,
-    ) =>
-      assertThatArray(publishedEvents).anyMatches(
-        (published) =>
-          isEventOfType<EventType>(type, published) && matches(published),
-      ),
-
-    clearPublishedHistory: () => (publishedEvents = []),
-  };
-};
 
 export const TestConfiguration = (
   utilsConfiguration?: UtilsConfiguration,
@@ -121,6 +42,8 @@ export const TestConfiguration = (
   utilsConfiguration =
     utilsConfiguration ?? new UtilsConfiguration(eventBusWrapper);
   let drizzleConfig: DrizzleConfig;
+  let redisClient: Redis | undefined;
+  let redisContainer: StartedRedisContainer | undefined;
 
   return {
     eventBus: eventBusWrapper,
@@ -129,13 +52,22 @@ export const TestConfiguration = (
       TSchema extends Record<string, unknown> = Record<string, never>,
     >(
       config: DrizzleConfig<TSchema>,
-    ): Promise<string> => {
-      if (startedCount++ === 0 || postgreSQLContainer === null)
+      startRedis: boolean = false,
+    ): Promise<{
+      connectionString: string;
+      redisClient: Redis | undefined;
+    }> => {
+      if (startedPostgresCount++ === 0 || postgreSQLContainer === null)
         postgreSQLContainer = await new PostgreSqlContainer(
           'postgres:15-alpine',
         )
           .withDatabase(databaseName ?? 'test')
           .start();
+
+      if (startRedis) {
+        redisContainer = await getRedisTestContainer();
+        redisClient = redisContainer.getClient();
+      }
 
       connectionString = postgreSQLContainer.getConnectionUri();
       drizzleConfig = config as DrizzleConfig;
@@ -146,10 +78,10 @@ export const TestConfiguration = (
 
       await migrate(database, { migrationsFolder: './drizzle' });
 
-      return connectionString;
+      return { connectionString, redisClient };
     },
     stop: async (): Promise<void> => {
-      if (postgreSQLContainer !== null && --startedCount === 0) {
+      if (postgreSQLContainer !== null && --startedPostgresCount === 0) {
         try {
           await endPool(connectionString);
         } finally {
@@ -157,11 +89,13 @@ export const TestConfiguration = (
           postgreSQLContainer = null;
         }
       }
+      await stopRedisTestContainer();
     },
 
     clearTestData: async () => {
       eventBusWrapper.clearPublishedHistory();
       await clearDb(getDB(connectionString, drizzleConfig));
+      if (redisClient) await redisClient.flushdb();
     },
   };
 };

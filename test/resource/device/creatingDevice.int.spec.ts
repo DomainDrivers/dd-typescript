@@ -12,7 +12,7 @@ void describe('CreatingDevice', () => {
   let deviceFacade: DeviceFacade;
 
   before(async () => {
-    const connectionString = await testEnvironment.start({ schema });
+    const { connectionString } = await testEnvironment.start({ schema });
 
     const configuration = new DeviceConfiguration(
       connectionString,

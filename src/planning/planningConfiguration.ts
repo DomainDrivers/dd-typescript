@@ -1,19 +1,19 @@
-import { getDB, injectDatabase } from '#storage';
-import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { Redis } from 'ioredis';
 import { AvailabilityConfiguration } from '../availability';
 import { UtilsConfiguration } from '../utils';
 import { StageParallelization } from './parallelization';
 import { PlanChosenResources } from './planChosenResources';
 import { PlanningFacade } from './planningFacade';
 import {
-  DrizzleProjectRepository,
+  RedisProjectRepository,
   type ProjectRepository,
 } from './projectRepository';
-import * as schema from './schema';
+import { nulloTransactionContext } from '../storage';
 
 export class PlanningConfiguration {
   constructor(
-    public readonly connectionString: string,
+    private readonly redisConfiguration: RedisConfiguration,
+    connectionString: string,
     private readonly utils: UtilsConfiguration = new UtilsConfiguration(),
     private readonly availabilityConfiguration: AvailabilityConfiguration = new AvailabilityConfiguration(
       connectionString,
@@ -24,36 +24,40 @@ export class PlanningConfiguration {
   public planningFacade = (
     projectRepository?: ProjectRepository,
     planChosenResources?: PlanChosenResources,
-    getDatabase?: () => NodePgDatabase<typeof schema>,
   ) => {
-    const repository = projectRepository ?? this.projectRepository();
-    const getDB = getDatabase ?? this.db;
+    const repository =
+      projectRepository ?? this.redisConfiguration.projectRepository();
 
-    return injectDatabase(
+    return nulloTransactionContext(
       new PlanningFacade(
         repository,
         new StageParallelization(),
         planChosenResources ??
-          injectDatabase(this.planChosenResourcesService(repository), getDB()),
+          nulloTransactionContext(
+            this.planChosenResourcesService(repository),
+            this.utils.eventBus.commit,
+          ),
         this.utils.eventBus,
         this.utils.clock,
       ),
-      getDB(),
       this.utils.eventBus.commit,
     );
   };
 
   public planChosenResourcesService = (projectRepository?: ProjectRepository) =>
     new PlanChosenResources(
-      projectRepository ?? this.projectRepository(),
+      projectRepository ?? this.redisConfiguration.projectRepository(),
       this.availabilityConfiguration.availabilityFacade(),
       this.utils.eventBus,
       this.utils.clock,
     );
+}
 
-  public projectRepository = (): ProjectRepository =>
-    new DrizzleProjectRepository();
+export type RedisConfig = { host: string; port: number };
 
-  public db = (cs?: string): NodePgDatabase<typeof schema> =>
-    getDB(cs ?? this.connectionString, { schema });
+export class RedisConfiguration {
+  constructor(private readonly redisClient: Redis) {}
+
+  public projectRepository = (redisClient?: Redis): ProjectRepository =>
+    new RedisProjectRepository(redisClient ?? this.redisClient);
 }

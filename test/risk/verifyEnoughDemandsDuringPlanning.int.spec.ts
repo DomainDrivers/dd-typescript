@@ -2,13 +2,15 @@ import {
   Demand,
   Demands,
   PlanningConfiguration,
+  RedisConfiguration,
   type PlanningFacade,
 } from '#planning';
 import { EmployeeConfiguration, EmployeeFacade, Seniority } from '#resource';
 import { RiskConfiguration, RiskPushNotification } from '#risk';
 import * as schema from '#schema';
 import { Capability } from '#shared';
-import { afterEach, beforeEach, describe, it } from 'node:test';
+import type Redis from 'ioredis';
+import { after, before, beforeEach, describe, it } from 'node:test';
 import { argValue, verifyThat } from '../asserts';
 import { TestConfiguration } from '../setup';
 
@@ -20,33 +22,50 @@ void describe('VerifyEnoughDemandsDuringPlanning', () => {
   let employeeFacade: EmployeeFacade;
   let riskPushNotification: RiskPushNotification;
   let planningFacade: PlanningFacade;
+  let connectionString: string;
+  let redisClient: Redis;
+
+  before(async () => {
+    testEnvironment = TestConfiguration(undefined, undefined, true);
+    const configuration = await testEnvironment.start(
+      {
+        schema,
+      },
+      true,
+    );
+    connectionString = configuration.connectionString;
+    redisClient = configuration.redisClient!;
+  });
 
   beforeEach(async () => {
-    testEnvironment = TestConfiguration(undefined, undefined, true);
-    const connectionString = await testEnvironment.start({ schema });
-
     const employeeConfiguration = new EmployeeConfiguration(
       connectionString,
       testEnvironment.utilsConfiguration,
     );
     employeeFacade = employeeConfiguration.employeeFacade();
 
+    const redisConfiguration = new RedisConfiguration(redisClient!);
+
     planningFacade = new PlanningConfiguration(
+      redisConfiguration,
       connectionString,
       testEnvironment.utilsConfiguration,
     ).planningFacade();
 
     riskPushNotification = new RiskPushNotification();
 
-    const _riskConfiguration = new RiskConfiguration(connectionString, {
-      utilsConfiguration: testEnvironment.utilsConfiguration,
-      riskPushNotification,
-    });
+    const _riskConfiguration = new RiskConfiguration(
+      connectionString,
+      redisClient!,
+      {
+        utilsConfiguration: testEnvironment.utilsConfiguration,
+        riskPushNotification,
+      },
+    );
+    await testEnvironment.clearTestData();
   });
 
-  // beforeEach(testEnvironment.clearTestData);
-
-  afterEach(() => testEnvironment?.stop());
+  after(async () => await testEnvironment.stop());
 
   void it('Does nothing when enough resources', async ({ mock }) => {
     const notifyAboutPossibleRiskDuringPlanning = mock.method(

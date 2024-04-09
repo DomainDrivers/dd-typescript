@@ -1,5 +1,6 @@
 import {
   PlanningConfiguration,
+  RedisConfiguration,
   Stage,
   schema,
   type PlanningFacade,
@@ -13,14 +14,22 @@ void describe('PlanningFacadeIntegration', () => {
   let projectFacade: PlanningFacade;
 
   before(async () => {
-    const connectionString = await testEnvironment.start({ schema });
+    const { connectionString, redisClient } = await testEnvironment.start(
+      {
+        schema,
+      },
+      true,
+    );
 
-    const configuration = new PlanningConfiguration(connectionString);
+    const configuration = new PlanningConfiguration(
+      new RedisConfiguration(redisClient!),
+      connectionString,
+    );
 
     projectFacade = configuration.planningFacade();
   });
 
-  after(testEnvironment.stop);
+  after(async () => await testEnvironment.stop());
 
   void it('Can create project and load project card', async () => {
     //given

@@ -19,7 +19,7 @@ void describe('ScheduleEmployeeCapabilities', () => {
   let capabilityFinder: CapabilityFinder;
 
   before(async () => {
-    const connectionString = await testEnvironment.start({ schema });
+    const { connectionString } = await testEnvironment.start({ schema });
 
     const configuration = new EmployeeConfiguration(
       connectionString,

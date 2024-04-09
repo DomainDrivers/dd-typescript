@@ -43,7 +43,7 @@ void describe('ResourceAllocating', () => {
   const RESOURCE_ID = AllocatableResourceId.newOne();
 
   before(async () => {
-    const connectionString = await testEnvironment.start({ schema });
+    const { connectionString } = await testEnvironment.start({ schema });
 
     const configuration = new AllocationConfiguration(connectionString);
 

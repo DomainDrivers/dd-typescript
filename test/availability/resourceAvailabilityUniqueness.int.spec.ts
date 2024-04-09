@@ -19,7 +19,7 @@ void describe('ResourceAvailabilityUniqueness', () => {
   let resourceAvailabilityRepository: ResourceAvailabilityRepository;
 
   before(async () => {
-    const connectionString = await testEnvironment.start({ schema });
+    const { connectionString } = await testEnvironment.start({ schema });
 
     const pool = getPool(connectionString);
     client = await pool.connect();

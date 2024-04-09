@@ -8,7 +8,7 @@ import * as schema from '#schema';
 import { TimeSlot } from '#shared';
 import { ObjectSet } from '#utils';
 import { addMinutes } from 'date-fns';
-import { after, before, describe, it } from 'node:test';
+import { after, before, beforeEach, describe, it } from 'node:test';
 import { assertThatArray } from '../asserts';
 import { TestConfiguration } from '../setup';
 
@@ -17,12 +17,14 @@ void describe('AvailabilityFacade', () => {
   let availabilityFacade: AvailabilityFacade;
 
   before(async () => {
-    const connectionString = await testEnvironment.start({ schema });
+    const { connectionString } = await testEnvironment.start({ schema });
 
     const configuration = new AvailabilityConfiguration(connectionString);
 
     availabilityFacade = configuration.availabilityFacade();
   });
+
+  beforeEach(testEnvironment.clearTestData);
 
   after(testEnvironment.stop);
 

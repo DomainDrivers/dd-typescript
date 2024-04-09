@@ -30,14 +30,21 @@ void describe('RiskPeriodicCheckSagaDispatcherE2E', () => {
   const PROJECT_DATES = new TimeSlot(new UTCDate(), addDays(new UTCDate(), 20));
 
   before(async () => {
-    const connectionString = await testEnvironment.start({ schema });
+    const { connectionString, redisClient } = await testEnvironment.start(
+      { schema },
+      true,
+    );
 
     riskPushNotification = new RiskPushNotification();
 
-    const riskConfiguration = new RiskConfiguration(connectionString, {
-      utilsConfiguration: testEnvironment.utilsConfiguration,
-      riskPushNotification,
-    });
+    const riskConfiguration = new RiskConfiguration(
+      connectionString,
+      redisClient!,
+      {
+        utilsConfiguration: testEnvironment.utilsConfiguration,
+        riskPushNotification,
+      },
+    );
     riskSagaDispatcher = riskConfiguration.riskSagaDispatcher();
     clock = testEnvironment.utilsConfiguration.clock;
   });

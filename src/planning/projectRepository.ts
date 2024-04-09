@@ -1,9 +1,9 @@
 import { ResourceId } from '#availability';
 import { Capability, TimeSlot } from '#shared';
-import { DrizzleRepository, type Repository } from '#storage';
+import { type Repository } from '#storage';
 import { ObjectMap, ObjectSet, UUID } from '#utils';
 import { UTCDate } from '@date-fns/utc';
-import { eq, inArray } from 'drizzle-orm';
+import { Redis } from 'ioredis';
 import { ChosenResources } from './chosenResources';
 import { Demand, Demands, DemandsPerStage } from './demands';
 import { ParallelStagesList, Stage } from './parallelization';
@@ -11,57 +11,78 @@ import { ParallelStages } from './parallelization/parallelStages';
 import { Project } from './project';
 import { ProjectId } from './projectId';
 import { Schedule } from './schedule';
-import * as schema from './schema';
+import type {
+  CapabilityEntity,
+  ChosenResourcesEntity,
+  DemandEntity,
+  DemandsEntity,
+  DemandsPerStageEntity,
+  ParallelStagesListEntity,
+  ProjectEntity,
+  ScheduleEntity,
+  StageEntity,
+  TimeSlotEntity,
+} from './schema';
 
 export interface ProjectRepository extends Repository<Project, ProjectId> {
   findAllById(ids: ProjectId[]): Promise<Project[]>;
   findAll(): Promise<Project[]>;
 }
 
-export class DrizzleProjectRepository extends DrizzleRepository<
-  Project,
-  ProjectId,
-  typeof schema
-> {
-  constructor() {
-    super(schema.projects, schema.projects.id, schema.projects.version);
+export class RedisProjectRepository implements ProjectRepository {
+  constructor(private readonly redis: Redis) {}
+
+  public async findAllById(ids: ProjectId[]): Promise<Project[]> {
+    const idsArray = ids.map((id) => id.toString());
+
+    const projectsStrings = await this.redis.hmget('projects', ...idsArray);
+
+    return projectsStrings
+      .filter((project) => project !== null)
+      .map((value) => mapToProject(JSON.parse(value!) as ProjectEntity));
   }
 
-  public findById = async (id: ProjectId): Promise<Project | null> => {
-    const result = await this.db.query.projects.findFirst({
-      where: eq(schema.projects.id, id),
-    });
+  public async findAll(): Promise<Project[]> {
+    const values = await this.redis.hvals('projects');
 
-    return result ? mapToProject(result) : null;
-  };
+    return values.map((value) =>
+      mapToProject(JSON.parse(value) as ProjectEntity),
+    );
+  }
 
-  public findAllById = async (ids: ProjectId[]): Promise<Project[]> => {
-    const result = await this.db
-      .select()
-      .from(schema.projects)
-      .where(inArray(schema.projects.id, ids));
+  public async getById(id: ProjectId): Promise<Project> {
+    const entity = await this.findById(id);
 
-    return result.map(mapToProject);
-  };
+    if (entity === null)
+      throw new Error(`Entity with '${id?.toString()}' was not found!`);
 
-  public findAll = async (): Promise<Project[]> => {
-    const result = await this.db.select().from(schema.projects);
+    return entity;
+  }
 
-    return result.map(mapToProject);
-  };
+  public async existsById(id: ProjectId): Promise<boolean> {
+    const result = await this.redis.hexists('projects', id.toString());
 
-  public save = async (project: Project): Promise<void> => {
-    const entity = mapFromProject(project);
-    const { id: _id, ...toUpdate } = entity;
+    return !!result;
+  }
 
-    return this.upsert(entity, toUpdate, {
-      id: project.getId(),
-      version: entity.version,
-    });
-  };
+  public async findById(id: ProjectId): Promise<Project | null> {
+    const value = await this.redis.hget('projects', id.toString());
+
+    if (!value) return null;
+
+    return mapToProject(JSON.parse(value) as ProjectEntity);
+  }
+
+  public async save(project: Project): Promise<void> {
+    await this.redis.hset(
+      'projects',
+      project.getId().toString(),
+      JSON.stringify(mapFromProject(project)),
+    );
+  }
 }
 
-const mapToProject = (entity: typeof schema.projects.$inferSelect): Project =>
+const mapToProject = (entity: ProjectEntity): Project =>
   new Project(
     entity.name,
     mapToParallelizedStagesList(entity.parallelizedStages),
@@ -74,7 +95,7 @@ const mapToProject = (entity: typeof schema.projects.$inferSelect): Project =>
   );
 
 const mapToParallelizedStagesList = (
-  parallelizedStages: schema.ParallelStagesListEntity | null,
+  parallelizedStages: ParallelStagesListEntity | null,
 ): ParallelStagesList => {
   return new ParallelStagesList(
     (parallelizedStages?.all ?? []).map(
@@ -83,11 +104,11 @@ const mapToParallelizedStagesList = (
   );
 };
 
-const mapToDemands = (demands: schema.DemandsEntity | null): Demands =>
+const mapToDemands = (demands: DemandsEntity | null): Demands =>
   new Demands(demands ? demands.all.map(mapToDemand) : []);
 
 const mapToChosenResources = (
-  chosenResources: schema.ChosenResourcesEntity | null,
+  chosenResources: ChosenResourcesEntity | null,
 ): ChosenResources =>
   new ChosenResources(
     chosenResources
@@ -99,7 +120,7 @@ const mapToChosenResources = (
   );
 
 const mapToDemandsPerStage = (
-  demandsPerStage: schema.DemandsPerStageEntity | null,
+  demandsPerStage: DemandsPerStageEntity | null,
 ): DemandsPerStage =>
   new DemandsPerStage(
     demandsPerStage?.demands && Object.keys(demandsPerStage?.demands).length > 0
@@ -112,7 +133,7 @@ const mapToDemandsPerStage = (
       : ObjectMap.empty<string, Demands>(),
   );
 
-const mapToSchedule = (schedule: schema.ScheduleEntity | null): Schedule =>
+const mapToSchedule = (schedule: ScheduleEntity | null): Schedule =>
   new Schedule(
     schedule && Object.keys(schedule.dates).length > 0
       ? ObjectMap.from(
@@ -129,7 +150,7 @@ const mapToStage = ({
   dependencies,
   resources,
   duration,
-}: schema.StageEntity): Stage =>
+}: StageEntity): Stage =>
   new Stage(
     stageName,
     ObjectSet.from(dependencies.map(mapToStage)),
@@ -137,21 +158,19 @@ const mapToStage = ({
     duration,
   );
 
-const mapToDemand = ({ capability }: schema.DemandEntity): Demand =>
+const mapToDemand = ({ capability }: DemandEntity): Demand =>
   new Demand(mapToCapability(capability));
 
-const mapToTimeSlot = ({ from, to }: schema.TimeSlotEntity): TimeSlot =>
+const mapToTimeSlot = ({ from, to }: TimeSlotEntity): TimeSlot =>
   new TimeSlot(new UTCDate(from), new UTCDate(to));
 
-const mapToCapability = ({ name, type }: schema.CapabilityEntity): Capability =>
+const mapToCapability = ({ name, type }: CapabilityEntity): Capability =>
   new Capability(name, type);
 
 const mapToResourceId = (id: string): ResourceId =>
   ResourceId.from(UUID.from(id));
 
-const mapFromProject = (
-  project: Project,
-): typeof schema.projects.$inferSelect => {
+const mapFromProject = (project: Project): ProjectEntity => {
   return {
     id: project.getId(),
     name: project.getName(),
@@ -168,7 +187,7 @@ const mapFromProject = (
 
 const mapFromParallelizedStagesList = (
   parallelisedStages: ParallelStagesList,
-): schema.ParallelStagesListEntity => {
+): ParallelStagesListEntity => {
   return {
     all: parallelisedStages.all.map((ps: ParallelStages) => {
       return { stages: ps.stages.map(mapFromStage) };
@@ -176,7 +195,7 @@ const mapFromParallelizedStagesList = (
   };
 };
 
-const mapFromDemands = (demands: Demands): schema.DemandsEntity => {
+const mapFromDemands = (demands: Demands): DemandsEntity => {
   return {
     all: demands.all.map(mapFromDemand),
   };
@@ -184,7 +203,7 @@ const mapFromDemands = (demands: Demands): schema.DemandsEntity => {
 
 const mapFromChosenResources = (
   chosenResources: ChosenResources,
-): schema.ChosenResourcesEntity => {
+): ChosenResourcesEntity => {
   return {
     resources: chosenResources.resources.map(mapFromResourceId),
     timeSlot: mapFromTimeSlot(chosenResources.timeSlot),
@@ -193,7 +212,7 @@ const mapFromChosenResources = (
 
 const mapFromDemandsPerStage = (
   demandsPerStage: DemandsPerStage,
-): schema.DemandsPerStageEntity => {
+): DemandsPerStageEntity => {
   return {
     demands: demandsPerStage.demands.map(({ key, value }) => {
       return { key, value: mapFromDemands(value) };
@@ -201,7 +220,7 @@ const mapFromDemandsPerStage = (
   };
 };
 
-const mapFromSchedule = (schedule: Schedule): schema.ScheduleEntity => {
+const mapFromSchedule = (schedule: Schedule): ScheduleEntity => {
   return {
     dates: schedule.dates.map(({ key, value }) => {
       return { key, value: mapFromTimeSlot(value) };
@@ -209,7 +228,7 @@ const mapFromSchedule = (schedule: Schedule): schema.ScheduleEntity => {
   };
 };
 
-const mapFromStage = (stage: Stage): schema.StageEntity => {
+const mapFromStage = (stage: Stage): StageEntity => {
   return {
     stageName: stage.name,
     dependencies: stage.dependencies.map(mapFromStage),
@@ -218,17 +237,17 @@ const mapFromStage = (stage: Stage): schema.StageEntity => {
   };
 };
 
-const mapFromDemand = (demand: Demand): schema.DemandEntity => {
+const mapFromDemand = (demand: Demand): DemandEntity => {
   return {
     capability: mapFromCapability(demand.capability),
   };
 };
 
-const mapFromTimeSlot = (timeSlot: TimeSlot): schema.TimeSlotEntity => {
+const mapFromTimeSlot = (timeSlot: TimeSlot): TimeSlotEntity => {
   return { from: timeSlot.from.toJSON(), to: timeSlot.to.toJSON() };
 };
 
-const mapFromCapability = (capability: Capability): schema.CapabilityEntity => {
+const mapFromCapability = (capability: Capability): CapabilityEntity => {
   return {
     name: capability.name,
     type: capability.type,

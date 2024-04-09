@@ -28,7 +28,7 @@ void describe('CapabilityScheduling', () => {
   let availabilityFacade: AvailabilityFacade;
 
   before(async () => {
-    const connectionString = await testEnvironment.start({ schema });
+    const { connectionString } = await testEnvironment.start({ schema });
 
     const configuration = new CapabilityPlanningConfiguration(connectionString);
 
