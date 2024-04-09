@@ -30,6 +30,17 @@ export class TimeSlot {
     return new TimeSlot(from, addDays(from, 1));
   };
 
+  public static createTimeSlotAtUTCOfDuration = (
+    year: number,
+    month: number,
+    day: number,
+    duration: Duration,
+  ): TimeSlot => {
+    const thisDay = new Date(year, month, day);
+    const from = startOfDay(new UTCDate(thisDay));
+    return new TimeSlot(from, addMilliseconds(from, duration));
+  };
+
   public static createMonthlyTimeSlotAtUTC = (
     year: number,
     month: number,

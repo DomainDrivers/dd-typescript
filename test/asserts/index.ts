@@ -78,7 +78,7 @@ export function verifyThat(fn: MockedFunction) {
       assertTrue(
         fn.mock?.calls.length !== undefined &&
           fn.mock.calls.length === 1 &&
-          deepEquals(fn.mock.calls[0].arguments, args),
+          fn.mock.calls.some((call) => deepEquals(call.arguments, args)),
       );
     },
     calledWithArgumentMatching: (...matches: ArgumentMatcher[]) => {

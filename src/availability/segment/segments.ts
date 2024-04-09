@@ -4,7 +4,7 @@ import { slotToNormalizedSlot } from './slotToNormalizedSlot';
 import { slotToSegments } from './slotToSegments';
 
 export class Segments {
-  public static readonly DEFAULT_SEGMENT_DURATION_IN_MINUTES = 15;
+  public static readonly DEFAULT_SEGMENT_DURATION_IN_MINUTES = 60;
 
   public static split = (
     timeSlot: TimeSlot,

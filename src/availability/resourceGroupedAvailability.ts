@@ -76,6 +76,11 @@ export class ResourceGroupedAvailability {
   public isDisabledEntirelyBy = (owner: Owner): boolean =>
     this.resourceAvailabilities.every((ra) => ra.isDisabledBy(owner));
 
+  public isEntirelyWithParentId = (parentId: ResourceId) =>
+    this.resourceAvailabilities.every((ra) =>
+      deepEquals(ra.resourceParentId, parentId),
+    );
+
   public findBlockedBy = (owner: Owner): ResourceAvailability[] =>
     this.resourceAvailabilities.filter((ra) =>
       deepEquals(ra.blockedBy(), owner),
