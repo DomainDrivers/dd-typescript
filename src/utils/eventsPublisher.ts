@@ -21,6 +21,10 @@ export interface EventsSubscriber {
 
 export interface EventBus extends EventsPublisher, EventsSubscriber {}
 
+export type TransactionAwareEventPublisher = EventsPublisher &
+  PostTransactionCommit &
+  EnlistableInTransaction;
+
 export type TransactionAwareEventBus = EventBus &
   PostTransactionCommit &
   EnlistableInTransaction;

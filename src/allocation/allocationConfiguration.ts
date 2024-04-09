@@ -8,12 +8,10 @@ import {
   CapabilityFinder,
   CapabilityPlanningConfiguration,
   CashflowConfiguration,
+  DrizzleProjectAllocationsRepository,
   PotentialTransfersService,
 } from '.';
-import {
-  DrizzleProjectAllocationsRepository,
-  type ProjectAllocationsRepository,
-} from './projectAllocationsRepository';
+import { type ProjectAllocationsRepository } from './projectAllocationsRepository';
 import * as schema from './schema';
 
 export class AllocationConfiguration {
@@ -35,9 +33,9 @@ export class AllocationConfiguration {
   ) {}
 
   public allocationFacade = (
+    projectAllocationsRepository?: ProjectAllocationsRepository,
     clock: Clock = Clock,
     eventPublisher?: EventsPublisher,
-    projectAllocationsRepository?: ProjectAllocationsRepository,
     getDatabase?: () => NodePgDatabase<typeof schema>,
   ) => {
     const repository =

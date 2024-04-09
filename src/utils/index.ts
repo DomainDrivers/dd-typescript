@@ -21,6 +21,7 @@ export {
   type EventsPublisher,
   type EventsSubscriber,
   type TransactionAwareEventBus,
+  type TransactionAwareEventPublisher,
 } from './eventsPublisher';
 export { ObjectMap, type KeyValue } from './objectMap';
 export { ObjectSet } from './objectSet';

@@ -2,12 +2,11 @@ import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import pg from 'pg';
 import type { PostgresTransaction } from './drizzle';
 
-type DatabaseAware<
+export type DatabaseAware<
   TSchema extends Record<string, unknown> = Record<string, never>,
 > = {
   ___database: NodePgDatabase<TSchema>;
-  ___postCommit?: () => Promise<void>;
-};
+} & TransactionAware;
 
 const toDatabaseAware = (service: unknown): DatabaseAware | null => {
   const result = service as DatabaseAware;
@@ -34,7 +33,23 @@ export const injectDatabase = <
   return service;
 };
 
-type TransactionAware = { ___transaction: PostgresTransaction };
+export const nulloTransactionContext = <T>(
+  service: T,
+  postCommit: () => Promise<void>,
+): T => {
+  const dbAware = service as DatabaseAware;
+  dbAware.___transaction = 'DISABLED';
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+  dbAware.___database = {} as any;
+
+  dbAware.___postCommit = postCommit;
+  return service;
+};
+
+export type TransactionAware = {
+  ___transaction: PostgresTransaction | 'DISABLED';
+  ___postCommit?: () => Promise<void>;
+};
 
 const toTransactionAware = (service: unknown): TransactionAware | null => {
   const result = service as TransactionAware;
@@ -138,9 +153,19 @@ export const transactional = (
 
   descriptor.value = async function (...args: unknown[]) {
     const withTransaction = toTransactionAware(this);
+
     if (withTransaction?.___transaction) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      return originalDef.apply(this, args);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      const result = await originalDef.apply(this, args);
+
+      if (
+        withTransaction.___transaction === 'DISABLED' &&
+        withTransaction.___postCommit
+      )
+        await withTransaction.___postCommit();
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return result;
     }
 
     const dbAware = toDatabaseAware(this);

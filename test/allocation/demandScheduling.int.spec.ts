@@ -2,6 +2,7 @@ import {
   AllocationConfiguration,
   Demand,
   Demands,
+  InMemoryProjectAllocationsRepository,
   ProjectAllocationsId,
   type AllocationFacade,
 } from '#allocation';
@@ -32,7 +33,9 @@ void describe('DemandScheduling', () => {
 
     const configuration = new AllocationConfiguration(connectionString);
 
-    allocationFacade = configuration.allocationFacade();
+    allocationFacade = configuration.allocationFacade(
+      new InMemoryProjectAllocationsRepository(),
+    );
   });
 
   after(async () => await testEnvironment.stop());

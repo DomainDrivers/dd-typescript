@@ -1,35 +1,24 @@
 import {
-  CashflowConfiguration,
   Cost,
   Earnings,
   Income,
   ProjectAllocationsId,
-  type CashFlowFacade,
   type EarningsRecalculated,
 } from '#allocation';
-import * as schema from '#schema';
+import { Clock } from '#utils';
+import { UTCDate } from '@date-fns/utc';
 import assert from 'node:assert';
-import { after, afterEach, before, describe, it } from 'node:test';
+import { describe, it } from 'node:test';
 import { TestConfiguration } from '../../setup';
+import { CashFlowTestConfiguration } from './cashFlowTestConfiguration';
 
 void describe('CapabilityAllocating', () => {
+  const NOW = new UTCDate();
   const testEnvironment = TestConfiguration();
-  let cashFlowFacade: CashFlowFacade;
-
-  before(async () => {
-    const connectionString = await testEnvironment.start({ schema });
-
-    const configuration = new CashflowConfiguration(
-      connectionString,
-      testEnvironment.utilsConfiguration,
-    );
-
-    cashFlowFacade = configuration.cashflowFacade();
-  });
-
-  afterEach(testEnvironment.clearTestData);
-
-  after(testEnvironment.stop);
+  const cashFlowFacade = CashFlowTestConfiguration.cashFlowFacade(
+    testEnvironment.eventBus,
+    Clock.fixed(NOW),
+  );
 
   void it('can allocate capability to project', async () => {
     //given
