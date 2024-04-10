@@ -8,9 +8,12 @@ import {
   type ProjectAllocationScheduled,
   type ProjectAllocationsDemandsScheduled,
 } from '#allocation';
+
 import type { UTCDate } from '@date-fns/utc';
+import { isAfter } from 'date-fns';
 import { RiskPeriodicCheckSagaId, type RiskPeriodicCheckSagaStep } from '.';
 import type { ResourceTakenOver } from '../availability';
+import { Duration } from '../utils';
 
 export type RiskPeriodicCheckSagaEvent =
   | EarningsRecalculated
@@ -20,11 +23,8 @@ export type RiskPeriodicCheckSagaEvent =
   | ResourceTakenOver
   | CapabilityReleased;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const RISK_THRESHOLD_VALUE = Earnings.of(1000);
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const UPCOMING_DEADLINE_AVAILABILITY_SEARCH = 30;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const UPCOMING_DEADLINE_REPLACEMENT_SUGGESTION = 15;
 
 export class RiskPeriodicCheckSaga {
@@ -64,14 +64,65 @@ export class RiskPeriodicCheckSaga {
   }
   areDemandsSatisfied = (): boolean => this._missingDemands?.all.length === 0;
 
-  public handle = (
-    _event: RiskPeriodicCheckSagaEvent,
-  ): RiskPeriodicCheckSagaStep => {
-    return null!;
+  public handle = ({
+    type,
+    data: event,
+  }: RiskPeriodicCheckSagaEvent): RiskPeriodicCheckSagaStep => {
+    switch (type) {
+      case 'EarningsRecalculated': {
+        this._earnings = event.earnings;
+        return 'DO_NOTHING';
+      }
+      case 'ProjectAllocationsDemandsScheduled': {
+        this._missingDemands = event.missingDemands;
+        if (this.areDemandsSatisfied()) {
+          return 'NOTIFY_ABOUT_DEMANDS_SATISFIED';
+        }
+        return 'DO_NOTHING';
+      }
+      case 'ProjectAllocationScheduled': {
+        this._deadline = event.fromTo.to;
+        return 'DO_NOTHING';
+      }
+      case 'CapabilitiesAllocated': {
+        this._missingDemands = event.missingDemands;
+        if (this.areDemandsSatisfied()) {
+          return 'NOTIFY_ABOUT_DEMANDS_SATISFIED';
+        }
+        return 'DO_NOTHING';
+      }
+      case 'CapabilityReleased': {
+        this._missingDemands = event.missingDemands;
+        return 'DO_NOTHING';
+      }
+      case 'ResourceTakenOver': {
+        if (this._deadline && isAfter(event.occurredAt, this._deadline)) {
+          return 'DO_NOTHING';
+        }
+        return 'NOTIFY_ABOUT_POSSIBLE_RISK';
+      }
+    }
   };
 
-  public handleWeeklyCheck = (_when: UTCDate): RiskPeriodicCheckSagaStep => {
-    return null!;
+  public handleWeeklyCheck = (when: UTCDate): RiskPeriodicCheckSagaStep => {
+    if (this._deadline == null || isAfter(when, this._deadline)) {
+      return 'DO_NOTHING';
+    }
+    if (this.areDemandsSatisfied()) {
+      return 'DO_NOTHING';
+    }
+    const daysToDeadline =
+      Duration.between(when, this._deadline) / Duration.day;
+    if (daysToDeadline > UPCOMING_DEADLINE_AVAILABILITY_SEARCH) {
+      return 'DO_NOTHING';
+    }
+    if (daysToDeadline > UPCOMING_DEADLINE_REPLACEMENT_SUGGESTION) {
+      return 'FIND_AVAILABLE';
+    }
+    if (this._earnings != null && this._earnings > RISK_THRESHOLD_VALUE) {
+      return 'SUGGEST_REPLACEMENT';
+    }
+    return 'DO_NOTHING';
   };
 
   public get id() {
