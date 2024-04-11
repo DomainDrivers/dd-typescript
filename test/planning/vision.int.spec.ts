@@ -53,68 +53,64 @@ void describe('Vision', () => {
 
   after(testEnvironment.stop);
 
-  void it(
-    'time critical waterfall project process',
-    { skip: 'not implemented yet' },
-    async () => {
-      //given
-      const projectId = await projectFacade.addNewProject('vision');
-      //when
-      const java = Demands.of(demandFor(skill('JAVA')));
-      await projectFacade.addDemands(projectId, java);
+  void it('time critical waterfall project process', async () => {
+    //given
+    const projectId = await projectFacade.addNewProject('vision');
+    //when
+    const java = Demands.of(demandFor(skill('JAVA')));
+    await projectFacade.addDemands(projectId, java);
 
-      //then
-      await verifyPossibleRiskDuringPlanning(projectId, java);
+    //then
+    await verifyPossibleRiskDuringPlanning(projectId, java);
 
-      //when
-      await projectFacade.defineProjectStages(
-        projectId,
-        new Stage('stage1').withChosenResourceCapabilities(RESOURCE_1),
-        new Stage('stage2').withChosenResourceCapabilities(
-          RESOURCE_2,
-          RESOURCE_1,
-        ),
-        new Stage('stage3').withChosenResourceCapabilities(RESOURCE_4),
-      );
+    //when
+    await projectFacade.defineProjectStages(
+      projectId,
+      new Stage('stage1').withChosenResourceCapabilities(RESOURCE_1),
+      new Stage('stage2').withChosenResourceCapabilities(
+        RESOURCE_2,
+        RESOURCE_1,
+      ),
+      new Stage('stage3').withChosenResourceCapabilities(RESOURCE_4),
+    );
 
-      //then
-      const projectCard = await projectFacade.load(projectId);
-      assert.ok(
-        ['stage1 | stage2, stage3', 'stage2, stage3 | stage1'].includes(
-          projectCard.parallelizedStages.print(),
-        ),
-      );
+    //then
+    const projectCard = await projectFacade.load(projectId);
+    assert.ok(
+      ['stage1 | stage2, stage3', 'stage2, stage3 | stage1'].includes(
+        projectCard.parallelizedStages.print(),
+      ),
+    );
 
-      //when
-      await projectFacade.defineProjectStages(
-        projectId,
-        new Stage('stage1')
-          .ofDuration(ofDays(1))
-          .withChosenResourceCapabilities(RESOURCE_1),
-        new Stage('stage2')
-          .ofDuration(ofDays(3))
-          .withChosenResourceCapabilities(RESOURCE_2, RESOURCE_1),
-        new Stage('stage3')
-          .ofDuration(ofDays(10))
-          .withChosenResourceCapabilities(RESOURCE_4),
-      );
-      //and
-      await projectFacade.defineStartDate(projectId, JAN_1);
+    //when
+    await projectFacade.defineProjectStages(
+      projectId,
+      new Stage('stage1')
+        .ofDuration(ofDays(1))
+        .withChosenResourceCapabilities(RESOURCE_1),
+      new Stage('stage2')
+        .ofDuration(ofDays(3))
+        .withChosenResourceCapabilities(RESOURCE_2, RESOURCE_1),
+      new Stage('stage3')
+        .ofDuration(ofDays(10))
+        .withChosenResourceCapabilities(RESOURCE_4),
+    );
+    //and
+    await projectFacade.defineStartDate(projectId, JAN_1);
 
-      //then
-      const project = await projectFacade.load(projectId);
-      const schedule = project.schedule;
-      assertThat(schedule)
-        .hasStage('stage1')
-        .withSlot(JAN_1_2)
-        .and()
-        .hasStage('stage2')
-        .withSlot(JAN_2_5)
-        .and()
-        .hasStage('stage3')
-        .withSlot(JAN_2_12);
-    },
-  );
+    //then
+    const project = await projectFacade.load(projectId);
+    const schedule = project.schedule;
+    assertThat(schedule)
+      .hasStage('stage1')
+      .withSlot(JAN_1_2)
+      .and()
+      .hasStage('stage2')
+      .withSlot(JAN_2_5)
+      .and()
+      .hasStage('stage3')
+      .withSlot(JAN_2_12);
+  });
 
   const verifyPossibleRiskDuringPlanning = (
     projectId: ProjectId,
